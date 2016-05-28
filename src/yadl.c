@@ -43,6 +43,7 @@ void usage(void)
 	printf("usage: yadl --sensor <analog|digital See sensor options below>\n");
 	printf("\t\t--output <text|json|yaml|csv|xml|rrd>\n");
 	printf("\t\t[ --outfile <optional output filename. Defaults to stdout> ]\n");
+	printf("\t\t[ --only_log_value_changes ]\n");
 	printf("\t\t[ --num_results <# results returned (default %d)> ]\n", DEFAULT_NUM_RESULTS);
 	printf("\t\t[ --sleep_usecs_between_results <usecs (default %d)> ]\n", DEFAULT_SLEEP_USECS_BETWEEN_RESULTS);
 	printf("\t\t[ --num_samples_per_result <# samples (default %d). See --filter for aggregation.> ]\n", DEFAULT_NUM_SAMPLES_PER_RESULT);
@@ -265,6 +266,7 @@ int main(int argc, char **argv)
 		{"num_results", required_argument, 0, 0 },
 		{"sleep_usecs_between_results", required_argument, 0, 0 },
 		{"i2c_address", required_argument, 0, 0 },
+		{"only_log_value_changes", no_argument, 0, 0 },
 		{0, 0, 0, 0 }
 	};
 
@@ -292,6 +294,8 @@ int main(int argc, char **argv)
 	config.num_samples_per_result = DEFAULT_NUM_SAMPLES_PER_RESULT;
 	config.remove_n_samples_from_ends = DEFAULT_REMOVE_N_SAMPLES_FROM_ENDS;
 	config.sleep_usecs_between_samples = DEFAULT_SLEEP_USECS_BETWEEN_SAMPLES;
+	config.only_log_value_changes = 0;
+	config.last_value = -1;
 
 	while ((opt = getopt_long(argc, argv, "", long_options, &long_index)) != -1) {
 		if (opt != 0)
@@ -355,6 +359,9 @@ int main(int argc, char **argv)
 			break;
 		case 18:
 			config.i2c_address = strtol(optarg, NULL, 16);
+			break;
+		case 19:
+			config.only_log_value_changes = 1;
 			break;
 		default:
 			usage();

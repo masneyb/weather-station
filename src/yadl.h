@@ -75,6 +75,8 @@ struct yadl_config_tag {
 	int num_results;
 	int num_samples_per_result;
 	int remove_n_samples_from_ends;
+	int only_log_value_changes;
+	float last_value;
 };
 
 filter get_filter(char *name);

@@ -71,6 +71,12 @@ static void _close_fd(FILE *fd, yadl_config *config)
 static void _write_text(FILE *fd, __attribute__((__unused__)) int reading_number,
 			yadl_result *result, __attribute__((__unused__)) yadl_config *config)
 {
+	if (config->only_log_value_changes) {
+		if (config->last_value == result->value)
+			return;
+		config->last_value = result->value;
+	}
+
 	fprintf(fd, "Value: %.1f\nTimestamp: %ld\n",
 		result->value,
 		_get_current_timestamp());
@@ -83,6 +89,12 @@ static void _write_json_header(FILE *fd)
 
 static void _write_json(FILE *fd, int reading_number, yadl_result *result, yadl_config *config)
 {
+	if (config->only_log_value_changes) {
+		if (config->last_value == result->value)
+			return;
+		config->last_value = result->value;
+	}
+
 	fprintf(fd, "{ \"value\": %.1f, \"timestamp\": %ld }",
 		result->value,
 		_get_current_timestamp());
@@ -104,6 +116,12 @@ static void _write_yaml_header(FILE *fd)
 static void _write_yaml(FILE *fd, __attribute__((__unused__)) int reading_number,
 		yadl_result *result, __attribute__((__unused__)) yadl_config *config)
 {
+	if (config->only_log_value_changes) {
+		if (config->last_value == result->value)
+			return;
+		config->last_value = result->value;
+	}
+
 	fprintf(fd, "- value: %.1f\n  timestamp: %ld\n",
 		result->value,
 		_get_current_timestamp());
@@ -117,6 +135,12 @@ static void _write_csv_header(FILE *fd)
 static void _write_csv(FILE *fd, __attribute__((__unused__)) int reading_number,
 		yadl_result *result, __attribute__((__unused__)) yadl_config *config)
 {
+	if (config->only_log_value_changes) {
+		if (config->last_value == result->value)
+			return;
+		config->last_value = result->value;
+	}
+
 	fprintf(fd, "%ld,%.1f\n",
 		_get_current_timestamp(),
 		result->value);
@@ -125,6 +149,12 @@ static void _write_csv(FILE *fd, __attribute__((__unused__)) int reading_number,
 static void _write_rrd(__attribute__((__unused__)) FILE *fd, __attribute__((__unused__)) int reading_number,
 		yadl_result *result, yadl_config *config)
 {
+	if (config->only_log_value_changes) {
+		if (config->last_value == result->value)
+			return;
+		config->last_value = result->value;
+	}
+
 	if (config->outfile == NULL) {
 		fprintf(stderr, "--outfile must be specified for the RRD output\n");
 		exit(1);
@@ -142,6 +172,12 @@ static void _write_xml_header(FILE *fd)
 static void _write_xml(FILE *fd, __attribute__((__unused__)) int reading_number,
 		yadl_result *result, __attribute__((__unused__)) yadl_config *config)
 {
+	if (config->only_log_value_changes) {
+		if (config->last_value == result->value)
+			return;
+		config->last_value = result->value;
+	}
+
 	fprintf(fd, "  <result><value>%.1f</value><timestamp>%ld</timestamp></result>\n",
 		result->value,
 		_get_current_timestamp());
