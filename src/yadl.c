@@ -40,11 +40,14 @@
 
 void usage(void)
 {
-	printf("usage: yadl --sensor <analog|digital See sensor options below>\n");
+	printf("usage: yadl --sensor <analog|digital>\n");
+	printf("\t\t[ --gpio_pin <wiringPi pin #. Required for digital pins> ]\n");
+	printf("\t\t  See http://wiringpi.com/pins/ to lookup the pin number.\n");
+	printf("\t\t[ --adc <see ADC list below. Required for analog> ]\n");
 	printf("\t\t--output <text|json|yaml|csv|xml|rrd>\n");
 	printf("\t\t[ --outfile <optional output filename. Defaults to stdout> ]\n");
 	printf("\t\t[ --only_log_value_changes ]\n");
-	printf("\t\t[ --num_results <# results returned (default %d)> ]\n", DEFAULT_NUM_RESULTS);
+	printf("\t\t[ --num_results <# results returned (default %d). Set to -1 to poll indefinitely.> ]\n", DEFAULT_NUM_RESULTS);
 	printf("\t\t[ --sleep_usecs_between_results <usecs (default %d)> ]\n", DEFAULT_SLEEP_USECS_BETWEEN_RESULTS);
 	printf("\t\t[ --num_samples_per_result <# samples (default %d). See --filter for aggregation.> ]\n", DEFAULT_NUM_SAMPLES_PER_RESULT);
 	printf("\t\t[ --sleep_usecs_between_samples <usecs (default %d)> ]\n", DEFAULT_SLEEP_USECS_BETWEEN_SAMPLES);
@@ -55,15 +58,6 @@ void usage(void)
 	printf("\t\t[ --min_valid_value <minimum allowable value> ]\n");
 	printf("\t\t[ --max_valid_value <maximum allowable value> ]\n");
 	printf("\t\t[ --debug ]\n");
-	printf("\n");
-	printf("Supported Sensors\n");
-	printf("\n");
-	printf("* digital\n");
-	printf("  --gpio_pin <wiringPi pin #>\n");
-	printf("  \tSee http://wiringpi.com/pins/ to lookup the pin number.\n");
-	printf("\n");
-	printf("* analog\n");
-	printf("  --adc <see ADC list below>\n");
 	printf("\n");
 	printf("Supported Analog to Digital Converters (ADCs)\n");
 	printf("\n");
@@ -83,8 +77,14 @@ void usage(void)
 	printf("\n");
 	printf("Examples\n");
 	printf("\n");
-	printf("* Polling an analog sensor hooked up to channel 0 of a MCP3008\n");
-	printf("  $ yadl --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 0 --output csv --num_results 7 --sleep_usecs_between_results 50000\n");
+	printf("* Poll a single sample from BCM digital pin 17 (wiringPi pin 0) as JSON\n");
+	printf("  $ yadl --sensor digital --gpio_pin 0 --output json\n");
+	printf("  { \"result\": [ { \"value\": 0.0, \"timestamp\": 1464465651 } ] }\n");
+	printf("\n");
+	printf("* Poll 7 results from an analog sensor hooked up to channel 0 of a MCP3008.\n");
+	printf("  Wait 0.05 seconds between each result shown.\n");
+	printf("  $ yadl --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 0 \\\n");
+	printf("	--output csv --num_results 7 --sleep_usecs_between_results 50000\n");
 	printf("  timestamp,value\n");
 	printf("  1464465367,716.0\n");
 	printf("  1464465367,712.0\n");
@@ -94,9 +94,39 @@ void usage(void)
 	printf("  1464465367,712.0\n");
 	printf("  1464465367,712.0\n");
 	printf("\n");
-	printf("* Polling BCM digital pin 17 (wiringPi pin 0) as JSON\n");
-	printf("  $ yadl --sensor digital --gpio_pin 0 --output json --num_results 1 --num_samples_per_result 1\n");
-	printf("  { \"result\": [ { \"value\": 0.0, \"timestamp\": 1464465651 } ] }\n");
+	printf("* Show 5 averaged results from a photoresistor hooked up to an ADC.\n");
+	printf("  1000 samples are taken for each result shown. 200 samples from each end\n");
+	printf("  are removed and the mean is taken of the middle 600 samples. This is\n");
+	printf("  useful for removing noise from analog sensors.\n");
+	printf("  $ yadl --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 0 \\\n");
+	printf("	--output csv --num_results 5 --sleep_usecs_between_results 2000000 \\\n");
+	printf("	--num_samples_per_result 1000 --remove_n_samples_from_ends 200 --filter mean\n");
+	printf("  timestamp,value\n");
+	printf("  1464469264,779.4\n");
+	printf("  1464469267,778.7\n");
+	printf("  1464469269,779.7\n");
+	printf("  1464469271,779.8\n");
+	printf("  1464469273,779.2\n");
+	printf("\n");
+	printf("* Hook a button up to a digital pin and check for bounce when the button\n");
+	printf("  is pressed. This polls the digital pin indefinitely until Crtl-C is\n");
+	printf("  pressed. Note: Newlines were added for clarity between the three button\n");
+	printf("  presses for illustration purposes.\n");
+	printf("  $ yadl --sensor digital --gpio_pin 0 --output csv --num_results -1 \\\n");
+	printf("	--only_log_value_changes\n");
+	printf("  timestamp,value\n");
+	printf("  1464470143,1.0\n");
+	printf("  1464470143,0.0\n");
+	printf("\n");
+	printf("  1464470145,1.0\n");
+	printf("  1464470145,0.0\n");
+	printf("  1464470145,1.0\n");
+	printf("  1464470145,0.0\n");
+	printf("  1464470145,1.0\n");
+	printf("  1464470145,0.0\n");
+	printf("\n");
+	printf("  1464470147,1.0\n");
+	printf("  1464470147,0.0\n");
 
 	exit(1);
 }
@@ -420,7 +450,7 @@ int main(int argc, char **argv)
 	if (output_funcs->write_header != NULL)
 		output_funcs->write_header(fd);
 
-	for (int i = 0; i < config.num_results; i++) {
+	for (int i = 0; i < config.num_results || config.num_results < 0; i++) {
 		if (i > 0 && config.sleep_usecs_between_results > 0)
 			delayMicroseconds(config.sleep_usecs_between_results);
 

@@ -8,10 +8,14 @@ Some sensors can occasionally return erratic readings that cause large spikes
 or dips in your graphs. You can set valid thresholds to ignore these erroneous
 readings. It also supports taking multiple samples to help smooth the results.
 
-    usage: yadl --sensor <analog|digital See sensor options below>
+    usage: yadl --sensor <analog|digital>
+    		[ --gpio_pin <wiringPi pin #. Required for digital pins> ]
+    		  See http://wiringpi.com/pins/ to lookup the pin number.
+    		[ --adc <see ADC list below. Required for analog> ]
     		--output <text|json|yaml|csv|xml|rrd>
     		[ --outfile <optional output filename. Defaults to stdout> ]
-    		[ --num_results <# results returned (default 1)> ]
+    		[ --only_log_value_changes ]
+    		[ --num_results <# results returned (default 1). Set to -1 to poll indefinitely.> ]
     		[ --sleep_usecs_between_results <usecs (default 0)> ]
     		[ --num_samples_per_result <# samples (default 1). See --filter for aggregation.> ]
     		[ --sleep_usecs_between_samples <usecs (default 0)> ]
@@ -22,15 +26,6 @@ readings. It also supports taking multiple samples to help smooth the results.
     		[ --min_valid_value <minimum allowable value> ]
     		[ --max_valid_value <maximum allowable value> ]
     		[ --debug ]
-    
-    Supported Sensors
-    
-    * digital
-      --gpio_pin <wiringPi pin #>
-      	See http://wiringpi.com/pins/ to lookup the pin number.
-    
-    * analog
-      --adc <see ADC list below>
     
     Supported Analog to Digital Converters (ADCs)
     
@@ -50,8 +45,14 @@ readings. It also supports taking multiple samples to help smooth the results.
     
     Examples
     
-    * Polling an analog sensor hooked up to channel 0 of a MCP3008
-      $ yadl --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 0 --output csv --num_results 7 --sleep_usecs_between_results 50000
+    * Poll a single sample from BCM digital pin 17 (wiringPi pin 0) as JSON
+      $ yadl --sensor digital --gpio_pin 0 --output json
+      { "result": [ { "value": 0.0, "timestamp": 1464465651 } ] }
+    
+    * Poll 7 results from an analog sensor hooked up to channel 0 of a MCP3008.
+      Wait 0.05 seconds between each result shown.
+      $ yadl --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 0 \
+    	--output csv --num_results 7 --sleep_usecs_between_results 50000
       timestamp,value
       1464465367,716.0
       1464465367,712.0
@@ -61,9 +62,39 @@ readings. It also supports taking multiple samples to help smooth the results.
       1464465367,712.0
       1464465367,712.0
     
-    * Polling BCM digital pin 17 (wiringPi pin 0) as JSON
-      $ yadl --sensor digital --gpio_pin 0 --output json --num_results 1 --num_samples_per_result 1
-      { "result": [ { "value": 0.0, "timestamp": 1464465651 } ] }
+    * Show 5 averaged results from a photoresistor hooked up to an ADC.
+      1000 samples are taken for each result shown. 200 samples from each end
+      are removed and the mean is taken of the middle 600 samples. This is
+      useful for removing noise from analog sensors.
+      $ yadl --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 0 \
+    	--output csv --num_results 5 --sleep_usecs_between_results 2000000 \
+    	--num_samples_per_result 1000 --remove_n_samples_from_ends 200 --filter mean
+      timestamp,value
+      1464469264,779.4
+      1464469267,778.7
+      1464469269,779.7
+      1464469271,779.8
+      1464469273,779.2
+    
+    * Hook a button up to a digital pin and check for bounce when the button
+      is pressed. This polls the digital pin indefinitely until Crtl-C is
+      pressed. Note: Newlines were added for clarity between the three button
+      presses for illustration purposes.
+      $ yadl --sensor digital --gpio_pin 0 --output csv --num_results -1 \
+    	--only_log_value_changes
+      timestamp,value
+      1464470143,1.0
+      1464470143,0.0
+    
+      1464470145,1.0
+      1464470145,0.0
+      1464470145,1.0
+      1464470145,0.0
+      1464470145,1.0
+      1464470145,0.0
+    
+      1464470147,1.0
+      1464470147,0.0
 
 ## Data sheets for the supported ADCs
 
