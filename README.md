@@ -53,14 +53,14 @@ readings. It also supports taking multiple samples to help smooth the results.
       Wait 0.05 seconds between each result shown.
       $ yadl --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 0 \
     	--output csv --num_results 7 --sleep_usecs_between_results 50000
-      timestamp,value
-      1464465367,716.0
-      1464465367,712.0
-      1464465367,712.0
-      1464465367,708.0
-      1464465367,712.0
-      1464465367,712.0
-      1464465367,712.0
+      reading_number,timestamp,value
+      0,1464465367,716.0
+      1,1464465367,712.0
+      2,1464465367,712.0
+      3,1464465367,708.0
+      4,1464465367,712.0
+      5,1464465367,712.0
+      6,1464465367,712.0
     
     * Show 5 averaged results from a photoresistor hooked up to an ADC.
       1000 samples are taken for each result shown. 200 samples from each end
@@ -69,32 +69,29 @@ readings. It also supports taking multiple samples to help smooth the results.
       $ yadl --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 0 \
     	--output csv --num_results 5 --sleep_usecs_between_results 2000000 \
     	--num_samples_per_result 1000 --remove_n_samples_from_ends 200 --filter mean
-      timestamp,value
-      1464469264,779.4
-      1464469267,778.7
-      1464469269,779.7
-      1464469271,779.8
-      1464469273,779.2
+      reading_number,timestamp,value
+      0,1464469264,779.4
+      1,1464469267,778.7
+      2,1464469269,779.7
+      3,1464469271,779.8
+      4,1464469273,779.2
     
     * Hook a button up to a digital pin and check for bounce when the button
       is pressed. This polls the digital pin indefinitely until Crtl-C is
-      pressed. Note: Newlines were added for clarity between the three button
+      pressed. Note: Newlines were added for clarity between the two button
       presses for illustration purposes.
       $ yadl --sensor digital --gpio_pin 0 --output csv --num_results -1 \
     	--only_log_value_changes
-      timestamp,value
-      1464470143,1.0
-      1464470143,0.0
+      reading_number,timestamp,value
+      0,1464480347,0.0
     
-      1464470145,1.0
-      1464470145,0.0
-      1464470145,1.0
-      1464470145,0.0
-      1464470145,1.0
-      1464470145,0.0
+      636673,1464480348,1.0
+      687383,1464480348,0.0
     
-      1464470147,1.0
-      1464470147,0.0
+      1678984,1464480351,1.0
+      1731987,1464480351,0.0
+      1731988,1464480351,1.0
+      1732148,1464480351,0.0
 
 ## Data sheets for the supported ADCs
 

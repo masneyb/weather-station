@@ -129,10 +129,10 @@ static void _write_yaml(FILE *fd, __attribute__((__unused__)) int reading_number
 
 static void _write_csv_header(FILE *fd)
 {
-	fprintf(fd, "timestamp,value\n");
+	fprintf(fd, "reading_number,timestamp,value\n");
 }
 
-static void _write_csv(FILE *fd, __attribute__((__unused__)) int reading_number,
+static void _write_csv(FILE *fd, int reading_number,
 		yadl_result *result, __attribute__((__unused__)) yadl_config *config)
 {
 	if (config->only_log_value_changes) {
@@ -141,8 +141,7 @@ static void _write_csv(FILE *fd, __attribute__((__unused__)) int reading_number,
 		config->last_value = result->value;
 	}
 
-	fprintf(fd, "%ld,%.1f\n",
-		_get_current_timestamp(),
+	fprintf(fd, "%d,%ld,%.1f\n", reading_number, _get_current_timestamp(),
 		result->value);
 }
 
