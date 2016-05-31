@@ -54,7 +54,7 @@ static void _create_rrd_database(logger log, char *rrd_database)
 	log("Creating RRD database %s\n", rrd_database);
 
 	rrd_clear_error();
-	rrd_create(18, createparams);
+	rrd_create(17, createparams);
 }
 
 void write_to_rrd_database(logger log, char *rrd_database, float value)
