@@ -1,8 +1,7 @@
 # pi-yadl - Yet Another Data Logger
 
-An extensible data collector for the Raspberry Pi that supports returning the
-data in JSON, YAML, CSV, XML, text, and RRD. RRDtool can be used to graph the
-data over time.
+An extensible analog and digital data collector for the Raspberry Pi that supports
+returning the data in JSON, YAML, CSV, XML, text, and RRD.
 
 Some sensors can occasionally return erratic readings that cause large spikes
 or dips in your graphs. You can set valid thresholds to ignore these erroneous
@@ -93,14 +92,52 @@ readings. It also supports taking multiple samples to help smooth the results.
       1731988,1464480351,1.0
       1732148,1464480351,0.0
 
+
+## Using gnuplot to graph the data
+
+Here is an example using the pi-yadl project to log the output from an analog
+potentiometer hooked up to a 10-bit ADC.
+
+    $ yadl --sensor analog --adc mcp3002 --spi_channel 0 --analog_channel 0 --num_results 7000 --sleep_usecs_between_results 500 --output csv --outfile data.csv
+
+The associated [gnuplot](http://www.gnuplot.info/) script.
+
+    set datafile separator ","
+    set autoscale
+    set yrange [-10:1100]
+    set xtic auto
+    set ytic auto
+    set title "Logging an analog potentiometer using the pi-yadl project"
+    set xlabel "Sample Number"
+    set ylabel "ADC Reading"
+    plot 'data.csv' using 1:3 with lines
+
+![Example using GNUplot to log the data](images/pi-yadl-analog-pot-example.png?raw=1)
+
+
+## Using RRDtool to graph the data over time
+
+If you plan to graph one or more sensors over a long period of time, then you
+may want to consider storing the data in a RRD database. See my
+[pi-yatl](https://github.com/masneyb/pi-yatl) project for suggestions about how
+to set this up.
+
+
+## Single Node Installation
+
+* `sudo apt-get install wiringpi librrd-dev`
+* `make`
+
+
+## Multinode Installation
+
+See my [pi-yatl](https://github.com/masneyb/pi-yatl) project for suggestions
+about how to set this up.
+
+
 ## Data sheets for the supported ADCs
 
 * [MCP3002 ADC converter](http://ww1.microchip.com/downloads/en/DeviceDoc/21294C.pdf)
 * [MCP3008 ADC converter](https://www.adafruit.com/datasheets/MCP3008.pdf)
 * [PCF8591 ADC converter](http://www.nxp.com/documents/data_sheet/PCF8591.pdf)
-
-## Single Node Installation
-
-* `sudo apt-get install wiringpi rrdtool librrd-dev`
-* `make`
 
