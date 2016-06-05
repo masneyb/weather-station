@@ -28,6 +28,7 @@
 #include <getopt.h>
 #include <limits.h>
 #include <unistd.h>
+#include <sys/types.h>
 #include "yadl.h"
 
 #define DEFAULT_SLEEP_USECS_BETWEEN_RETRIES 500000
@@ -63,6 +64,7 @@ void usage(void)
 	printf("\t\t[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default %.1f)> ]\n", DEFAULT_COUNTER_MULTIPLIER);
 	printf("\t\t[ --debug ]\n");
 	printf("\t\t[ --logfile <path to debug logs. Uses stderr if not specified.> ]\n");
+	printf("\t\t[ --daemon ]\n");
 	printf("\n");
 	printf("Supported Analog to Digital Converters (ADCs)\n");
 	printf("\n");
@@ -289,6 +291,46 @@ static yadl_result *_perform_all_readings(yadl_config *config)
 	return result;
 }
 
+static void _dofork(yadl_config *config)
+{
+	pid_t pid;
+
+	pid = fork();
+	if (pid < 0) {
+		fprintf(stderr, "Error forking: %s\n", strerror(errno));
+		exit(1);
+	}
+	else if (pid > 0) {
+		config->logger("Terminating parent process %d\n", pid);
+		/* In parent process */
+		exit(0);
+	}
+
+	/* Now running in child process */
+}
+
+static void _daemonize(yadl_config *config)
+{
+	config->logger("Note: Running in daemon mode\n");
+
+	if (chdir("/") < 0) {
+		fprintf(stderr, "Error changing current path to /: %s\n", strerror(errno));
+		exit(1);
+	}
+
+	_dofork(config);
+	_dofork(config);
+
+	if (setsid() < 0) {
+		fprintf(stderr, "Error calling setsid(): %s\n", strerror(errno));
+		exit(1);
+	}
+
+	close(0);
+	close(1);
+	close(2);
+}
+
 int main(int argc, char **argv)
 {
 	static struct option long_options[] = {
@@ -315,6 +357,7 @@ int main(int argc, char **argv)
 		{"counter_poll_secs", required_argument, 0, 0 },
 		{"counter_multiplier", required_argument, 0, 0 },
 		{"logfile", required_argument, 0, 0 },
+		{"daemon", no_argument, 0, 0 },
 		{0, 0, 0, 0 }
 	};
 
@@ -322,7 +365,7 @@ int main(int argc, char **argv)
 	char *filter_name = NULL, *logfile = NULL;
 	yadl_config config;
 	outputter *output_funcs;
-	int opt = 0, long_index = 0, debug = 0;
+	int opt = 0, long_index = 0, debug = 0, daemon = 0;
 	yadl_result *result;
 
 	if (argc <= 1)
@@ -422,6 +465,9 @@ int main(int argc, char **argv)
 		case 22:
 			logfile = optarg;
 			break;
+		case 23:
+			daemon = 1;
+			break;
 		default:
 			usage();
 		}
@@ -431,16 +477,22 @@ int main(int argc, char **argv)
 	}
 
 	if (config.num_samples_per_result <= 0) {
-		fprintf(stderr, "num_samples_per_result must be > 0\n");
+		fprintf(stderr, "--num_samples_per_result must be > 0\n");
 		usage();
 	} else if (config.remove_n_samples_from_ends < 0) {
-		fprintf(stderr, "remove_n_samples_from_ends must be >= 0\n");
+		fprintf(stderr, "--remove_n_samples_from_ends must be >= 0\n");
 		usage();
 	} else if (config.num_samples_per_result <= (config.remove_n_samples_from_ends * 2)) {
-		fprintf(stderr, "remove_n_samples_from_ends * 2 must be less than num_samples_per_result\n");
+		fprintf(stderr, "--remove_n_samples_from_ends * 2 must be less than --num_samples_per_result\n");
 		usage();
 	} else if (config.counter_poll_secs <= 0) {
-		fprintf(stderr, "counter_poll_secs must be > 0\n");
+		fprintf(stderr, "--counter_poll_secs must be > 0\n");
+		usage();
+	} else if (daemon && debug && logfile == NULL) {
+		fprintf(stderr, "You must specify the --logfile argument with --daemon\n");
+		usage();
+	} else if (daemon && config.outfile == NULL) {
+		fprintf(stderr, "You must specify the --outfile argument with --daemon\n");
 		usage();
 	}
 
@@ -481,6 +533,13 @@ int main(int argc, char **argv)
 
 	if (output_funcs->write_header != NULL)
 		output_funcs->write_header(fd);
+
+	if (daemon) {
+		/* don't write duplicate headers to the output file*/
+		fflush(fd);
+
+		_daemonize(&config);
+	}
 
 	for (int i = 0; i < config.num_results || config.num_results < 0; i++) {
 		if (i > 0 && config.sleep_usecs_between_results > 0)

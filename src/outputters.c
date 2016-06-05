@@ -49,6 +49,8 @@ static FILE *_open_fd(yadl_config *config)
 	if (config->outfile == NULL)
 		return stdout;
 
+	config->logger("Writing results to file %s\n", config->outfile);
+
 	FILE *fd = fopen(config->outfile, "w");
 	if (fd == NULL) {
 		fprintf(stderr, "Error opening %s: %s\n", config->outfile, strerror(errno));

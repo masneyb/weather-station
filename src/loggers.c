@@ -49,6 +49,8 @@ static void _logger_fd(const char *format, ...)
 	va_start(args, format);
 	vfprintf(_logfd, format, args);
 	va_end(args);
+
+	fflush(_logfd);
 }
 
 logger get_logger(int debug, char *logfile)
@@ -63,7 +65,7 @@ logger get_logger(int debug, char *logfile)
 	}
 
 	if (logfile != NULL) {
-		_logfd = fopen(logfile, "a");
+		_logfd = fopen(logfile, "w");
 		if (_logfd == NULL) {
 			fprintf(stderr, "Error opening %s: %s\n", logfile, strerror(errno));
 			exit(1);

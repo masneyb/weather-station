@@ -30,6 +30,8 @@ See the examples below in the usage for some use cases.
     		[ --counter_poll_secs <seconds to poll each sample in counter mode (default 5)> ]
     		[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default 1.0)> ]
     		[ --debug ]
+    		[ --logfile <path to debug logs. Uses stderr if not specified.> ]
+    		[ --daemon ]
     
     Supported Analog to Digital Converters (ADCs)
     
