@@ -36,6 +36,8 @@ void usage(void)
 	printf("usage: yadl-add-rrd-sample [ --debug ]\n");
 	printf("\t\t--outfile <path to RRD database>\n");
 	printf("\t\t--value <value>\n");
+	printf("\t\t[ --debug ]\n");
+	printf("\t\t[ --logfile <path to debug logs. Uses stderr if not specified.> ]\n");
 	printf("\n");
 	printf("Note: A new RRD database will be created if it does not exist\n");
 	exit(1);
