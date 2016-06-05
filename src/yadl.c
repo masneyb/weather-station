@@ -31,9 +31,9 @@
 #include <sys/types.h>
 #include "yadl.h"
 
-#define DEFAULT_SLEEP_USECS_BETWEEN_RETRIES 500000
-#define DEFAULT_SLEEP_USECS_BETWEEN_SAMPLES 0
-#define DEFAULT_SLEEP_USECS_BETWEEN_RESULTS 0
+#define DEFAULT_SLEEP_MILLIS_BETWEEN_RETRIES 500
+#define DEFAULT_SLEEP_MILLIS_BETWEEN_SAMPLES 0
+#define DEFAULT_SLEEP_MILLIS_BETWEEN_RESULTS 0
 #define DEFAULT_MAX_RETRIES                 1
 #define DEFAULT_NUM_SAMPLES_PER_RESULT      1
 #define DEFAULT_NUM_RESULTS                 1
@@ -51,13 +51,13 @@ void usage(void)
 	printf("\t\t[ --outfile <optional output filename. Defaults to stdout> ]\n");
 	printf("\t\t[ --only_log_value_changes ]\n");
 	printf("\t\t[ --num_results <# results returned (default %d). Set to -1 to poll indefinitely.> ]\n", DEFAULT_NUM_RESULTS);
-	printf("\t\t[ --sleep_usecs_between_results <usecs (default %d)> ]\n", DEFAULT_SLEEP_USECS_BETWEEN_RESULTS);
+	printf("\t\t[ --sleep_millis_between_results <milliseconds (default %d)> ]\n", DEFAULT_SLEEP_MILLIS_BETWEEN_RESULTS);
 	printf("\t\t[ --num_samples_per_result <# samples (default %d). See --filter for aggregation.> ]\n", DEFAULT_NUM_SAMPLES_PER_RESULT);
-	printf("\t\t[ --sleep_usecs_between_samples <usecs (default %d)> ]\n", DEFAULT_SLEEP_USECS_BETWEEN_SAMPLES);
+	printf("\t\t[ --sleep_millis_between_samples <milliseconds (default %d)> ]\n", DEFAULT_SLEEP_MILLIS_BETWEEN_SAMPLES);
 	printf("\t\t[ --filter <median|mean|mode|min|max|range (default median)> ]\n");
 	printf("\t\t[ --remove_n_samples_from_ends <# samples (default %d)> ]\n", DEFAULT_REMOVE_N_SAMPLES_FROM_ENDS);
 	printf("\t\t[ --max_retries <# retries (default %d)> ]\n", DEFAULT_MAX_RETRIES);
-	printf("\t\t[ --sleep_usecs_between_retries <usecs (default %d)> ]\n", DEFAULT_SLEEP_USECS_BETWEEN_RETRIES);
+	printf("\t\t[ --sleep_millis_between_retries <milliseconds (default %d)> ]\n", DEFAULT_SLEEP_MILLIS_BETWEEN_RETRIES);
 	printf("\t\t[ --min_valid_value <minimum allowable value> ]\n");
 	printf("\t\t[ --max_valid_value <maximum allowable value> ]\n");
 	printf("\t\t[ --counter_poll_secs <seconds to poll each sample in counter mode (default %d)> ]\n", DEFAULT_SAMPLE_COUNTER_POLL_SECS);
@@ -89,9 +89,9 @@ void usage(void)
 	printf("  { \"result\": [ { \"value\": 0.0, \"timestamp\": 1464465651 } ] }\n");
 	printf("\n");
 	printf("* Poll 7 results from an analog sensor hooked up to channel 0 of a MCP3008.\n");
-	printf("  Wait 0.05 seconds between each result shown.\n");
+	printf("  Wait 50 milliseconds between each result shown.\n");
 	printf("  $ yadl --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 0 \\\n");
-	printf("	--output csv --num_results 7 --sleep_usecs_between_results 50000\n");
+	printf("	--output csv --num_results 7 --sleep_millis_between_results 50\n");
 	printf("  reading_number,timestamp,value\n");
 	printf("  0,1464465367,716.0\n");
 	printf("  1,1464465367,712.0\n");
@@ -106,7 +106,7 @@ void usage(void)
 	printf("  are removed and the mean is taken of the middle 600 samples. This is\n");
 	printf("  useful for removing noise from analog sensors.\n");
 	printf("  $ yadl --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 0 \\\n");
-	printf("	--output csv --num_results 5 --sleep_usecs_between_results 2000000 \\\n");
+	printf("	--output csv --num_results 5 --sleep_millis_between_results 2000 \\\n");
 	printf("	--num_samples_per_result 1000 --remove_n_samples_from_ends 200 --filter mean\n");
 	printf("  reading_number,timestamp,value\n");
 	printf("  0,1464469264,779.4\n");
@@ -155,8 +155,8 @@ static yadl_result *_perform_reading(yadl_config *config)
 	int success = 0;
 
 	for (int i = 0; i < config->max_retries; i++) {
-		if (i > 0 && config->sleep_usecs_between_retries > 0)
-			delayMicroseconds(config->sleep_usecs_between_retries);
+		if (i > 0 && config->sleep_millis_between_retries > 0)
+			delay(config->sleep_millis_between_retries);
 
 		result = config->sens->read(config);
 		if (result == NULL) {
@@ -268,8 +268,8 @@ static yadl_result *_perform_all_readings(yadl_config *config)
 	sample_node *value_list = NULL;
 
 	for (int i = 0; i < config->num_samples_per_result; i++) {
-		if (i > 0 && config->sleep_usecs_between_samples > 0)
-			delayMicroseconds(config->sleep_usecs_between_samples);
+		if (i > 0 && config->sleep_millis_between_samples > 0)
+			delay(config->sleep_millis_between_samples);
 
 		yadl_result *sample = _perform_reading(config);
 
@@ -344,14 +344,14 @@ int main(int argc, char **argv)
 		{"spi_channel", required_argument, 0, 0 },
 		{"adc", required_argument, 0, 0 },
 		{"max_retries", required_argument, 0, 0 },
-		{"sleep_usecs_between_retries", required_argument, 0, 0 },
+		{"sleep_millis_between_retries", required_argument, 0, 0 },
 		{"num_samples_per_result", required_argument, 0, 0 },
 		{"analog_channel", required_argument, 0, 0 },
-		{"sleep_usecs_between_samples", required_argument, 0, 0 },
+		{"sleep_millis_between_samples", required_argument, 0, 0 },
 		{"filter", required_argument, 0, 0 },
 		{"remove_n_samples_from_ends", required_argument, 0, 0 },
 		{"num_results", required_argument, 0, 0 },
-		{"sleep_usecs_between_results", required_argument, 0, 0 },
+		{"sleep_millis_between_results", required_argument, 0, 0 },
 		{"i2c_address", required_argument, 0, 0 },
 		{"only_log_value_changes", no_argument, 0, 0 },
 		{"counter_poll_secs", required_argument, 0, 0 },
@@ -378,13 +378,13 @@ int main(int argc, char **argv)
 	config.min_valid_reading = INT_MIN;
 	config.max_valid_reading = INT_MAX;
 	config.max_retries = DEFAULT_MAX_RETRIES;
-	config.sleep_usecs_between_retries = DEFAULT_SLEEP_USECS_BETWEEN_RETRIES;
-	config.sleep_usecs_between_samples = DEFAULT_SLEEP_USECS_BETWEEN_SAMPLES;
+	config.sleep_millis_between_retries = DEFAULT_SLEEP_MILLIS_BETWEEN_RETRIES;
+	config.sleep_millis_between_samples = DEFAULT_SLEEP_MILLIS_BETWEEN_SAMPLES;
 	config.analog_channel = -1;
 	config.num_results = DEFAULT_NUM_RESULTS;
 	config.num_samples_per_result = DEFAULT_NUM_SAMPLES_PER_RESULT;
 	config.remove_n_samples_from_ends = DEFAULT_REMOVE_N_SAMPLES_FROM_ENDS;
-	config.sleep_usecs_between_samples = DEFAULT_SLEEP_USECS_BETWEEN_SAMPLES;
+	config.sleep_millis_between_samples = DEFAULT_SLEEP_MILLIS_BETWEEN_SAMPLES;
 	config.only_log_value_changes = 0;
 	config.last_value = -1;
 	config.counter_poll_secs = DEFAULT_SAMPLE_COUNTER_POLL_SECS;
@@ -427,7 +427,7 @@ int main(int argc, char **argv)
 			config.max_retries = strtol(optarg, NULL, 10);
 			break;
 		case 10:
-			config.sleep_usecs_between_retries = strtol(optarg, NULL, 10);
+			config.sleep_millis_between_retries = strtol(optarg, NULL, 10);
 			break;
 		case 11:
 			config.num_samples_per_result = strtol(optarg, NULL, 10);
@@ -436,7 +436,7 @@ int main(int argc, char **argv)
 			config.analog_channel = strtol(optarg, NULL, 10);
 			break;
 		case 13:
-			config.sleep_usecs_between_samples = strtol(optarg, NULL, 10);
+			config.sleep_millis_between_samples = strtol(optarg, NULL, 10);
 			break;
 		case 14:
 			filter_name = optarg;
@@ -448,7 +448,7 @@ int main(int argc, char **argv)
 			config.num_results = strtol(optarg, NULL, 10);
 			break;
 		case 17:
-			config.sleep_usecs_between_results = strtol(optarg, NULL, 10);
+			config.sleep_millis_between_results = strtol(optarg, NULL, 10);
 			break;
 		case 18:
 			config.i2c_address = strtol(optarg, NULL, 16);
@@ -516,10 +516,10 @@ int main(int argc, char **argv)
 
 	config.logger("min_valid_value=%d; max_valid_value=%d\n",
 			config.min_valid_reading, config.max_valid_reading);
-	config.logger("num_results=%d; sleep_usecs_between_samples=%d; num_samples_per_result=%d; sleep_usecs_between_samples=%d\n",
-			config.num_results, config.sleep_usecs_between_samples, config.num_samples_per_result, config.sleep_usecs_between_samples);
-	config.logger("max_retries=%d; sleep_usecs_between_retries=%d\n",
-			config.max_retries, config.sleep_usecs_between_retries);
+	config.logger("num_results=%d; sleep_millis_between_samples=%d; num_samples_per_result=%d; sleep_millis_between_samples=%d\n",
+			config.num_results, config.sleep_millis_between_samples, config.num_samples_per_result, config.sleep_millis_between_samples);
+	config.logger("max_retries=%d; sleep_millis_between_retries=%d\n",
+			config.max_retries, config.sleep_millis_between_retries);
 
 	if (wiringPiSetup() == -1)
 		exit(1);
@@ -542,8 +542,8 @@ int main(int argc, char **argv)
 	}
 
 	for (int i = 0; i < config.num_results || config.num_results < 0; i++) {
-		if (i > 0 && config.sleep_usecs_between_results > 0)
-			delayMicroseconds(config.sleep_usecs_between_results);
+		if (i > 0 && config.sleep_millis_between_results > 0)
+			delay(config.sleep_millis_between_results);
 
 		result = _perform_all_readings(&config);
 		output_funcs->write_result(fd, i, result, &config);

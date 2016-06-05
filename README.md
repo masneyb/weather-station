@@ -18,13 +18,13 @@ See the examples below in the usage for some use cases.
     		[ --outfile <optional output filename. Defaults to stdout> ]
     		[ --only_log_value_changes ]
     		[ --num_results <# results returned (default 1). Set to -1 to poll indefinitely.> ]
-    		[ --sleep_usecs_between_results <usecs (default 0)> ]
+    		[ --sleep_millis_between_results <milliseconds (default 0)> ]
     		[ --num_samples_per_result <# samples (default 1). See --filter for aggregation.> ]
-    		[ --sleep_usecs_between_samples <usecs (default 0)> ]
+    		[ --sleep_millis_between_samples <milliseconds (default 0)> ]
     		[ --filter <median|mean|mode|min|max|range (default median)> ]
     		[ --remove_n_samples_from_ends <# samples (default 0)> ]
     		[ --max_retries <# retries (default 1)> ]
-    		[ --sleep_usecs_between_retries <usecs (default 500000)> ]
+    		[ --sleep_millis_between_retries <milliseconds (default 500)> ]
     		[ --min_valid_value <minimum allowable value> ]
     		[ --max_valid_value <maximum allowable value> ]
     		[ --counter_poll_secs <seconds to poll each sample in counter mode (default 5)> ]
@@ -56,9 +56,9 @@ See the examples below in the usage for some use cases.
       { "result": [ { "value": 0.0, "timestamp": 1464465651 } ] }
     
     * Poll 7 results from an analog sensor hooked up to channel 0 of a MCP3008.
-      Wait 0.05 seconds between each result shown.
+      Wait 50 milliseconds between each result shown.
       $ yadl --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 0 \
-    	--output csv --num_results 7 --sleep_usecs_between_results 50000
+    	--output csv --num_results 7 --sleep_millis_between_results 50
       reading_number,timestamp,value
       0,1464465367,716.0
       1,1464465367,712.0
@@ -73,7 +73,7 @@ See the examples below in the usage for some use cases.
       are removed and the mean is taken of the middle 600 samples. This is
       useful for removing noise from analog sensors.
       $ yadl --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 0 \
-    	--output csv --num_results 5 --sleep_usecs_between_results 2000000 \
+    	--output csv --num_results 5 --sleep_millis_between_results 2000 \
     	--num_samples_per_result 1000 --remove_n_samples_from_ends 200 --filter mean
       reading_number,timestamp,value
       0,1464469264,779.4

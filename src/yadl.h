@@ -67,9 +67,9 @@ struct yadl_config_tag {
 	int i2c_address;
 	int analog_channel;
 	adc_converter *adc;
-	int sleep_usecs_between_retries;
-	int sleep_usecs_between_results;
-	int sleep_usecs_between_samples;
+	int sleep_millis_between_retries;
+	int sleep_millis_between_results;
+	int sleep_millis_between_samples;
 	int max_retries;
 	filter filter_func;
 	int num_results;
