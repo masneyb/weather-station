@@ -37,10 +37,12 @@
 #define DEFAULT_NUM_SAMPLES_PER_RESULT      1
 #define DEFAULT_NUM_RESULTS                 1
 #define DEFAULT_REMOVE_N_SAMPLES_FROM_ENDS  0
+#define DEFAULT_SAMPLE_COUNTER_POLL_SECS    5
+#define DEFAULT_COUNTER_MULTIPLIER          1.0
 
 void usage(void)
 {
-	printf("usage: yadl --sensor <analog|digital>\n");
+	printf("usage: yadl --sensor <analog|digital|counter>\n");
 	printf("\t\t[ --gpio_pin <wiringPi pin #. Required for digital pins> ]\n");
 	printf("\t\t  See http://wiringpi.com/pins/ to lookup the pin number.\n");
 	printf("\t\t[ --adc <see ADC list below. Required for analog> ]\n");
@@ -57,6 +59,8 @@ void usage(void)
 	printf("\t\t[ --sleep_usecs_between_retries <usecs (default %d)> ]\n", DEFAULT_SLEEP_USECS_BETWEEN_RETRIES);
 	printf("\t\t[ --min_valid_value <minimum allowable value> ]\n");
 	printf("\t\t[ --max_valid_value <maximum allowable value> ]\n");
+	printf("\t\t[ --counter_poll_secs <seconds to poll each sample in counter mode (default %d)> ]\n", DEFAULT_SAMPLE_COUNTER_POLL_SECS);
+	printf("\t\t[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default %.1f)> ]\n", DEFAULT_COUNTER_MULTIPLIER);
 	printf("\t\t[ --debug ]\n");
 	printf("\n");
 	printf("Supported Analog to Digital Converters (ADCs)\n");
@@ -107,6 +111,19 @@ void usage(void)
 	printf("  2,1464469269,779.7\n");
 	printf("  3,1464469271,779.8\n");
 	printf("  4,1464469273,779.2\n");
+	printf("\n");
+	printf("* Hook an anemometer (wind speed meter) up to a digital pin and count the\n");
+	printf("  number of times that the switch closes over a 5 second period. Multiply the\n");
+	printf("  requests per second by 1.492 to get the wind speed in miles per hour. Show\n");
+	printf("  5 different results.\n");
+	printf("  $ yadl --sensor counter --gpio_pin 1 --output csv --num_results 5 \\\n");
+	printf("  	--counter_poll_secs 5 --counter_multiplier 1.492\n");
+	printf("  reading_number,timestamp,value\n");
+	printf("  0,1465084823,6.9\n");
+	printf("  1,1465084828,6.9\n");
+	printf("  2,1465084833,7.2\n");
+	printf("  3,1465084838,6.9\n");
+	printf("  4,1465084843,6.9\n");
 	printf("\n");
 	printf("* Hook a button up to a digital pin and check for bounce when the button\n");
 	printf("  is pressed. This polls the digital pin indefinitely until Crtl-C is\n");
@@ -294,6 +311,8 @@ int main(int argc, char **argv)
 		{"sleep_usecs_between_results", required_argument, 0, 0 },
 		{"i2c_address", required_argument, 0, 0 },
 		{"only_log_value_changes", no_argument, 0, 0 },
+		{"counter_poll_secs", required_argument, 0, 0 },
+		{"counter_multiplier", required_argument, 0, 0 },
 		{0, 0, 0, 0 }
 	};
 
@@ -323,6 +342,8 @@ int main(int argc, char **argv)
 	config.sleep_usecs_between_samples = DEFAULT_SLEEP_USECS_BETWEEN_SAMPLES;
 	config.only_log_value_changes = 0;
 	config.last_value = -1;
+	config.counter_poll_secs = DEFAULT_SAMPLE_COUNTER_POLL_SECS;
+	config.counter_multiplier = DEFAULT_COUNTER_MULTIPLIER;
 
 	while ((opt = getopt_long(argc, argv, "", long_options, &long_index)) != -1) {
 		if (opt != 0)
@@ -390,6 +411,12 @@ int main(int argc, char **argv)
 		case 19:
 			config.only_log_value_changes = 1;
 			break;
+		case 20:
+			config.counter_poll_secs = strtol(optarg, NULL, 10);
+			break;
+		case 21:
+			config.counter_multiplier = strtof(optarg, NULL);
+			break;
 		default:
 			usage();
 		}
@@ -406,6 +433,9 @@ int main(int argc, char **argv)
 		usage();
 	} else if (config.num_samples_per_result <= (config.remove_n_samples_from_ends * 2)) {
 		fprintf(stderr, "remove_n_samples_from_ends * 2 must be less than num_samples_per_result\n");
+		usage();
+	} else if (config.counter_poll_secs <= 0) {
+		fprintf(stderr, "counter_poll_secs must be > 0\n");
 		usage();
 	}
 

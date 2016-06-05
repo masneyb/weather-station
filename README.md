@@ -1,13 +1,16 @@
 # pi-yadl - Yet Another Data Logger
 
 An extensible analog and digital data collector for the Raspberry Pi that supports
-returning the data in JSON, YAML, CSV, XML, text, and RRD.
+returning the data in JSON, YAML, CSV, XML, text, and RRD. It also supports
+counting the number of times that a digital pin closes, which is useful for
+logging some types of sensors such as anemometer, rain gauge, etc.
 
 Some sensors can occasionally return erratic readings that cause large spikes
 or dips in your graphs. You can set valid thresholds to ignore these erroneous
 readings. It also supports taking multiple samples to help smooth the results.
+See the examples below in the usage for some use cases.
 
-    usage: yadl --sensor <analog|digital>
+    usage: yadl --sensor <analog|digital|counter>
     		[ --gpio_pin <wiringPi pin #. Required for digital pins> ]
     		  See http://wiringpi.com/pins/ to lookup the pin number.
     		[ --adc <see ADC list below. Required for analog> ]
@@ -24,6 +27,8 @@ readings. It also supports taking multiple samples to help smooth the results.
     		[ --sleep_usecs_between_retries <usecs (default 500000)> ]
     		[ --min_valid_value <minimum allowable value> ]
     		[ --max_valid_value <maximum allowable value> ]
+    		[ --counter_poll_secs <seconds to poll each sample in counter mode (default 5)> ]
+    		[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default 1.0)> ]
     		[ --debug ]
     
     Supported Analog to Digital Converters (ADCs)
@@ -74,6 +79,19 @@ readings. It also supports taking multiple samples to help smooth the results.
       2,1464469269,779.7
       3,1464469271,779.8
       4,1464469273,779.2
+    
+    * Hook an anemometer (wind speed meter) up to a digital pin and count the
+      number of times that the switch closes over a 5 second period. Multiply the
+      requests per second by 1.492 to get the wind speed in miles per hour. Show
+      5 different results.
+      $ yadl --sensor counter --gpio_pin 1 --output csv --num_results 5 \
+      	--counter_poll_secs 5 --counter_multiplier 1.492
+      reading_number,timestamp,value
+      0,1465084823,6.9
+      1,1465084828,6.9
+      2,1465084833,7.2
+      3,1465084838,6.9
+      4,1465084843,6.9
     
     * Hook a button up to a digital pin and check for bounce when the button
       is pressed. This polls the digital pin indefinitely until Crtl-C is

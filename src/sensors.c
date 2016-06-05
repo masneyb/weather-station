@@ -29,6 +29,8 @@ sensor *get_sensor(char *name)
 		return NULL;
 	else if (strcmp(name, "digital") == 0)
 		return &digital_sensor_funcs;
+	else if (strcmp(name, "counter") == 0)
+		return &digital_counter_sensor_funcs;
 	else if (strcmp(name, "analog") == 0)
 		return &analog_sensor_funcs;
 

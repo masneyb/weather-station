@@ -77,6 +77,8 @@ struct yadl_config_tag {
 	int remove_n_samples_from_ends;
 	int only_log_value_changes;
 	float last_value;
+	int counter_poll_secs;
+	float counter_multiplier;
 };
 
 filter get_filter(char *name);
@@ -86,6 +88,8 @@ outputter *get_outputter(char *name);
 sensor analog_sensor_funcs;
 
 sensor digital_sensor_funcs;
+
+sensor digital_counter_sensor_funcs;
 
 sensor *get_sensor(char *name);
 
