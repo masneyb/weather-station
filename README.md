@@ -118,7 +118,8 @@ See the examples below in the usage for some use cases.
 Here is an example using the pi-yadl project to log the output from an analog
 potentiometer hooked up to a 10-bit ADC.
 
-    $ yadl --sensor analog --adc mcp3002 --spi_channel 0 --analog_channel 0 --num_results 7000 --sleep_usecs_between_results 500 --output csv --outfile data.csv
+    $ yadl --sensor analog --adc mcp3002 --spi_channel 0 --analog_channel 0 --num_results 7000 \
+    				--sleep_usecs_between_results 500 --output csv --outfile data.csv
 
 The associated [gnuplot](http://www.gnuplot.info/) script.
 
