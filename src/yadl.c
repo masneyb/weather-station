@@ -62,6 +62,7 @@ void usage(void)
 	printf("\t\t[ --counter_poll_secs <seconds to poll each sample in counter mode (default %d)> ]\n", DEFAULT_SAMPLE_COUNTER_POLL_SECS);
 	printf("\t\t[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default %.1f)> ]\n", DEFAULT_COUNTER_MULTIPLIER);
 	printf("\t\t[ --debug ]\n");
+	printf("\t\t[ --logfile <path to debug logs. Uses stderr if not specified.> ]\n");
 	printf("\n");
 	printf("Supported Analog to Digital Converters (ADCs)\n");
 	printf("\n");
@@ -313,11 +314,12 @@ int main(int argc, char **argv)
 		{"only_log_value_changes", no_argument, 0, 0 },
 		{"counter_poll_secs", required_argument, 0, 0 },
 		{"counter_multiplier", required_argument, 0, 0 },
+		{"logfile", required_argument, 0, 0 },
 		{0, 0, 0, 0 }
 	};
 
 	char *output_name = NULL, *sensor_name = NULL, *adc_name = NULL;
-	char *filter_name = NULL;
+	char *filter_name = NULL, *logfile = NULL;
 	yadl_config config;
 	outputter *output_funcs;
 	int opt = 0, long_index = 0, debug = 0;
@@ -417,6 +419,9 @@ int main(int argc, char **argv)
 		case 21:
 			config.counter_multiplier = strtof(optarg, NULL);
 			break;
+		case 22:
+			logfile = optarg;
+			break;
 		default:
 			usage();
 		}
@@ -439,6 +444,8 @@ int main(int argc, char **argv)
 		usage();
 	}
 
+	config.logger = get_logger(debug, logfile);
+
 	config.sens = get_sensor(sensor_name);
 	if (config.sens == NULL) {
 		fprintf(stderr, "You must specify the --sensor argument\n");
@@ -454,8 +461,6 @@ int main(int argc, char **argv)
 		usage();
 
 	config.adc = get_adc(adc_name);
-
-	config.logger = get_logger(debug);
 
 	config.logger("min_valid_value=%d; max_valid_value=%d\n",
 			config.min_valid_reading, config.max_valid_reading);
@@ -492,6 +497,8 @@ int main(int argc, char **argv)
 		output_funcs->close(fd, &config);
 
 	free(result);
+
+	close_logger(logfile);
 
 	return 0;
 }

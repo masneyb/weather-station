@@ -19,9 +19,11 @@
  * 02110-1301, USA.
  */
 
+#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 #include "yadl.h"
 
 static void _logger_noop(__attribute__((__unused__)) const char *format, ...)
@@ -38,8 +40,52 @@ static void _logger_stderr(const char *format, ...)
 	va_end(args);
 }
 
-logger get_logger(int debug)
+static FILE *_logfd = NULL;
+
+static void _logger_fd(const char *format, ...)
 {
-	return debug ? &_logger_stderr : &_logger_noop;
+	va_list args;
+
+	va_start(args, format);
+	vfprintf(_logfd, format, args);
+	va_end(args);
+}
+
+logger get_logger(int debug, char *logfile)
+{
+	if (!debug) {
+		if (logfile != NULL) {
+			fprintf(stderr, "You must also specify the --debug flag with the --logfile argument\n");
+			usage();
+		}
+
+		return &_logger_noop;
+	}
+
+	if (logfile != NULL) {
+		_logfd = fopen(logfile, "a");
+		if (_logfd == NULL) {
+			fprintf(stderr, "Error opening %s: %s\n", logfile, strerror(errno));
+			exit(1);
+		}
+		return &_logger_fd;
+	}
+
+	return &_logger_stderr;
+}
+
+void close_logger(char *logfile)
+{
+	if (logfile == NULL)
+		return;
+
+	int ret = fclose(_logfd);
+	if (ret < 0) {
+		fprintf(stderr, "Error closing logfile %s: %s\n", logfile,
+			strerror(errno));
+		exit(1);
+	}
+
+	_logfd = NULL;
 }
 

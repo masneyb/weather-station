@@ -47,11 +47,12 @@ int main(int argc, char **argv)
 		{"debug", no_argument, 0, 0 },
 		{"outfile", required_argument, 0, 0 },
 		{"value", required_argument, 0, 0 },
+		{"logfile", required_argument, 0, 0 },
 		{0, 0, 0, 0 }
 	};
 
 	float value = FLT_MIN;
-	char *outfile;
+	char *outfile, *logfile;
 	int opt = 0, long_index = 0, debug = 0;
 
 	while ((opt = getopt_long(argc, argv, "", long_options, &long_index)) != -1) {
@@ -69,6 +70,9 @@ int main(int argc, char **argv)
 		case 2:
 			value = strtof(optarg, NULL);
 			break;
+		case 3:
+			logfile = optarg;
+			break;
 		default:
 			usage();
 		}
@@ -80,9 +84,12 @@ int main(int argc, char **argv)
 	if (value == FLT_MIN || outfile == NULL)
 		usage();
 
-	logger log = get_logger(debug);
+	logger log = get_logger(debug, logfile);
 
 	write_to_rrd_database(log, outfile, value);
+
+	close_logger(logfile);
+
 	return 0;
 }
 

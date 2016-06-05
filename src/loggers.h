@@ -21,5 +21,7 @@
 
 typedef void (*logger)(const char *format, ...);
 
-logger get_logger(int debug);
+logger get_logger(int debug, char *logfile);
+
+void close_logger(char *logfile);
 

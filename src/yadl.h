@@ -101,6 +101,4 @@ adc_converter pcf8591_funcs;
 
 adc_converter *get_adc(char *name);
 
-logger get_logger(int debug);
-
 void usage(void);
