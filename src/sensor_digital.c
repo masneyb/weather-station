@@ -28,8 +28,15 @@
 
 static void _digital_init(__attribute__((__unused__)) yadl_config *config)
 {
+	if (config->gpio_pin == -1) {
+		fprintf(stderr, "You must specify the --gpio_pin argument\n");
+		usage();
+	}
+
 	if (wiringPiSetup() == -1)
 		exit(1);
+
+	pinMode(config->gpio_pin, INPUT);
 }
 
 static yadl_result *_digital_read_data(yadl_config *config)
