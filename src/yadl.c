@@ -40,6 +40,7 @@
 #define DEFAULT_REMOVE_N_SAMPLES_FROM_ENDS  0
 #define DEFAULT_SAMPLE_COUNTER_POLL_SECS    5
 #define DEFAULT_COUNTER_MULTIPLIER          1.0
+#define DEFAULT_INTERRUPT_EDGE              "rising"
 
 void usage(void)
 {
@@ -60,11 +61,15 @@ void usage(void)
 	printf("\t\t[ --sleep_millis_between_retries <milliseconds (default %d)> ]\n", DEFAULT_SLEEP_MILLIS_BETWEEN_RETRIES);
 	printf("\t\t[ --min_valid_value <minimum allowable value> ]\n");
 	printf("\t\t[ --max_valid_value <maximum allowable value> ]\n");
-	printf("\t\t[ --counter_poll_secs <seconds to poll each sample in counter mode (default %d)> ]\n", DEFAULT_SAMPLE_COUNTER_POLL_SECS);
-	printf("\t\t[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default %.1f)> ]\n", DEFAULT_COUNTER_MULTIPLIER);
 	printf("\t\t[ --debug ]\n");
 	printf("\t\t[ --logfile <path to debug logs. Uses stderr if not specified.> ]\n");
 	printf("\t\t[ --daemon ]\n");
+	printf("\n");
+	printf("Counter specific options\n");
+	printf("\n");
+	printf("\t\t[ --counter_poll_secs <seconds to poll each sample in counter mode (default %d)> ]\n", DEFAULT_SAMPLE_COUNTER_POLL_SECS);
+	printf("\t\t[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default %.1f)> ]\n", DEFAULT_COUNTER_MULTIPLIER);
+	printf("\t\t[ --interrupt_edge <rising|falling|both (default %s)> ]\n", DEFAULT_INTERRUPT_EDGE);
 	printf("\n");
 	printf("Supported Analog to Digital Converters (ADCs)\n");
 	printf("\n");
@@ -358,6 +363,7 @@ int main(int argc, char **argv)
 		{"counter_multiplier", required_argument, 0, 0 },
 		{"logfile", required_argument, 0, 0 },
 		{"daemon", no_argument, 0, 0 },
+		{"interrupt_edge", required_argument, 0, 0 },
 		{0, 0, 0, 0 }
 	};
 
@@ -389,6 +395,7 @@ int main(int argc, char **argv)
 	config.last_value = -1;
 	config.counter_poll_secs = DEFAULT_SAMPLE_COUNTER_POLL_SECS;
 	config.counter_multiplier = DEFAULT_COUNTER_MULTIPLIER;
+	config.interrupt_edge = DEFAULT_INTERRUPT_EDGE;
 
 	while ((opt = getopt_long(argc, argv, "", long_options, &long_index)) != -1) {
 		if (opt != 0)
@@ -467,6 +474,9 @@ int main(int argc, char **argv)
 			break;
 		case 23:
 			daemon = 1;
+			break;
+		case 24:
+			config.interrupt_edge = optarg;
 			break;
 		default:
 			usage();

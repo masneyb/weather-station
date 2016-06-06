@@ -35,7 +35,7 @@ void _interrupt_handler(void)
 	_interrupt_counter++;
 }
 
-static void _digital_counter_init(__attribute__((__unused__)) yadl_config *config)
+static void _digital_counter_init(yadl_config *config)
 {
 	if (config->gpio_pin == -1) {
 		fprintf(stderr, "You must specify the --gpio_pin argument\n");
@@ -45,7 +45,16 @@ static void _digital_counter_init(__attribute__((__unused__)) yadl_config *confi
 	if (wiringPiSetup() == -1)
 		exit(1);
 
-	wiringPiISR (config->gpio_pin, INT_EDGE_FALLING, &_interrupt_handler);
+	if (strcmp(config->interrupt_edge, "rising") == 0)
+		wiringPiISR(config->gpio_pin, INT_EDGE_RISING, &_interrupt_handler);
+	else if (strcmp(config->interrupt_edge, "falling") == 0)
+		wiringPiISR(config->gpio_pin, INT_EDGE_FALLING, &_interrupt_handler);
+	else if (strcmp(config->interrupt_edge, "both") == 0)
+		wiringPiISR(config->gpio_pin, INT_EDGE_BOTH, &_interrupt_handler);
+	else {
+		fprintf(stderr, "Invalid --interrupt_edge paramter %s\n", config->interrupt_edge);
+		usage();
+	}
 }
 
 static yadl_result *_digital_counter_read_data(yadl_config *config)

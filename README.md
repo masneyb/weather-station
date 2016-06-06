@@ -27,11 +27,15 @@ See the examples below in the usage for some use cases.
     		[ --sleep_millis_between_retries <milliseconds (default 500)> ]
     		[ --min_valid_value <minimum allowable value> ]
     		[ --max_valid_value <maximum allowable value> ]
-    		[ --counter_poll_secs <seconds to poll each sample in counter mode (default 5)> ]
-    		[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default 1.0)> ]
     		[ --debug ]
     		[ --logfile <path to debug logs. Uses stderr if not specified.> ]
     		[ --daemon ]
+    
+    Counter specific options
+    
+    		[ --counter_poll_secs <seconds to poll each sample in counter mode (default 5)> ]
+    		[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default 1.0)> ]
+    		[ --interrupt_edge <rising|falling|both (default rising)> ]
     
     Supported Analog to Digital Converters (ADCs)
     

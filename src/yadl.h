@@ -79,6 +79,7 @@ struct yadl_config_tag {
 	float last_value;
 	int counter_poll_secs;
 	float counter_multiplier;
+	char *interrupt_edge;
 };
 
 filter get_filter(char *name);
