@@ -122,10 +122,10 @@ void usage(void)
 	printf("\n");
 	printf("* Hook an anemometer (wind speed meter) up to a digital pin and count the\n");
 	printf("  number of times that the switch closes over a 5 second period. Multiply the\n");
-	printf("  requests per second by 1.492 to get the wind speed in miles per hour. Show\n");
+	printf("  requests per second by 0.746 to get the wind speed in miles per hour. Show\n");
 	printf("  5 different results.\n");
 	printf("  $ yadl --sensor counter --gpio_pin 1 --output csv --num_results 5 \\\n");
-	printf("  	--counter_poll_secs 5 --counter_multiplier 1.492\n");
+	printf("  	--counter_poll_secs 5 --counter_multiplier 0.746\n");
 	printf("  reading_number,timestamp,value\n");
 	printf("  0,1465084823,6.9\n");
 	printf("  1,1465084828,6.9\n");
