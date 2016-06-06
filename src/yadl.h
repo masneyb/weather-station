@@ -77,9 +77,9 @@ struct yadl_config_tag {
 	int remove_n_samples_from_ends;
 	int only_log_value_changes;
 	float last_value;
-	int counter_poll_secs;
 	float counter_multiplier;
 	char *interrupt_edge;
+	int counter_show_speed;
 };
 
 filter get_filter(char *name);

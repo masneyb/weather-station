@@ -38,7 +38,6 @@
 #define DEFAULT_NUM_SAMPLES_PER_RESULT      1
 #define DEFAULT_NUM_RESULTS                 1
 #define DEFAULT_REMOVE_N_SAMPLES_FROM_ENDS  0
-#define DEFAULT_SAMPLE_COUNTER_POLL_SECS    5
 #define DEFAULT_COUNTER_MULTIPLIER          1.0
 #define DEFAULT_INTERRUPT_EDGE              "rising"
 
@@ -67,9 +66,9 @@ void usage(void)
 	printf("\n");
 	printf("Counter specific options\n");
 	printf("\n");
-	printf("\t\t[ --counter_poll_secs <seconds to poll each sample in counter mode (default %d)> ]\n", DEFAULT_SAMPLE_COUNTER_POLL_SECS);
 	printf("\t\t[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default %.1f)> ]\n", DEFAULT_COUNTER_MULTIPLIER);
 	printf("\t\t[ --interrupt_edge <rising|falling|both (default %s)> ]\n", DEFAULT_INTERRUPT_EDGE);
+	printf("\t\t[ --counter_show_speed ]\n");
 	printf("\n");
 	printf("Supported Analog to Digital Converters (ADCs)\n");
 	printf("\n");
@@ -124,8 +123,8 @@ void usage(void)
 	printf("  number of times that the switch closes over a 5 second period. Multiply the\n");
 	printf("  requests per second by 0.746 to get the wind speed in miles per hour. Show\n");
 	printf("  5 different results.\n");
-	printf("  $ yadl --sensor counter --gpio_pin 1 --output csv --num_results 5 \\\n");
-	printf("  	--counter_poll_secs 5 --counter_multiplier 0.746\n");
+	printf("  $ yadl --sensor counter --counter_show_speed --gpio_pin 1 --output csv --num_results 5 \\\n");
+	printf("  	--sleep_millis_between_results 5000 --counter_multiplier 0.746\n");
 	printf("  reading_number,timestamp,value\n");
 	printf("  0,1465084823,6.9\n");
 	printf("  1,1465084828,6.9\n");
@@ -359,11 +358,11 @@ int main(int argc, char **argv)
 		{"sleep_millis_between_results", required_argument, 0, 0 },
 		{"i2c_address", required_argument, 0, 0 },
 		{"only_log_value_changes", no_argument, 0, 0 },
-		{"counter_poll_secs", required_argument, 0, 0 },
 		{"counter_multiplier", required_argument, 0, 0 },
 		{"logfile", required_argument, 0, 0 },
 		{"daemon", no_argument, 0, 0 },
 		{"interrupt_edge", required_argument, 0, 0 },
+		{"counter_show_speed", no_argument, 0, 0 },
 		{0, 0, 0, 0 }
 	};
 
@@ -393,7 +392,6 @@ int main(int argc, char **argv)
 	config.sleep_millis_between_samples = DEFAULT_SLEEP_MILLIS_BETWEEN_SAMPLES;
 	config.only_log_value_changes = 0;
 	config.last_value = -1;
-	config.counter_poll_secs = DEFAULT_SAMPLE_COUNTER_POLL_SECS;
 	config.counter_multiplier = DEFAULT_COUNTER_MULTIPLIER;
 	config.interrupt_edge = DEFAULT_INTERRUPT_EDGE;
 
@@ -464,19 +462,19 @@ int main(int argc, char **argv)
 			config.only_log_value_changes = 1;
 			break;
 		case 20:
-			config.counter_poll_secs = strtol(optarg, NULL, 10);
-			break;
-		case 21:
 			config.counter_multiplier = strtof(optarg, NULL);
 			break;
-		case 22:
+		case 21:
 			logfile = optarg;
 			break;
-		case 23:
+		case 22:
 			daemon = 1;
 			break;
-		case 24:
+		case 23:
 			config.interrupt_edge = optarg;
+			break;
+		case 24:
+			config.counter_show_speed = 1;
 			break;
 		default:
 			usage();
@@ -494,9 +492,6 @@ int main(int argc, char **argv)
 		usage();
 	} else if (config.num_samples_per_result <= (config.remove_n_samples_from_ends * 2)) {
 		fprintf(stderr, "--remove_n_samples_from_ends * 2 must be less than --num_samples_per_result\n");
-		usage();
-	} else if (config.counter_poll_secs <= 0) {
-		fprintf(stderr, "--counter_poll_secs must be > 0\n");
 		usage();
 	} else if (daemon && debug && logfile == NULL) {
 		fprintf(stderr, "You must specify the --logfile argument with --daemon\n");

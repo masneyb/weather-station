@@ -26,9 +26,12 @@
 #include <string.h>
 #include <limits.h>
 #include <unistd.h>
+#include <sys/time.h>
 #include "yadl.h"
 
 static volatile int _interrupt_counter = 0;
+static int _last_stop_counter = 0;
+static struct timeval _last_time;
 
 void _interrupt_handler(void)
 {
@@ -45,6 +48,10 @@ static void _digital_counter_init(yadl_config *config)
 	if (wiringPiSetup() == -1)
 		exit(1);
 
+	config->logger("Using interrupt edge %s on GPIO pin %d; counter_show_speed=%d.\n",
+			config->interrupt_edge, config->gpio_pin,
+			config->counter_show_speed);
+
 	if (strcmp(config->interrupt_edge, "rising") == 0)
 		wiringPiISR(config->gpio_pin, INT_EDGE_RISING, &_interrupt_handler);
 	else if (strcmp(config->interrupt_edge, "falling") == 0)
@@ -55,19 +62,19 @@ static void _digital_counter_init(yadl_config *config)
 		fprintf(stderr, "Invalid --interrupt_edge paramter %s\n", config->interrupt_edge);
 		usage();
 	}
+
+	gettimeofday(&_last_time, NULL);
+
+	/* Wait for the first sample */
+	if (config->sleep_millis_between_results > 0)
+		delay(config->sleep_millis_between_results);
 }
 
 static yadl_result *_digital_counter_read_data(yadl_config *config)
 {
-	config->logger("Counting the number of times the pin %d goes from high to low for the next %d seconds.\n",
-			config->gpio_pin, config->counter_poll_secs);
-
-	int start_counter = _interrupt_counter;
-
-	/* Sleep and wait for the interupt handler to do the counting */	
-	sleep(config->counter_poll_secs);
-
+	int start_counter = _last_stop_counter;
 	int stop_counter = _interrupt_counter;
+	_last_stop_counter = stop_counter;
 
 	int num_seen;
 	/* Check to see if the number wrapped */
@@ -76,11 +83,27 @@ static yadl_result *_digital_counter_read_data(yadl_config *config)
 	else
 		num_seen = stop_counter - start_counter;
 
-	float counts_per_sec = (float) num_seen / config->counter_poll_secs;
-	float value = counts_per_sec * config->counter_multiplier;
+	config->logger("start=%d, stop=%d, num_seen=%d\n",
+			start_counter, stop_counter, num_seen);
 
-	config->logger("counter_poll_secs=%d, start_counter=%d, stop_counter=%d, num_seen=%d, counts_per_sec=%.2f\n",
-			config->counter_poll_secs, start_counter, stop_counter, num_seen, counts_per_sec);
+	float value;
+	if (config->counter_show_speed) {
+		static struct timeval _current_time;
+		gettimeofday(&_current_time, NULL);
+		double elapsed_secs = ((_current_time.tv_sec - _last_time.tv_sec) * 1000000L + _current_time.tv_usec - _last_time.tv_usec) / 1000000L;
+		_last_time.tv_sec = _current_time.tv_sec;
+		_last_time.tv_usec = _current_time.tv_usec;
+
+		float counts_per_sec = num_seen / elapsed_secs;
+		value = counts_per_sec * config->counter_multiplier;
+
+		config->logger("elapsed_secs=%.2f, counts_per_sec=%.2f\n",
+				elapsed_secs, counts_per_sec);
+	}
+	else {
+		value = num_seen * config->counter_multiplier;
+	}
+
 	config->logger("counter_multiplier=%.2f, value=%.2f\n", config->counter_multiplier, value);
 
 	yadl_result *result;
