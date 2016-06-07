@@ -40,13 +40,13 @@
 #define DEFAULT_REMOVE_N_SAMPLES_FROM_ENDS  0
 #define DEFAULT_COUNTER_MULTIPLIER          1.0
 #define DEFAULT_INTERRUPT_EDGE              "rising"
+#define DEFAULT_ADC_MILLIVOLTS              3300
 
 void usage(void)
 {
-	printf("usage: yadl --sensor <analog|digital|counter>\n");
-	printf("\t\t[ --gpio_pin <wiringPi pin #. Required for digital pins> ]\n");
+	printf("usage: yadl --sensor <digital|counter|analog>\n");
+	printf("\t\t[ --gpio_pin <wiringPi pin #. Required for digital or counter sensor> ]\n");
 	printf("\t\t  See http://wiringpi.com/pins/ to lookup the pin number.\n");
-	printf("\t\t[ --adc <see ADC list below. Required for analog> ]\n");
 	printf("\t\t--output <text|json|yaml|csv|xml|rrd>\n");
 	printf("\t\t[ --outfile <optional output filename. Defaults to stdout> ]\n");
 	printf("\t\t[ --only_log_value_changes ]\n");
@@ -69,6 +69,12 @@ void usage(void)
 	printf("\t\t[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default %.1f)> ]\n", DEFAULT_COUNTER_MULTIPLIER);
 	printf("\t\t[ --interrupt_edge <rising|falling|both (default %s)> ]\n", DEFAULT_INTERRUPT_EDGE);
 	printf("\t\t[ --counter_show_speed ]\n");
+	printf("\n");
+	printf("Analog specific options\n");
+	printf("\n");
+	printf("\t\t[ --adc <see ADC list below. Required for analog> ]\n");
+	printf("\t\t[ --adc_millivolts <value (default %d)> ]\n", DEFAULT_ADC_MILLIVOLTS);
+	printf("\t\t[ --adc_show_millivolts> ]\n");
 	printf("\n");
 	printf("Supported Analog to Digital Converters (ADCs)\n");
 	printf("\n");
@@ -363,6 +369,8 @@ int main(int argc, char **argv)
 		{"daemon", no_argument, 0, 0 },
 		{"interrupt_edge", required_argument, 0, 0 },
 		{"counter_show_speed", no_argument, 0, 0 },
+		{"adc_millivolts", required_argument, 0, 0 },
+		{"adc_show_millivolts", no_argument, 0, 0 },
 		{0, 0, 0, 0 }
 	};
 
@@ -394,6 +402,7 @@ int main(int argc, char **argv)
 	config.last_value = -1;
 	config.counter_multiplier = DEFAULT_COUNTER_MULTIPLIER;
 	config.interrupt_edge = DEFAULT_INTERRUPT_EDGE;
+	config.adc_millivolts = DEFAULT_ADC_MILLIVOLTS; /* Raspberry Pi GPIO pins are 3.3V */
 
 	while ((opt = getopt_long(argc, argv, "", long_options, &long_index)) != -1) {
 		if (opt != 0)
@@ -475,6 +484,12 @@ int main(int argc, char **argv)
 			break;
 		case 24:
 			config.counter_show_speed = 1;
+			break;
+		case 25:
+			config.adc_millivolts = strtol(optarg, NULL, 10);
+			break;
+		case 26:
+			config.adc_show_millivolts = 1;
 			break;
 		default:
 			usage();

@@ -80,6 +80,8 @@ struct yadl_config_tag {
 	float counter_multiplier;
 	char *interrupt_edge;
 	int counter_show_speed;
+	int adc_millivolts;
+	int adc_show_millivolts;
 };
 
 filter get_filter(char *name);

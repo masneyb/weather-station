@@ -10,10 +10,9 @@ or dips in your graphs. You can set valid thresholds to ignore these erroneous
 readings. It also supports taking multiple samples to help smooth the results.
 See the examples below in the usage for some use cases.
 
-    usage: yadl --sensor <analog|digital|counter>
-    		[ --gpio_pin <wiringPi pin #. Required for digital pins> ]
+    usage: yadl --sensor <digital|counter|analog>
+    		[ --gpio_pin <wiringPi pin #. Required for digital or counter sensor> ]
     		  See http://wiringpi.com/pins/ to lookup the pin number.
-    		[ --adc <see ADC list below. Required for analog> ]
     		--output <text|json|yaml|csv|xml|rrd>
     		[ --outfile <optional output filename. Defaults to stdout> ]
     		[ --only_log_value_changes ]
@@ -36,6 +35,12 @@ See the examples below in the usage for some use cases.
     		[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default 1.0)> ]
     		[ --interrupt_edge <rising|falling|both (default rising)> ]
     		[ --counter_show_speed ]
+    
+    Analog specific options
+    
+    		[ --adc <see ADC list below. Required for analog> ]
+    		[ --adc_millivolts <value (default 3300)> ]
+    		[ --adc_show_millivolts> ]
     
     Supported Analog to Digital Converters (ADCs)
     
