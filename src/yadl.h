@@ -57,6 +57,8 @@ typedef struct sensor_tag {
 
 typedef float (*filter)(float_node *list);
 
+typedef float (*temperature_unit_converter)(float input);
+
 struct yadl_config_tag {
 	sensor *sens;
 	int gpio_pin;
@@ -81,6 +83,10 @@ struct yadl_config_tag {
 	float counter_multiplier;
 	char *interrupt_edge;
 	int adc_millivolts;
+	char *temperature_unit;
+	temperature_unit_converter temperature_converter;
+	char *w1_slave;
+	int analog_scaling_factor;
 };
 
 filter get_filter(char *name);
@@ -95,6 +101,14 @@ sensor digital_sensor_funcs;
 
 sensor digital_counter_sensor_funcs;
 
+sensor dht11_sensor_funcs;
+
+sensor dht22_sensor_funcs;
+
+sensor ds18b20_sensor_funcs;
+
+sensor tmp36_sensor_funcs;
+
 sensor *get_sensor(char *name);
 
 adc_converter mcp3002_funcs;
@@ -108,3 +122,5 @@ adc_converter *get_adc(char *name);
 void usage(void);
 
 int get_num_values(yadl_config *config);
+
+temperature_unit_converter get_temperature_converter(char *name);

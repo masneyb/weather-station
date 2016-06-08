@@ -1,5 +1,5 @@
 /*
- * sensors.c
+ * temperature_units.c
  *
  * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
  *
@@ -23,28 +23,40 @@
 #include <string.h>
 #include "yadl.h"
 
-sensor *get_sensor(char *name)
+static float _celsius_to_fahrenheit(float input)
+{
+	return input * 9.0 / 5.0 + 32;
+}
+
+static float _celsius_to_celsius(float input)
+{
+	return input;
+}
+
+static float _celsius_to_kelvin(float input)
+{
+	return input + 273.15;
+}
+
+static float _celsius_to_rankine(float input)
+{
+	return (input + 273.15) * (9.0 / 5.0);
+}
+
+temperature_unit_converter get_temperature_converter(char *name)
 {
 	if (name == NULL)
 		return NULL;
-	else if (strcmp(name, "digital") == 0)
-		return &digital_sensor_funcs;
-	else if (strcmp(name, "counter") == 0)
-		return &digital_counter_sensor_funcs;
-	else if (strcmp(name, "analog") == 0)
-		return &analog_sensor_funcs;
-	else if (strcmp(name, "wind_direction") == 0)
-		return &wind_direction_sensor_funcs;
-	else if (strcmp(name, "dht11") == 0)
-		return &dht11_sensor_funcs;
-	else if (strcmp(name, "dht22") == 0)
-		return &dht22_sensor_funcs;
-	else if (strcmp(name, "ds18b20") == 0)
-		return &ds18b20_sensor_funcs;
-	else if (strcmp(name, "tmp36") == 0)
-		return &tmp36_sensor_funcs;
+	else if (strcmp(name, "celsius") == 0)
+		return &_celsius_to_celsius;
+	else if (strcmp(name, "fahrenheit") == 0)
+		return &_celsius_to_fahrenheit;
+	else if (strcmp(name, "kelvin") == 0)
+		return &_celsius_to_kelvin;
+	else if (strcmp(name, "rankine") == 0)
+		return &_celsius_to_rankine;
 
-	fprintf(stderr, "Unknown sensor type '%s'\n", name);
+	fprintf(stderr, "Unknown tempearture unit '%s'\n", name);
 	return NULL;
 }
 

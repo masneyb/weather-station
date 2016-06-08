@@ -41,10 +41,11 @@
 #define DEFAULT_COUNTER_MULTIPLIER          1.0
 #define DEFAULT_INTERRUPT_EDGE              "rising"
 #define DEFAULT_ADC_MILLIVOLTS              3300
+#define DEFAULT_ANALOG_SCALING_FACTOR       500
 
 void usage(void)
 {
-	printf("usage: yadl --sensor <digital|counter|analog|wind_direction>\n");
+	printf("usage: yadl --sensor <digital|counter|analog|wind_direction|dht11|dht22|ds18b20|tmp36>\n");
 	printf("\t\t[ --gpio_pin <wiringPi pin #. Required for digital or counter sensor> ]\n");
 	printf("\t\t  See http://wiringpi.com/pins/ to lookup the pin number.\n");
 	printf("\t\t--output <json|yaml|csv|xml|rrd>\n");
@@ -71,8 +72,27 @@ void usage(void)
 	printf("\n");
 	printf("Analog specific options\n");
 	printf("\n");
-	printf("\t\t[ --adc <see ADC list below. Required for analog> ]\n");
+	printf("\t\t--adc <see ADC list below. Required for analog>\n");
 	printf("\t\t[ --adc_millivolts <value (default %d)> ]\n", DEFAULT_ADC_MILLIVOLTS);
+	printf("\n");
+	printf("Temperature sensors specific options\n");
+	printf("\t\t--temperature_unit <celsius|fahrenheit|kelvin|rankine>\n");
+	printf("\n");
+	printf("* ds18b20 - This temperature sensor uses the Dallas 1-Wire protocol.\n");
+	printf("  --w1_slave <w1 slave device>\n");
+	printf("  \tThe w1 slave device will be one of the\n");
+	printf("  \t/sys/bus/w1/devices/28-*/w1_slave files.\n");
+	printf("\n");
+	printf("  \tYou need to have the w1-gpio and w1-therm kernel modules loaded.\n");
+	printf("  \tYou'll also need to have 'dtoverlay=w1-gpio' in your /boot/config.txt\n");
+	printf("  \tand reboot if it was not already present.\n");
+	printf("\n");
+	printf("* tmp36 - Analog temperature sensor.\n");
+	printf("  --adc <see ADC list below>\n");
+	printf("\n");
+	printf("  [ --adc_millivolts <value (default %d)> ]\n", DEFAULT_ADC_MILLIVOLTS);
+	printf("\n");
+	printf("  [ --analog_scaling_factor <value> (default %d) ]\n", DEFAULT_ANALOG_SCALING_FACTOR);
 	printf("\n");
 	printf("Supported Analog to Digital Converters (ADCs)\n");
 	printf("\n");
@@ -394,6 +414,9 @@ int main(int argc, char **argv)
 		{"daemon", no_argument, 0, 0 },
 		{"interrupt_edge", required_argument, 0, 0 },
 		{"adc_millivolts", required_argument, 0, 0 },
+		{"temperature_unit", required_argument, 0, 0 },
+		{"w1_slave", required_argument, 0, 0 },
+		{"analog_scaling_factor", required_argument, 0, 0 },
 		{0, 0, 0, 0 }
 	};
 
@@ -424,6 +447,7 @@ int main(int argc, char **argv)
 	config.counter_multiplier = DEFAULT_COUNTER_MULTIPLIER;
 	config.interrupt_edge = DEFAULT_INTERRUPT_EDGE;
 	config.adc_millivolts = DEFAULT_ADC_MILLIVOLTS; /* Raspberry Pi GPIO pins are 3.3V */
+	config.analog_scaling_factor = DEFAULT_ANALOG_SCALING_FACTOR;
 
 	while ((opt = getopt_long(argc, argv, "", long_options, &long_index)) != -1) {
 		if (opt != 0)
@@ -506,6 +530,15 @@ int main(int argc, char **argv)
 		case 24:
 			config.adc_millivolts = strtol(optarg, NULL, 10);
 			break;
+		case 25:
+			config.temperature_unit = optarg;
+			break;
+		case 26:
+			config.w1_slave = optarg;
+			break;
+		case 27:
+			config.analog_scaling_factor = strtol(optarg, NULL, 10);
+			break;
 		default:
 			usage();
 		}
@@ -546,6 +579,8 @@ int main(int argc, char **argv)
 	config.filter_func = get_filter(filter_name);
 	if (config.filter_func == NULL)
 		usage();
+
+	config.temperature_converter = get_temperature_converter(config.temperature_unit);
 
 	config.adc = get_adc(adc_name);
 
