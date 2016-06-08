@@ -33,6 +33,8 @@ sensor *get_sensor(char *name)
 		return &digital_counter_sensor_funcs;
 	else if (strcmp(name, "analog") == 0)
 		return &analog_sensor_funcs;
+	else if (strcmp(name, "wind_direction") == 0)
+		return &wind_direction_sensor_funcs;
 
 	fprintf(stderr, "Unknown sensor type '%s'\n", name);
 	return NULL;

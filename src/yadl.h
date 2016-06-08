@@ -90,6 +90,8 @@ outputter *get_outputter(char *name);
 
 sensor analog_sensor_funcs;
 
+sensor wind_direction_sensor_funcs;
+
 sensor digital_sensor_funcs;
 
 sensor digital_counter_sensor_funcs;

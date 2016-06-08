@@ -1,7 +1,7 @@
 YATL_C_DEPS=src/adc_mcp3002.c src/adc_mcp3004.c src/adc_pcf8591.c src/adcs.c \
 	src/filters.c src/loggers.c src/outputters.c src/rrd_common.c \
 	src/sensor_analog.c src/sensor_digital.c src/sensor_digital_counter.c \
-	src/sensors.c src/yadl.c
+	src/sensor_wind_direction.c src/sensors.c src/yadl.c
 
 YATL_ADD_RRD_SAMPLE_C_DEPS=src/loggers.c src/rrd_common.c \
 	src/yadl-add-rrd-sample.c

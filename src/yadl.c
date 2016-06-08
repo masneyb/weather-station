@@ -44,7 +44,7 @@
 
 void usage(void)
 {
-	printf("usage: yadl --sensor <digital|counter|analog>\n");
+	printf("usage: yadl --sensor <digital|counter|analog|wind_direction>\n");
 	printf("\t\t[ --gpio_pin <wiringPi pin #. Required for digital or counter sensor> ]\n");
 	printf("\t\t  See http://wiringpi.com/pins/ to lookup the pin number.\n");
 	printf("\t\t--output <text|json|yaml|csv|xml|rrd>\n");
