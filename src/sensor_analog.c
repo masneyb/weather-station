@@ -19,7 +19,6 @@
  * 02110-1301, USA.
  */
 
-#include <mcp3002.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
