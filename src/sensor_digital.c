@@ -33,9 +33,6 @@ static void _digital_init(__attribute__((__unused__)) yadl_config *config)
 		usage();
 	}
 
-	if (wiringPiSetup() == -1)
-		exit(1);
-
 	pinMode(config->gpio_pin, INPUT);
 }
 

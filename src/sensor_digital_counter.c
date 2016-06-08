@@ -45,9 +45,6 @@ static void _digital_counter_init(yadl_config *config)
 		usage();
 	}
 
-	if (wiringPiSetup() == -1)
-		exit(1);
-
 	config->logger("Using interrupt edge %s on GPIO pin %d\n",
 			config->interrupt_edge, config->gpio_pin);
 
