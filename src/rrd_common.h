@@ -21,5 +21,5 @@
 
 #include "loggers.h"
 
-void write_to_rrd_database(logger log, char *rrd_database, float value);
+void write_to_rrd_database(logger log, char *rrd_database, char **names, float *values);
 

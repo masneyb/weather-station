@@ -23,14 +23,14 @@
 #include "loggers.h"
 
 typedef struct yadl_result_tag {
-	float value;
+	float *value;
 } yadl_result;
 
-typedef struct sample_node_tag sample_node;
+typedef struct float_node_tag float_node;
 
-struct sample_node_tag {
-	float sample;
-	sample_node *next;
+struct float_node_tag {
+	float value;
+	float_node *next;
 };
 
 typedef struct yadl_config_tag yadl_config;
@@ -43,7 +43,7 @@ typedef struct adc_converter_tag {
 
 typedef struct outputter_tag {
 	FILE *(*open)(yadl_config *config);
-	void (*write_header)(FILE *fd);
+	void (*write_header)(FILE *fd, yadl_config *config);
 	void (*write_result)(FILE *fd, int reading_number, yadl_result *result, yadl_config *config);
 	void (*write_footer)(FILE *fd);
 	void (*close)(FILE *fd, yadl_config *config);
@@ -52,9 +52,10 @@ typedef struct outputter_tag {
 typedef struct sensor_tag {
 	void (*init)(yadl_config *config);
 	yadl_result * (*read)(yadl_config *config);
+	char ** (*get_value_header_names)(yadl_config *config);
 } sensor;
 
-typedef float (*filter)(sample_node *list);
+typedef float (*filter)(float_node *list);
 
 struct yadl_config_tag {
 	sensor *sens;
@@ -76,12 +77,10 @@ struct yadl_config_tag {
 	int num_samples_per_result;
 	int remove_n_samples_from_ends;
 	int only_log_value_changes;
-	float last_value;
+	float *last_values;
 	float counter_multiplier;
 	char *interrupt_edge;
-	int counter_show_speed;
 	int adc_millivolts;
-	int adc_show_millivolts;
 };
 
 filter get_filter(char *name);
@@ -107,3 +106,5 @@ adc_converter pcf8591_funcs;
 adc_converter *get_adc(char *name);
 
 void usage(void);
+
+int get_num_values(yadl_config *config);

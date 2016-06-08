@@ -47,11 +47,20 @@ static yadl_result *_digital_read_data(yadl_config *config)
 
 	yadl_result *result;
 	result = malloc(sizeof(*result));
-	result->value = reading;
+	result->value = malloc(sizeof(float) * 1);
+	result->value[0] = reading;
 	return result;
+}
+
+static char * _digital_value_header_names[] = { "pin_state", NULL };
+
+static char ** _digital_get_value_header_names(__attribute__((__unused__)) yadl_config *config)
+{
+        return _digital_value_header_names;
 }
 
 sensor digital_sensor_funcs = {
 	.init = &_digital_init,
+	.get_value_header_names = &_digital_get_value_header_names,
 	.read = _digital_read_data
 };

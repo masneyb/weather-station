@@ -48,9 +48,8 @@ static void _digital_counter_init(yadl_config *config)
 	if (wiringPiSetup() == -1)
 		exit(1);
 
-	config->logger("Using interrupt edge %s on GPIO pin %d; counter_show_speed=%d.\n",
-			config->interrupt_edge, config->gpio_pin,
-			config->counter_show_speed);
+	config->logger("Using interrupt edge %s on GPIO pin %d\n",
+			config->interrupt_edge, config->gpio_pin);
 
 	if (strcmp(config->interrupt_edge, "rising") == 0)
 		wiringPiISR(config->gpio_pin, INT_EDGE_RISING, &_interrupt_handler);
@@ -86,33 +85,37 @@ static yadl_result *_digital_counter_read_data(yadl_config *config)
 	config->logger("start=%d, stop=%d, num_seen=%d\n",
 			start_counter, stop_counter, num_seen);
 
-	float value;
-	if (config->counter_show_speed) {
-		static struct timeval _current_time;
-		gettimeofday(&_current_time, NULL);
-		double elapsed_secs = ((_current_time.tv_sec - _last_time.tv_sec) * 1000000L + _current_time.tv_usec - _last_time.tv_usec) / 1000000L;
-		_last_time.tv_sec = _current_time.tv_sec;
-		_last_time.tv_usec = _current_time.tv_usec;
+	static struct timeval _current_time;
+	gettimeofday(&_current_time, NULL);
+	double elapsed_secs = ((_current_time.tv_sec - _last_time.tv_sec) * 1000000L + _current_time.tv_usec - _last_time.tv_usec) / 1000000L;
+	_last_time.tv_sec = _current_time.tv_sec;
+	_last_time.tv_usec = _current_time.tv_usec;
 
-		float counts_per_sec = num_seen / elapsed_secs;
-		value = counts_per_sec * config->counter_multiplier;
+	float counts_per_sec = num_seen / elapsed_secs;
 
-		config->logger("elapsed_secs=%.2f, counts_per_sec=%.2f\n",
-				elapsed_secs, counts_per_sec);
-	}
-	else {
-		value = num_seen * config->counter_multiplier;
-	}
-
-	config->logger("counter_multiplier=%.2f, value=%.2f\n", config->counter_multiplier, value);
+	config->logger("num_seen=%d, elapsed_secs=%.2f, counts_per_sec=%.2f, counter_multiplier=%.2f\n",
+			num_seen, elapsed_secs, counts_per_sec, config->counter_multiplier);
 
 	yadl_result *result;
 	result = malloc(sizeof(*result));
-	result->value = value;
+	result->value = malloc(sizeof(float) * 4);
+	result->value[0] = num_seen;
+	result->value[1] = num_seen * config->counter_multiplier;
+	result->value[2] = counts_per_sec;
+	result->value[3] = counts_per_sec * config->counter_multiplier;
+
 	return result;
+}
+
+static char * _digital_counter_value_header_names[] = { "num_seen", "num_seen_with_multiplier", "counts_per_sec", "counts_per_sec_with_multiplier", NULL };
+
+static char ** _digital_counter_get_value_header_names(__attribute__((__unused__)) yadl_config *config)
+{
+        return _digital_counter_value_header_names;
 }
 
 sensor digital_counter_sensor_funcs = {
 	.init = _digital_counter_init,
+	.get_value_header_names = &_digital_counter_get_value_header_names,
 	.read = _digital_counter_read_data
 };

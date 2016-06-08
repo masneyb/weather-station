@@ -35,7 +35,8 @@ void usage(void)
 {
 	printf("usage: yadl-add-rrd-sample [ --debug ]\n");
 	printf("\t\t--outfile <path to RRD database>\n");
-	printf("\t\t--value <value>\n");
+	printf("\t\t--name <header name1> [ --name <header name2> ... ]\n");
+	printf("\t\t--value <value1> [ --value <value2> ... ]\n");
 	printf("\t\t[ --debug ]\n");
 	printf("\t\t[ --logfile <path to debug logs. Uses stderr if not specified.> ]\n");
 	printf("\n");
@@ -48,13 +49,19 @@ int main(int argc, char **argv)
 	static struct option long_options[] = {
 		{"debug", no_argument, 0, 0 },
 		{"outfile", required_argument, 0, 0 },
+		{"name", required_argument, 0, 0 },
 		{"value", required_argument, 0, 0 },
 		{"logfile", required_argument, 0, 0 },
 		{0, 0, 0, 0 }
 	};
 
-	float value = FLT_MIN;
-	char *outfile, *logfile;
+	int num_values = 0;
+	float *values = NULL;
+
+	int num_headers = 0;
+	char **headers = NULL;
+
+	char *outfile = NULL, *logfile = NULL;
 	int opt = 0, long_index = 0, debug = 0;
 
 	while ((opt = getopt_long(argc, argv, "", long_options, &long_index)) != -1) {
@@ -70,9 +77,16 @@ int main(int argc, char **argv)
 			outfile = optarg;
 			break;
 		case 2:
-			value = strtof(optarg, NULL);
+			num_headers++;
+			headers = realloc(headers, sizeof(char *) * num_headers);
+			headers[num_headers - 1] = optarg;
 			break;
 		case 3:
+			num_values++;
+			values = realloc(values, sizeof(float) * num_values);
+			values[num_values - 1] = strtof(optarg, NULL);
+			break;
+		case 4:
 			logfile = optarg;
 			break;
 		default:
@@ -83,12 +97,16 @@ int main(int argc, char **argv)
 			usage();
 	}
 
-	if (value == FLT_MIN || outfile == NULL)
+	if (num_values == 0 || outfile == NULL)
 		usage();
+	else if (num_values != num_headers) {
+		fprintf(stderr, "You must specify the same number of --name and --value arguments\n");
+		usage();
+	}
 
 	logger log = get_logger(debug, logfile);
 
-	write_to_rrd_database(log, outfile, value);
+	write_to_rrd_database(log, outfile, headers, values);
 
 	close_logger(logfile);
 

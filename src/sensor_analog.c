@@ -36,20 +36,30 @@ static void _analog_init(yadl_config *config)
 
 static yadl_result *_analog_read_data(yadl_config *config)
 {
-	config->logger("Beginning to perform analog read. adc_millivolts=%d, adc_resolution=%d, adc_show_millivolts=%d\n",
-			config->adc_millivolts, config->adc->adc_resolution, config->adc_show_millivolts);
+	config->logger("Beginning to perform analog read. adc_millivolts=%d, adc_resolution=%d\n",
+			config->adc_millivolts, config->adc->adc_resolution);
 
 	int reading = config->adc->adc_read(config);
 	int read_millivolts = (float) reading * ((float) config->adc_millivolts / (float) config->adc->adc_resolution);
-	config->logger("Got analog reading %d (%d millivolts).\n", reading, read_millivolts);
+	config->logger("Got analog reading %d; %d millivolts.\n", reading, read_millivolts);
 
 	yadl_result *result;
 	result = malloc(sizeof(*result));
-	result->value = config->adc_show_millivolts ? read_millivolts : reading;
+	result->value = malloc(sizeof(float) * 2);
+	result->value[0] = reading;
+	result->value[1] = read_millivolts;
 	return result;
+}
+
+static char * _analog_value_header_names[] = { "reading", "millivolts", NULL };
+
+static char ** _analog_get_value_header_names(__attribute__((__unused__)) yadl_config *config)
+{
+	return _analog_value_header_names;
 }
 
 sensor analog_sensor_funcs = {
 	.init = &_analog_init,
+	.get_value_header_names = &_analog_get_value_header_names,
 	.read = _analog_read_data
 };

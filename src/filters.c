@@ -25,31 +25,31 @@
 #include <string.h>
 #include "yadl.h"
 
-static int _list_len(sample_node *list)
+static int _list_len(float_node *list)
 {
 	int ret = 0;
 
-	for (sample_node *node = list; node != NULL; node = node->next)
+	for (float_node *node = list; node != NULL; node = node->next)
 		ret++;
 	return ret;
 }
 
-float min_filter(sample_node *list)
+float min_filter(float_node *list)
 {
-	return list->sample;
+	return list->value;
 }
 
-float max_filter(sample_node *list)
+float max_filter(float_node *list)
 {
-	sample_node *curval = list;
+	float_node *curval = list;
 
 	while (curval->next != NULL)
 		curval = curval->next;
-	return curval->sample;
+	return curval->value;
 }
 
 /* Return the difference between the maximum and minimum number */
-float range_filter(sample_node *list)
+float range_filter(float_node *list)
 {
 	float min = min_filter(list);
 	float max = max_filter(list);
@@ -57,23 +57,23 @@ float range_filter(sample_node *list)
 	return max - min;
 }
 
-float median_filter(sample_node *list)
+float median_filter(float_node *list)
 {
-	sample_node *curval = list;
+	float_node *curval = list;
 
 	int median_pos = _list_len(list) / 2;
 
 	for (int i = 0; i < median_pos; i++)
 		curval = curval->next;
-	return curval->sample;
+	return curval->value;
 }
 
-float mean_filter(sample_node *list)
+float mean_filter(float_node *list)
 {
 	float sum = 0.0;
 
-	for (sample_node *node = list; node != NULL; node = node->next)
-		sum += node->sample;
+	for (float_node *node = list; node != NULL; node = node->next)
+		sum += node->value;
 
 	return sum / _list_len(list);
 }
@@ -81,22 +81,22 @@ float mean_filter(sample_node *list)
 /* Return the number that occurs the most number of times. Fallback to the
  *  mean if no numbers appear more than once.
  */
-float mode_filter(sample_node *list)
+float mode_filter(float_node *list)
 {
-	float cur_number = list->sample;
+	float cur_number = list->value;
 	float cur_count = 0;
 	float max_number = FLT_MIN;
 	float max_count = 0;
 
-	for (sample_node *curval = list; curval != NULL; curval = curval->next) {
-		if (cur_number == curval->sample) {
+	for (float_node *curval = list; curval != NULL; curval = curval->next) {
+		if (cur_number == curval->value) {
 			cur_count++;
 			if (cur_count > 1 && cur_count > max_count) {
 				max_number = cur_number;
 				max_count = cur_count;
 			}
 		} else {
-			cur_number = curval->sample;
+			cur_number = curval->value;
 			cur_count = 1;
 		}
 	}

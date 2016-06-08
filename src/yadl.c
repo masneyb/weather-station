@@ -47,7 +47,7 @@ void usage(void)
 	printf("usage: yadl --sensor <digital|counter|analog|wind_direction>\n");
 	printf("\t\t[ --gpio_pin <wiringPi pin #. Required for digital or counter sensor> ]\n");
 	printf("\t\t  See http://wiringpi.com/pins/ to lookup the pin number.\n");
-	printf("\t\t--output <text|json|yaml|csv|xml|rrd>\n");
+	printf("\t\t--output <json|yaml|csv|xml|rrd>\n");
 	printf("\t\t[ --outfile <optional output filename. Defaults to stdout> ]\n");
 	printf("\t\t[ --only_log_value_changes ]\n");
 	printf("\t\t[ --num_results <# results returned (default %d). Set to -1 to poll indefinitely.> ]\n", DEFAULT_NUM_RESULTS);
@@ -68,13 +68,11 @@ void usage(void)
 	printf("\n");
 	printf("\t\t[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default %.1f)> ]\n", DEFAULT_COUNTER_MULTIPLIER);
 	printf("\t\t[ --interrupt_edge <rising|falling|both (default %s)> ]\n", DEFAULT_INTERRUPT_EDGE);
-	printf("\t\t[ --counter_show_speed ]\n");
 	printf("\n");
 	printf("Analog specific options\n");
 	printf("\n");
 	printf("\t\t[ --adc <see ADC list below. Required for analog> ]\n");
 	printf("\t\t[ --adc_millivolts <value (default %d)> ]\n", DEFAULT_ADC_MILLIVOLTS);
-	printf("\t\t[ --adc_show_millivolts> ]\n");
 	printf("\n");
 	printf("Supported Analog to Digital Converters (ADCs)\n");
 	printf("\n");
@@ -129,7 +127,7 @@ void usage(void)
 	printf("  number of times that the switch closes over a 5 second period. Multiply the\n");
 	printf("  requests per second by 0.746 to get the wind speed in miles per hour. Show\n");
 	printf("  5 different results.\n");
-	printf("  $ yadl --sensor counter --counter_show_speed --gpio_pin 1 --output csv --num_results 5 \\\n");
+	printf("  $ yadl --sensor counter --gpio_pin 1 --output csv --num_results 5 \\\n");
 	printf("  	--sleep_millis_between_results 5000 --counter_multiplier 0.746\n");
 	printf("  reading_number,timestamp,value\n");
 	printf("  0,1465084823,6.9\n");
@@ -158,6 +156,20 @@ void usage(void)
 	exit(1);
 }
 
+int get_num_values(yadl_config *config)
+{
+	char **header_names = config->sens->get_value_header_names(config);
+	int i = 0;
+	for (; header_names[i] != NULL; i++);
+	return i;
+}
+
+static void _free_result(yadl_result *result)
+{
+	free(result->value);
+	free(result);
+}
+
 static yadl_result *_perform_reading(yadl_config *config)
 {
 	yadl_result *result;
@@ -174,11 +186,11 @@ static yadl_result *_perform_reading(yadl_config *config)
 			continue;
 		}
 
-		if (result->value < config->min_valid_reading ||
-				result->value > config->max_valid_reading) {
+		if (result->value[0] < config->min_valid_reading ||
+				result->value[0] > config->max_valid_reading) {
 			config->logger("Received reading outside of allowable ranges. value=%.2f. Retrying.\n",
-					result->value);
-			free(result);
+					result->value[0]);
+			_free_result(result);
 			continue;
 		}
 		success = 1;
@@ -193,27 +205,27 @@ static yadl_result *_perform_reading(yadl_config *config)
 	return result;
 }
 
-static sample_node *_add_sample_to_sorted_list(float sample, sample_node *list)
+static float_node *_add_sample_to_sorted_list(float value, float_node *list)
 {
-	sample_node *newnode = malloc(sizeof(*newnode));
+	float_node *newnode = malloc(sizeof(*newnode));
 
-	newnode->sample = sample;
+	newnode->value = value;
 	newnode->next = NULL;
 
 	if (list == NULL)
 		return newnode;
 
 	/* Add to head of list */
-	if (list->sample > sample) {
+	if (list->value > value) {
 		newnode->next = list;
 		return newnode;
 	}
 
-	sample_node *lastnode = list;
+	float_node *lastnode = list;
 
 	/* Add to middle of list */
-	for (sample_node *cur = list->next; cur != NULL; cur = cur->next) {
-		if (cur->sample > sample) {
+	for (float_node *cur = list->next; cur != NULL; cur = cur->next) {
+		if (cur->value > value) {
 			newnode->next = cur;
 			lastnode->next = newnode;
 			return list;
@@ -226,33 +238,33 @@ static sample_node *_add_sample_to_sorted_list(float sample, sample_node *list)
 	return list;
 }
 
-static void _free_list(sample_node *list)
+static void _free_list(float_node *list)
 {
-	sample_node *val = list;
+	float_node *val = list;
 
 	while (val != NULL) {
-		sample_node *nextval = val->next;
+		float_node *nextval = val->next;
 
 		free(val);
 		val = nextval;
 	}
 }
 
-static void _dump_list(char *description, sample_node *list, yadl_config *config)
+static void _dump_list(char *description, float_node *list, yadl_config *config)
 {
-	config->logger("%s: Sorted samples are:", description);
-	for (sample_node *val = list; val != NULL; val = val->next)
-		config->logger(" %.2f", val->sample);
+	config->logger("%s: Sorted values are:", description);
+	for (float_node *val = list; val != NULL; val = val->next)
+		config->logger(" %.2f", val->value);
 	config->logger("\n");
 }
 
-static sample_node *_remove_outliers(sample_node *list, yadl_config *config)
+static float_node *_remove_outliers(float_node *list, yadl_config *config)
 {
 	if (config->remove_n_samples_from_ends <= 0)
 		return list;
 
-	sample_node *last_node_on_head_of_list = NULL;
-	sample_node *cur = list;
+	float_node *last_node_on_head_of_list = NULL;
+	float_node *cur = list;
 
 	for (int i = 0; i < config->num_samples_per_result - config->remove_n_samples_from_ends - 1; i++) {
 		if (i == (config->remove_n_samples_from_ends - 1))
@@ -265,7 +277,7 @@ static sample_node *_remove_outliers(sample_node *list, yadl_config *config)
 	cur->next = NULL;
 
 	/* Chop off the head of the list */
-	sample_node *new_head_of_list = last_node_on_head_of_list->next;
+	float_node *new_head_of_list = last_node_on_head_of_list->next;
 
 	last_node_on_head_of_list->next = NULL;
 	_free_list(list);
@@ -275,7 +287,11 @@ static sample_node *_remove_outliers(sample_node *list, yadl_config *config)
 
 static yadl_result *_perform_all_readings(yadl_config *config)
 {
-	sample_node *value_list = NULL;
+	float_node **value_list;
+
+	char **header_names = config->sens->get_value_header_names(config);
+	int num_values = get_num_values(config);
+	value_list = calloc(num_values, sizeof(float *));
 
 	for (int i = 0; i < config->num_samples_per_result; i++) {
 		if (i > 0 && config->sleep_millis_between_samples > 0)
@@ -283,20 +299,29 @@ static yadl_result *_perform_all_readings(yadl_config *config)
 
 		yadl_result *sample = _perform_reading(config);
 
-		config->logger("Sample #%d: value=%.2f\n", i, sample->value);
+		config->logger("Sample #%d", i);
+		for (int num = 0; num < num_values; num++) {
+			config->logger(", %s=%.2f", header_names[num], sample->value[num]);
+			value_list[num] = _add_sample_to_sorted_list(sample->value[num], value_list[num]);
+		}
+		config->logger("\n");
 
-		value_list = _add_sample_to_sorted_list(sample->value, value_list);
-
-		free(sample);
+		_free_result(sample);
 	}
 
-	_dump_list("Values", value_list, config);
-	value_list = _remove_outliers(value_list, config);
-	_dump_list("Values(after removing outliers)", value_list, config);
+	for (int num = 0; num < num_values; num++) {
+		_dump_list(header_names[num], value_list[num], config);
+		value_list[num] = _remove_outliers(value_list[num], config);
+		_dump_list("Values(after removing outliers)", value_list[num], config);
+	}
 
 	yadl_result *result = malloc(sizeof(*result));
-	result->value = config->filter_func(value_list);
-	_free_list(value_list);
+	result->value = malloc(sizeof(float) * num_values);
+	for (int num = 0; num < num_values; num++) {
+		result->value[num] = config->filter_func(value_list[num]);
+		_free_list(value_list[num]);
+	}
+	free(value_list);
 
 	return result;
 }
@@ -368,9 +393,7 @@ int main(int argc, char **argv)
 		{"logfile", required_argument, 0, 0 },
 		{"daemon", no_argument, 0, 0 },
 		{"interrupt_edge", required_argument, 0, 0 },
-		{"counter_show_speed", no_argument, 0, 0 },
 		{"adc_millivolts", required_argument, 0, 0 },
-		{"adc_show_millivolts", no_argument, 0, 0 },
 		{0, 0, 0, 0 }
 	};
 
@@ -379,7 +402,6 @@ int main(int argc, char **argv)
 	yadl_config config;
 	outputter *output_funcs;
 	int opt = 0, long_index = 0, debug = 0, daemon = 0;
-	yadl_result *result;
 
 	if (argc <= 1)
 		usage();
@@ -399,7 +421,6 @@ int main(int argc, char **argv)
 	config.remove_n_samples_from_ends = DEFAULT_REMOVE_N_SAMPLES_FROM_ENDS;
 	config.sleep_millis_between_samples = DEFAULT_SLEEP_MILLIS_BETWEEN_SAMPLES;
 	config.only_log_value_changes = 0;
-	config.last_value = -1;
 	config.counter_multiplier = DEFAULT_COUNTER_MULTIPLIER;
 	config.interrupt_edge = DEFAULT_INTERRUPT_EDGE;
 	config.adc_millivolts = DEFAULT_ADC_MILLIVOLTS; /* Raspberry Pi GPIO pins are 3.3V */
@@ -483,13 +504,7 @@ int main(int argc, char **argv)
 			config.interrupt_edge = optarg;
 			break;
 		case 24:
-			config.counter_show_speed = 1;
-			break;
-		case 25:
 			config.adc_millivolts = strtol(optarg, NULL, 10);
-			break;
-		case 26:
-			config.adc_show_millivolts = 1;
 			break;
 		default:
 			usage();
@@ -541,6 +556,9 @@ int main(int argc, char **argv)
 	config.logger("max_retries=%d; sleep_millis_between_retries=%d\n",
 			config.max_retries, config.sleep_millis_between_retries);
 
+	int num_values = get_num_values(&config);
+	config.last_values = malloc(sizeof(float) * num_values);
+
 	if (wiringPiSetup() == -1)
 		exit(1);
 
@@ -552,7 +570,7 @@ int main(int argc, char **argv)
 		fd = output_funcs->open(&config);
 
 	if (output_funcs->write_header != NULL)
-		output_funcs->write_header(fd);
+		output_funcs->write_header(fd, &config);
 
 	if (daemon) {
 		/* don't write duplicate headers to the output file*/
@@ -565,8 +583,11 @@ int main(int argc, char **argv)
 		if (i > 0 && config.sleep_millis_between_results > 0)
 			delay(config.sleep_millis_between_results);
 
-		result = _perform_all_readings(&config);
+		yadl_result *result = _perform_all_readings(&config);
+
 		output_funcs->write_result(fd, i, result, &config);
+
+		_free_result(result);
 	}
 
 	if (output_funcs->write_footer != NULL)
@@ -574,8 +595,6 @@ int main(int argc, char **argv)
 
 	if (output_funcs->close != NULL)
 		output_funcs->close(fd, &config);
-
-	free(result);
 
 	close_logger(logfile);
 

@@ -77,8 +77,8 @@ static float _get_direction(int millivolts)
 
 static yadl_result *_wind_direction_read_data(yadl_config *config)
 {
-	config->logger("Beginning to perform analog read. adc_millivolts=%d, adc_resolution=%d, adc_show_millivolts=%d\n",
-			config->adc_millivolts, config->adc->adc_resolution, config->adc_show_millivolts);
+	config->logger("Beginning to perform analog read. adc_millivolts=%d, adc_resolution=%d\n",
+			config->adc_millivolts, config->adc->adc_resolution);
 
 	int reading = config->adc->adc_read(config);
 	int read_millivolts = (float) reading * ((float) config->adc_millivolts / (float) config->adc->adc_resolution);
@@ -88,11 +88,22 @@ static yadl_result *_wind_direction_read_data(yadl_config *config)
 
 	yadl_result *result;
 	result = malloc(sizeof(*result));
-	result->value = direction;
+	result->value = malloc(sizeof(float) * 3);
+	result->value[0] = direction;
+	result->value[1] = reading;
+	result->value[2] = read_millivolts;
 	return result;
+}
+
+static char * _wind_direction_value_header_names[] = { "direction", "reading", "millivolts", NULL };
+
+static char ** _wind_direction_get_value_header_names(__attribute__((__unused__)) yadl_config *config)
+{
+	return _wind_direction_value_header_names;
 }
 
 sensor wind_direction_sensor_funcs = {
 	.init = &_wind_direction_init,
+	.get_value_header_names = &_wind_direction_get_value_header_names,
 	.read = _wind_direction_read_data
 };
