@@ -421,7 +421,7 @@ int main(int argc, char **argv)
 	};
 
 	char *output_name = NULL, *sensor_name = NULL, *adc_name = NULL;
-	char *filter_name = NULL, *logfile = NULL;
+	char *filter_name = NULL, *logfile = NULL, *outfile = NULL;
 	yadl_config config;
 	outputter *output_funcs;
 	int opt = 0, long_index = 0, debug = 0, daemon = 0;
@@ -474,7 +474,7 @@ int main(int argc, char **argv)
 			debug = 1;
 			break;
 		case 6:
-			config.outfile = optarg;
+			outfile = optarg;
 			break;
 		case 7:
 			config.spi_channel = strtol(optarg, NULL, 10);
@@ -559,7 +559,7 @@ int main(int argc, char **argv)
 	} else if (daemon && debug && logfile == NULL) {
 		fprintf(stderr, "You must specify the --logfile argument with --daemon\n");
 		usage();
-	} else if (daemon && config.outfile == NULL) {
+	} else if (daemon && outfile == NULL) {
 		fprintf(stderr, "You must specify the --outfile argument with --daemon\n");
 		usage();
 	}
@@ -600,16 +600,14 @@ int main(int argc, char **argv)
 	if (config.sens->init != NULL)
 		config.sens->init(&config);
 
-	FILE *fd = NULL;
-	if (output_funcs->open != NULL)
-		fd = output_funcs->open(&config);
+	output_metadata *output_metadata = output_funcs->open(&config, outfile);
 
 	if (output_funcs->write_header != NULL)
-		output_funcs->write_header(fd, &config);
+		output_funcs->write_header(output_metadata, &config);
 
 	if (daemon) {
 		/* don't write duplicate headers to the output file*/
-		fflush(fd);
+		fflush(output_metadata->fd);
 
 		_daemonize(&config);
 	}
@@ -620,16 +618,15 @@ int main(int argc, char **argv)
 
 		yadl_result *result = _perform_all_readings(&config);
 
-		output_funcs->write_result(fd, i, result, &config);
+		output_funcs->write_result(output_metadata, i, result, &config);
 
 		_free_result(result);
 	}
 
 	if (output_funcs->write_footer != NULL)
-		output_funcs->write_footer(fd);
+		output_funcs->write_footer(output_metadata);
 
-	if (output_funcs->close != NULL)
-		output_funcs->close(fd, &config);
+	output_funcs->close(output_metadata, &config);
 
 	close_logger(logfile);
 

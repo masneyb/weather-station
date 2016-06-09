@@ -69,66 +69,75 @@ static int show_value(yadl_config *config, yadl_result *result)
 	return 1;
 }
 
-static FILE *_open_fd(yadl_config *config)
+static output_metadata *_open_fd(yadl_config *config, char *outfile)
 {
-	if (config->outfile == NULL)
-		return stdout;
+	output_metadata *ret = malloc(sizeof(*ret));
+	ret->outfile = outfile;
 
-	config->logger("Writing results to file %s\n", config->outfile);
+	if (outfile == NULL) {
+		ret->fd = stdout;
+		return ret;
+	}
 
-	FILE *fd = fopen(config->outfile, "w");
-	if (fd == NULL) {
-		fprintf(stderr, "Error opening %s: %s\n", config->outfile, strerror(errno));
+	config->logger("Writing results to file %s\n", outfile);
+
+	ret->fd = fopen(outfile, "w");
+	if (ret->fd == NULL) {
+		fprintf(stderr, "Error opening %s: %s\n", outfile, strerror(errno));
 		exit(1);
 	}
-	return fd;
+
+	return ret;
 }
 
-static void _close_fd(FILE *fd, yadl_config *config)
+static void _close_fd(output_metadata *meta, __attribute__((__unused__)) yadl_config *config)
 {
-	if (config->outfile == NULL)
+	if (meta->outfile == NULL) {
+		free(meta);
 		return;
+	}
 
-	if (fclose(fd) < 0) {
-		fprintf(stderr, "Error closing%s: %s\n", config->outfile, strerror(errno));
+	if (fclose(meta->fd) < 0) {
+		fprintf(stderr, "Error closing %s: %s\n", meta->outfile, strerror(errno));
+		free(meta);
 		exit(1);
 	}
 }
 
-static void _write_json_header(FILE *fd, __attribute__((__unused__)) yadl_config *config)
+static void _write_json_header(output_metadata *meta, __attribute__((__unused__)) yadl_config *config)
 {
-	fprintf(fd, "{ \"result\": [ ");
+	fprintf(meta->fd, "{ \"result\": [ ");
 }
 
-static void _write_json(FILE *fd, int reading_number, yadl_result *result, yadl_config *config)
+static void _write_json(output_metadata *meta, int reading_number, yadl_result *result, yadl_config *config)
 {
 	if (!show_value(config, result))
 		return;
 
-	fprintf(fd, " {");
+	fprintf(meta->fd, " {");
 
 	char **header_names = config->sens->get_value_header_names(config);
 	for (int i = 0; header_names[i] != NULL; i++) {
-		fprintf(fd, " \"%s\": %.1f,", header_names[i], result->value[i]);
+		fprintf(meta->fd, " \"%s\": %.1f,", header_names[i], result->value[i]);
 	}
 
-	fprintf(fd, " \"timestamp\": %ld }", _get_current_timestamp());
+	fprintf(meta->fd, " \"timestamp\": %ld }", _get_current_timestamp());
 
 	if (reading_number + 1 < config->num_results)
-		fprintf(fd, ",\n");
+		fprintf(meta->fd, ",\n");
 }
 
-static void _write_json_footer(FILE *fd)
+static void _write_json_footer(output_metadata *meta)
 {
-	fprintf(fd, " ] }\n");
+	fprintf(meta->fd, " ] }\n");
 }
 
-static void _write_yaml_header(FILE *fd, __attribute__((__unused__)) yadl_config *config)
+static void _write_yaml_header(output_metadata *meta, __attribute__((__unused__)) yadl_config *config)
 {
-	fprintf(fd, "---\nresult:\n");
+	fprintf(meta->fd, "---\nresult:\n");
 }
 
-static void _write_yaml(FILE *fd, __attribute__((__unused__)) int reading_number,
+static void _write_yaml(output_metadata *meta, __attribute__((__unused__)) int reading_number,
 		yadl_result *result, __attribute__((__unused__)) yadl_config *config)
 {
 	if (!show_value(config, result))
@@ -136,79 +145,92 @@ static void _write_yaml(FILE *fd, __attribute__((__unused__)) int reading_number
 
 	char **header_names = config->sens->get_value_header_names(config);
 	for (int i = 0; header_names[i] != NULL; i++) {
-		fprintf(fd, "%c %s: %.1f\n", i == 0 ? '-' : ' ', header_names[i], result->value[i]);
+		fprintf(meta->fd, "%c %s: %.1f\n", i == 0 ? '-' : ' ', header_names[i], result->value[i]);
 	}
-	fprintf(fd, "  timestamp: %ld\n",
+	fprintf(meta->fd, "  timestamp: %ld\n",
 		_get_current_timestamp());
 }
 
-static void _write_csv_header(FILE *fd, yadl_config *config)
+static void _write_csv_header(output_metadata *meta, yadl_config *config)
 {
-	fprintf(fd, "reading_number,timestamp");
+	fprintf(meta->fd, "reading_number,timestamp");
 
 	char **header_names = config->sens->get_value_header_names(config);
 	for (int i = 0; header_names[i] != NULL; i++) {
-		fprintf(fd, ",%s", header_names[i]);
+		fprintf(meta->fd, ",%s", header_names[i]);
 	}
 
-	fprintf(fd, "\n");
+	fprintf(meta->fd, "\n");
 }
 
-static void _write_csv(FILE *fd, int reading_number,
+static void _write_csv(output_metadata *meta, int reading_number,
 		yadl_result *result, __attribute__((__unused__)) yadl_config *config)
 {
 	if (!show_value(config, result))
 		return;
 
-	fprintf(fd, "%d,%ld", reading_number, _get_current_timestamp());
+	fprintf(meta->fd, "%d,%ld", reading_number, _get_current_timestamp());
 
 	char **header_names = config->sens->get_value_header_names(config);
 	for (int i = 0; header_names[i] != NULL; i++) {
-		fprintf(fd, ",%.1f", result->value[i]);
+		fprintf(meta->fd, ",%.1f", result->value[i]);
 	}
-	fprintf(fd, "\n");
+	fprintf(meta->fd, "\n");
 }
 
-static void _write_rrd(__attribute__((__unused__)) FILE *fd, __attribute__((__unused__)) int reading_number,
+static output_metadata *_rrd_open_fd(__attribute__((__unused__)) yadl_config *config, char *outfile)
+{
+	output_metadata *ret = malloc(sizeof(*ret));
+	ret->outfile = outfile;
+	ret->fd = NULL;
+	return ret;
+}
+
+static void _rrd_close_fd(output_metadata *meta, __attribute__((__unused__)) yadl_config *config)
+{
+	free(meta);
+}
+
+static void _write_rrd(output_metadata *meta, __attribute__((__unused__)) int reading_number,
 		yadl_result *result, yadl_config *config)
 {
 	if (!show_value(config, result))
 		return;
 
-	if (config->outfile == NULL) {
+	if (meta->outfile == NULL) {
 		fprintf(stderr, "--outfile must be specified for the RRD output\n");
 		exit(1);
 	}
 
 	char **header_names = config->sens->get_value_header_names(config);
-	write_to_rrd_database(config->logger, config->outfile, header_names, result->value);
+	write_to_rrd_database(config->logger, meta->outfile, header_names, result->value);
 }
 
-static void _write_xml_header(FILE *fd, __attribute__((__unused__)) yadl_config *config)
+static void _write_xml_header(output_metadata *meta, __attribute__((__unused__)) yadl_config *config)
 {
-	fprintf(fd, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
-	fprintf(fd, "<results>\n");
+	fprintf(meta->fd, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
+	fprintf(meta->fd, "<results>\n");
 }
 
-static void _write_xml(FILE *fd, __attribute__((__unused__)) int reading_number,
+static void _write_xml(output_metadata *meta, __attribute__((__unused__)) int reading_number,
 		yadl_result *result, __attribute__((__unused__)) yadl_config *config)
 {
 	if (!show_value(config, result))
 		return;
 
-	fprintf(fd, "  <result><timestamp>%ld</timestamp>", _get_current_timestamp());
+	fprintf(meta->fd, "  <result><timestamp>%ld</timestamp>", _get_current_timestamp());
 
 	char **header_names = config->sens->get_value_header_names(config);
 	for (int i = 0; header_names[i] != NULL; i++) {
-		fprintf(fd, "<%s>%.1f</%s>", header_names[i], result->value[i], header_names[i]);
+		fprintf(meta->fd, "<%s>%.1f</%s>", header_names[i], result->value[i], header_names[i]);
 	}
 
-	fprintf(fd, "</result>\n");
+	fprintf(meta->fd, "</result>\n");
 }
 
-static void _write_xml_footer(FILE *fd)
+static void _write_xml_footer(output_metadata *meta)
 {
-	fprintf(fd, "</results>\n");
+	fprintf(meta->fd, "</results>\n");
 }
 
 static outputter _json_output_funcs = {
@@ -240,11 +262,11 @@ static outputter _xml_output_funcs = {
 	.close = &_close_fd
 };
 static outputter _rrd_output_funcs = {
-	.open = NULL,
+	.open = &_rrd_open_fd,
 	.write_header = NULL,
 	.write_result = &_write_rrd,
 	.write_footer = NULL,
-	.close = NULL
+	.close = &_rrd_close_fd
 };
 
 outputter *get_outputter(char *name)

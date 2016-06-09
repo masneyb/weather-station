@@ -41,12 +41,17 @@ typedef struct adc_converter_tag {
 	int adc_resolution;
 } adc_converter;
 
+typedef struct output_metadata_tag {
+	FILE *fd;
+	char *outfile;
+} output_metadata;
+
 typedef struct outputter_tag {
-	FILE *(*open)(yadl_config *config);
-	void (*write_header)(FILE *fd, yadl_config *config);
-	void (*write_result)(FILE *fd, int reading_number, yadl_result *result, yadl_config *config);
-	void (*write_footer)(FILE *fd);
-	void (*close)(FILE *fd, yadl_config *config);
+	output_metadata *(*open)(yadl_config *config, char *outfile);
+	void (*write_header)(output_metadata *meta, yadl_config *config);
+	void (*write_result)(output_metadata *meta, int reading_number, yadl_result *result, yadl_config *config);
+	void (*write_footer)(output_metadata *meta);
+	void (*close)(output_metadata *meta, yadl_config *config);
 } outputter;
 
 typedef struct sensor_tag {
@@ -65,7 +70,6 @@ struct yadl_config_tag {
 	int min_valid_reading;
 	int max_valid_reading;
 	logger logger;
-	char *outfile;
 	int spi_channel;
 	int i2c_address;
 	int analog_channel;
