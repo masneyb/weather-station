@@ -48,8 +48,8 @@ void usage(void)
 	printf("usage: yadl --sensor <digital|counter|analog|wind_direction|dht11|dht22|ds18b20|tmp36>\n");
 	printf("\t\t[ --gpio_pin <wiringPi pin #. Required for digital or counter sensor> ]\n");
 	printf("\t\t  See http://wiringpi.com/pins/ to lookup the pin number.\n");
-	printf("\t\t--output <json|yaml|csv|xml|rrd>\n");
-	printf("\t\t[ --outfile <optional output filename. Defaults to stdout> ]\n");
+	printf("\t\t--output <json|yaml|csv|xml|rrd> [ --output <...> ]\n");
+	printf("\t\t[ --outfile <optional output filename. Defaults to stdout> [ --outfile <...> ] ]\n");
 	printf("\t\t[ --only_log_value_changes ]\n");
 	printf("\t\t[ --num_results <# results returned (default %d). Set to -1 to poll indefinitely.> ]\n", DEFAULT_NUM_RESULTS);
 	printf("\t\t[ --sleep_millis_between_results <milliseconds (default %d)> ]\n", DEFAULT_SLEEP_MILLIS_BETWEEN_RESULTS);
@@ -420,10 +420,16 @@ int main(int argc, char **argv)
 		{0, 0, 0, 0 }
 	};
 
-	char *output_name = NULL, *sensor_name = NULL, *adc_name = NULL;
-	char *filter_name = NULL, *logfile = NULL, *outfile = NULL;
+	char *sensor_name = NULL, *adc_name = NULL;
+	char *filter_name = NULL, *logfile = NULL;
 	yadl_config config;
-	outputter *output_funcs;
+
+	char **output_types = NULL;
+	int num_output_types = 0;
+	char **output_filenames = NULL;
+	int num_output_filenames = NULL;
+	outputter **output_funcs = NULL;
+
 	int opt = 0, long_index = 0, debug = 0, daemon = 0;
 
 	if (argc <= 1)
@@ -465,7 +471,9 @@ int main(int argc, char **argv)
 			config.max_valid_reading = strtol(optarg, NULL, 10);
 			break;
 		case 3:
-			output_name = optarg;
+			num_output_types++;
+			output_types = realloc(output_types, sizeof(char *) * num_output_types);
+			output_types[num_output_types - 1] = optarg;
 			break;
 		case 4:
 			sensor_name = optarg;
@@ -474,7 +482,9 @@ int main(int argc, char **argv)
 			debug = 1;
 			break;
 		case 6:
-			outfile = optarg;
+			num_output_filenames++;
+			output_filenames = realloc(output_filenames, sizeof(char *) * num_output_filenames);
+			output_filenames[num_output_filenames - 1] = optarg;
 			break;
 		case 7:
 			config.spi_channel = strtol(optarg, NULL, 10);
@@ -559,7 +569,7 @@ int main(int argc, char **argv)
 	} else if (daemon && debug && logfile == NULL) {
 		fprintf(stderr, "You must specify the --logfile argument with --daemon\n");
 		usage();
-	} else if (daemon && outfile == NULL) {
+	} else if (daemon && num_output_filenames == 0) {
 		fprintf(stderr, "You must specify the --outfile argument with --daemon\n");
 		usage();
 	}
@@ -572,9 +582,27 @@ int main(int argc, char **argv)
 		usage();
 	}
 
-	output_funcs = get_outputter(output_name);
-	if (output_funcs == NULL)
+	if (num_output_types == 0) {
+		fprintf(stderr, "You must specify at least one --output argument\n");
 		usage();
+	}
+	else if (num_output_types == 1 && num_output_filenames == 0) {
+		// Send output to stdout if no filename was specified
+		num_output_filenames++;
+		output_filenames = realloc(output_filenames, sizeof(char *) * num_output_filenames);
+		output_filenames[num_output_filenames - 1] = NULL;
+	}
+	else if (num_output_types != num_output_filenames) {
+		fprintf(stderr, "You must specify the same number of --output and --outfile arguments\n");
+		usage();
+	}
+
+	output_funcs = malloc(sizeof(outputter *) * num_output_types);
+	for (int output_idx = 0; output_idx < num_output_types; output_idx++) {
+		output_funcs[output_idx] = get_outputter(output_types[output_idx]);
+		if (output_funcs[output_idx] == NULL)
+			usage();
+	}
 
 	config.filter_func = get_filter(filter_name);
 	if (config.filter_func == NULL)
@@ -600,15 +628,19 @@ int main(int argc, char **argv)
 	if (config.sens->init != NULL)
 		config.sens->init(&config);
 
-	output_metadata *output_metadata = output_funcs->open(&config, outfile);
+	output_metadata **output_metadatas = malloc(sizeof(output_metadata *) * num_output_types);
+	for (int output_idx = 0; output_idx < num_output_types; output_idx++) {
+		output_metadatas[output_idx] = output_funcs[output_idx]->open(&config, output_filenames[output_idx]);
 
-	if (output_funcs->write_header != NULL)
-		output_funcs->write_header(output_metadata, &config);
+		if (output_funcs[output_idx]->write_header != NULL)
+			output_funcs[output_idx]->write_header(output_metadatas[output_idx], &config);
+	}
 
 	if (daemon) {
 		/* don't write duplicate headers to the output file*/
-		fflush(output_metadata->fd);
-
+		for (int output_idx = 0; output_idx < num_output_types; output_idx++) {
+			fflush(output_metadatas[output_idx]->fd);
+		}
 		_daemonize(&config);
 	}
 
@@ -618,15 +650,19 @@ int main(int argc, char **argv)
 
 		yadl_result *result = _perform_all_readings(&config);
 
-		output_funcs->write_result(output_metadata, i, result, &config);
+		for (int output_idx = 0; output_idx < num_output_types; output_idx++) {
+			output_funcs[output_idx]->write_result(output_metadatas[output_idx], i, result, &config);
+		}
 
 		_free_result(result);
 	}
 
-	if (output_funcs->write_footer != NULL)
-		output_funcs->write_footer(output_metadata);
+	for (int output_idx = 0; output_idx < num_output_types; output_idx++) {
+		if (output_funcs[output_idx]->write_footer != NULL)
+			output_funcs[output_idx]->write_footer(output_metadatas[output_idx]);
 
-	output_funcs->close(output_metadata, &config);
+		output_funcs[output_idx]->close(output_metadatas[output_idx], &config);
+	}
 
 	close_logger(logfile);
 
