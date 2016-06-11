@@ -3,24 +3,26 @@
 An extensible analog and digital data collector for the Raspberry Pi with the
 following features:
 
-* Supports logging raw values from digital or analog pins.
-* Supports logging the number of times that a digital pin either goes high
-  or low. Some sensors, such as rain gauges and wind anemometers, use a reed
-  switch and it is up to the microcontroller to count the number of times the
-  pin changes state.
-* Supports 4 different temperature and humidity sensors: DHT11, DHT22,
-  DS18B20 and TMP36 (analog). Supports multiple temperature units.
+* Supports various types of sensors and pins:
+  * Supports logging raw values from digital or analog pins.
+  * Supports logging the number of times that a digital pin either goes high
+    or low. Some sensors, such as rain gauges and wind anemometers, use a reed
+    switch and it is up to the microcontroller to count the number of times that
+    the pin changes state.
+  * Supports 4 different temperature and humidity sensors: DHT11, DHT22,
+    DS18B20 and TMP36 (analog). Supports multiple temperature units.
 * Supports returning the data in JSON, YAML, CSV, XML, and RRD. RRDtool can
   be used to graph the data over time. It also supports writing multiple
   files from a single sensor reading. For example, you may want to write the
-  values to a RRD database and also to a JSON file that you can put inside your
-  web root.
+  readings to a RRD database and also to a JSON file inside your web root.
 * Some sensors can occasionally return erratic readings that cause large spikes
-  or dips in your graphs. You can set optionally valid thresholds to ignore
+  or dips in your graphs. You can optionally set valid thresholds to ignore
   these erroneous readings.
-* It also supports taking multiple samples to help smooth the results. This is
-  particularly useful when reading from some types of analog sensors. See the
-  examples below in the usage for some use cases.
+* Supports taking multiple samples to help smooth the results. This is
+  particularly useful when reading from some types of analog sensors. For
+  example, you can tell the program to take 1000 samples from a sensor, discard
+  the 400 samples that are the outliers and return the mean of the remaining 600
+  samples.
 
 
 ## Usage

@@ -1,0 +1,50 @@
+Examples polling the supported temperature sensors
+
+* DHT22 sensor on BCM pin 17 (wiringPi pin 0) as JSON.
+  $ sudo yatl --gpio_pin 0 --sensor dht22 --temperature_unit fahrenheit --output json
+  { "result": [ { "humidity": 54.7, "temperature": 63.3  "temperature_unit": "fahrenheit", "timestamp": 1463325164 } ] }
+
+* DHT11 sensor on BCM pin 18 (wiringPi pin 1) as YAML.
+  $ sudo yatl --gpio_pin 1 --sensor dht11 --temperature_unit fahrenheit --output yaml
+  ---
+  result:
+  - humidity: 37.7
+    temperature: 60.8
+    temperature_unit: fahrenheit
+    timestamp: 1463325483
+
+* TMP36 analog temperature sensor using a MCP3002 Analog to Digital Converter (ADC) as YAML.
+  $ yatl --sensor tmp36 --adc mcp3002 --spi_channel 0 --analog_channel 0 \
+	--temperature_unit fahrenheit --output yaml
+  ---
+  result:
+  - humidity: 0.0
+    temperature: 60.2
+    temperature_unit: fahrenheit
+    timestamp: 1463325777
+
+* DS18B20 sensor as XML.
+  $ yatl --sensor ds18b20 --w1_slave /sys/bus/w1/devices/28-0415a230acff/w1_slave \
+	--temperature_unit celsius --output xml
+  <?xml version="1.0" encoding="UTF-8"?>
+  <results>
+    <result><humidity>0.0</humidity><temperature>16.0</temperature><temperature_unit>celsius</temperature_unit><timestamp>1463325871</timestamp></result>
+  </results>
+
+* See systemd/pi-yatl-gatherer.service for an example writing the data to
+  a RRD database.
+
+* Show 5 results from a DHT22 sensor. 20 samples are taken for each result shown.
+  5 samples (outliers) are removed from both ends. The final result is the mean of
+  the middle 10 samples. Wait 2 seconds between each result shown. This is mostly
+  useful for removing noise from analog sensors.
+  $ sudo yatl --gpio_pin 0 --sensor dht22 --temperature_unit fahrenheit --output csv \
+	--num_results 5 --sleep_usecs_between_results 2000000 \
+	--num_samples_per_result 20 --remove_n_samples_from_ends 5 --filter mean
+  timestamp,temperature,humidity
+  1463786650,62.8,55.4
+  1463786655,62.8,55.3
+  1463786658,62.8,55.3
+  1463786662,62.8,55.4
+  1463786667,63.0,55.3
+
