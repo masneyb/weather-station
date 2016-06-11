@@ -23,6 +23,8 @@ following features:
   examples below in the usage for some use cases.
 
 
+## Usage
+
     usage: yadl --sensor <digital|counter|analog|wind_direction|dht11|dht22|ds18b20|tmp36>
     		[ --gpio_pin <wiringPi pin #. Required for digital sensors.> ]
     		  See http://wiringpi.com/pins/ to lookup the pin number.
