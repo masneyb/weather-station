@@ -1,20 +1,33 @@
 # pi-yadl - Yet Another Data Logger
 
-An extensible analog and digital data collector for the Raspberry Pi that supports
-returning the data in JSON, YAML, CSV, XML, text, and RRD. It also supports
-counting the number of times that a digital pin closes, which is useful for
-logging some types of sensors such as anemometer, rain gauge, etc.
+An extensible analog and digital data collector for the Raspberry Pi with the
+following features:
 
-Some sensors can occasionally return erratic readings that cause large spikes
-or dips in your graphs. You can set valid thresholds to ignore these erroneous
-readings. It also supports taking multiple samples to help smooth the results.
-See the examples below in the usage for some use cases.
+* Supports logging raw values from digital or analog pins.
+* Supports logging the number of times that a digital pin either goes high
+  or low. Some sensors, such as rain gauges and wind anemometers, use a reed
+  switch and it is up to the microcontroller to count the number of times the
+  pin changes state.
+* Supports 4 different temperature and humidity sensors: DHT11, DHT22,
+  DS18B20 and TMP36 (analog). Supports multiple temperature units.
+* Supports returning the data in JSON, YAML, CSV, XML, and RRD. RRDtool can
+  be used to graph the data over time. It also supports writing multiple
+  files from a single sensor reading. For example, you may want to write the
+  values to a RRD database and also to a JSON file that you can put inside your
+  web root.
+* Some sensors can occasionally return erratic readings that cause large spikes
+  or dips in your graphs. You can set optionally valid thresholds to ignore
+  these erroneous readings.
+* It also supports taking multiple samples to help smooth the results. This is
+  particularly useful when reading from some types of analog sensors. See the
+  examples below in the usage for some use cases.
 
-    usage: yadl --sensor <digital|counter|analog>
-    		[ --gpio_pin <wiringPi pin #. Required for digital or counter sensor> ]
+
+    usage: yadl --sensor <digital|counter|analog|wind_direction|dht11|dht22|ds18b20|tmp36>
+    		[ --gpio_pin <wiringPi pin #. Required for digital sensors.> ]
     		  See http://wiringpi.com/pins/ to lookup the pin number.
-    		--output <text|json|yaml|csv|xml|rrd>
-    		[ --outfile <optional output filename. Defaults to stdout> ]
+    		--output <json|yaml|csv|xml|rrd> [ --output <...> ]
+    		[ --outfile <optional output filename. Defaults to stdout> [ --outfile <...> ] ]
     		[ --only_log_value_changes ]
     		[ --num_results <# results returned (default 1). Set to -1 to poll indefinitely.> ]
     		[ --sleep_millis_between_results <milliseconds (default 0)> ]
@@ -22,7 +35,7 @@ See the examples below in the usage for some use cases.
     		[ --sleep_millis_between_samples <milliseconds (default 0)> ]
     		[ --filter <median|mean|mode|min|max|range (default median)> ]
     		[ --remove_n_samples_from_ends <# samples (default 0)> ]
-    		[ --max_retries <# retries (default 1)> ]
+    		[ --max_retries <# retries (default 10)> ]
     		[ --sleep_millis_between_retries <milliseconds (default 500)> ]
     		[ --min_valid_value <minimum allowable value> ]
     		[ --max_valid_value <maximum allowable value> ]
@@ -34,13 +47,26 @@ See the examples below in the usage for some use cases.
     
     		[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default 1.0)> ]
     		[ --interrupt_edge <rising|falling|both (default rising)> ]
-    		[ --counter_show_speed ]
     
     Analog specific options
     
-    		[ --adc <see ADC list below. Required for analog> ]
+    		--adc <see ADC list below. Required for analog>
     		[ --adc_millivolts <value (default 3300)> ]
-    		[ --adc_show_millivolts> ]
+    
+    Temperature sensors specific options
+    		--temperature_unit <celsius|fahrenheit|kelvin|rankine>
+    
+    * ds18b20 - This temperature sensor uses the Dallas 1-Wire protocol.
+      --w1_slave <w1 slave device>
+      	The w1 slave device will be one of the
+      	/sys/bus/w1/devices/28-*/w1_slave files.
+    
+      	You need to have the w1-gpio and w1-therm kernel modules loaded.
+      	You'll also need to have 'dtoverlay=w1-gpio' in your /boot/config.txt
+      	and reboot if it was not already present.
+    
+    * tmp36 - Analog temperature sensor.
+      [ --analog_scaling_factor <value> (default 500) ]
     
     Supported Analog to Digital Converters (ADCs)
     
@@ -59,6 +85,10 @@ See the examples below in the usage for some use cases.
       --analog_channel <analog channel>
     
     Examples
+    
+    * Poll a DHT22 temperature sensor on BCM pin 17 (wiringPi pin 0) as JSON.
+      $ sudo yadl --gpio_pin 0 --sensor dht22 --temperature_unit fahrenheit --output json
+      { "result": [  { "temperature": 63.9, "humidity": 49.0, "timestamp": 1465605522 } ] }
     
     * Poll a single sample from BCM digital pin 17 (wiringPi pin 0) as JSON
       $ yadl --sensor digital --gpio_pin 0 --output json
@@ -95,7 +125,7 @@ See the examples below in the usage for some use cases.
       number of times that the switch closes over a 5 second period. Multiply the
       requests per second by 0.746 to get the wind speed in miles per hour. Show
       5 different results.
-      $ yadl --sensor counter --counter_show_speed --gpio_pin 1 --output csv --num_results 5 \
+      $ yadl --sensor counter --gpio_pin 1 --output csv --num_results 5 \
       	--sleep_millis_between_results 5000 --counter_multiplier 0.746
       reading_number,timestamp,value
       0,1465084823,6.9
@@ -120,6 +150,17 @@ See the examples below in the usage for some use cases.
       1731987,1464480351,0.0
       1731988,1464480351,1.0
       1732148,1464480351,0.0
+    
+    * See systemd/pi-yadl-gatherer.service for an example writing the data to
+      a RRD database.
+
+
+## Using RRDtool to graph the data
+
+If you plan to graph one or more sensors over a long period of time, then
+you may want to consider storing the database in a RRD database.
+
+![Screenshot](images/pi-yadl-screenshot.png?raw=1)
 
 
 ## Using gnuplot to graph the data
@@ -145,14 +186,6 @@ The associated [gnuplot](http://www.gnuplot.info/) script.
 ![Example using GNUplot to log the data](images/pi-yadl-analog-pot-example.png?raw=1)
 
 
-## Using RRDtool to graph the data over time
-
-If you plan to graph one or more sensors over a long period of time, then you
-may want to consider storing the data in a RRD database. See my
-[pi-yatl](https://github.com/masneyb/pi-yatl) project for suggestions about how
-to set this up.
-
-
 ## Single Node Installation
 
 * `sudo apt-get install wiringpi librrd-dev`
@@ -161,13 +194,18 @@ to set this up.
 
 ## Multinode Installation
 
-See my [pi-yatl](https://github.com/masneyb/pi-yatl) project for suggestions
-about how to set this up.
+See [REMOTE_POLLING.md](REMOTE_POLLING.md) for some tips on how to set it up
+so that you can publish the temperature and humidity on a webserver and graph the
+data on a separate computer.
 
 
-## Data sheets for the supported ADCs
+## Data sheets for the supported sensors
 
 * [MCP3002 ADC converter](http://ww1.microchip.com/downloads/en/DeviceDoc/21294C.pdf)
 * [MCP3008 ADC converter](https://www.adafruit.com/datasheets/MCP3008.pdf)
 * [PCF8591 ADC converter](http://www.nxp.com/documents/data_sheet/PCF8591.pdf)
+* [DHT11](http://www.micropik.com/PDF/dht11.pdf)
+* [DHT22](https://www.sparkfun.com/datasheets/Sensors/Temperature/DHT22.pdf)
+* [DS18B20](http://cdn.sparkfun.com/datasheets/Sensors/Temp/DS18B20.pdf)
+* [TMP36 analog temperature sensor](http://cdn.sparkfun.com/datasheets/Sensors/Temp/TMP35_36_37.pdf)
 

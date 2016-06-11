@@ -46,7 +46,7 @@
 void usage(void)
 {
 	printf("usage: yadl --sensor <digital|counter|analog|wind_direction|dht11|dht22|ds18b20|tmp36>\n");
-	printf("\t\t[ --gpio_pin <wiringPi pin #. Required for digital or counter sensor> ]\n");
+	printf("\t\t[ --gpio_pin <wiringPi pin #. Required for digital sensors.> ]\n");
 	printf("\t\t  See http://wiringpi.com/pins/ to lookup the pin number.\n");
 	printf("\t\t--output <json|yaml|csv|xml|rrd> [ --output <...> ]\n");
 	printf("\t\t[ --outfile <optional output filename. Defaults to stdout> [ --outfile <...> ] ]\n");
@@ -88,10 +88,6 @@ void usage(void)
 	printf("  \tand reboot if it was not already present.\n");
 	printf("\n");
 	printf("* tmp36 - Analog temperature sensor.\n");
-	printf("  --adc <see ADC list below>\n");
-	printf("\n");
-	printf("  [ --adc_millivolts <value (default %d)> ]\n", DEFAULT_ADC_MILLIVOLTS);
-	printf("\n");
 	printf("  [ --analog_scaling_factor <value> (default %d) ]\n", DEFAULT_ANALOG_SCALING_FACTOR);
 	printf("\n");
 	printf("Supported Analog to Digital Converters (ADCs)\n");
@@ -111,6 +107,10 @@ void usage(void)
 	printf("  --analog_channel <analog channel>\n");
 	printf("\n");
 	printf("Examples\n");
+	printf("\n");
+	printf("* Poll a DHT22 temperature sensor on BCM pin 17 (wiringPi pin 0) as JSON.\n");
+	printf("  $ sudo yadl --gpio_pin 0 --sensor dht22 --temperature_unit fahrenheit --output json\n");
+	printf("  { \"result\": [  { \"temperature\": 63.9, \"humidity\": 49.0, \"timestamp\": 1465605522 } ] }\n");
 	printf("\n");
 	printf("* Poll a single sample from BCM digital pin 17 (wiringPi pin 0) as JSON\n");
 	printf("  $ yadl --sensor digital --gpio_pin 0 --output json\n");
@@ -172,6 +172,9 @@ void usage(void)
 	printf("  1731987,1464480351,0.0\n");
 	printf("  1731988,1464480351,1.0\n");
 	printf("  1732148,1464480351,0.0\n");
+	printf("\n");
+	printf("* See systemd/pi-yadl-gatherer.service for an example writing the data to\n");
+	printf("  a RRD database.\n");
 
 	exit(1);
 }
