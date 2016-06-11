@@ -1,4 +1,4 @@
-YATL_C_DEPS=src/adc_mcp3002.c src/adc_mcp3004.c src/adc_pcf8591.c src/adcs.c \
+YADL_C_DEPS=src/adc_mcp3002.c src/adc_mcp3004.c src/adc_pcf8591.c src/adcs.c \
 	src/filters.c src/loggers.c src/outputters.c src/rrd_common.c \
 	src/sensor_analog.c src/sensor_digital.c src/sensor_digital_counter.c \
 	src/sensor_temperature_dht.c src/sensor_temperature_ds18b20.c \
@@ -6,24 +6,24 @@ YATL_C_DEPS=src/adc_mcp3002.c src/adc_mcp3004.c src/adc_pcf8591.c src/adcs.c \
 	src/sensor_wind_direction.c src/sensors.c src/temperature_units.c \
 	src/yadl.c
 
-YATL_ADD_RRD_SAMPLE_C_DEPS=src/loggers.c src/rrd_common.c \
+YADL_ADD_RRD_SAMPLE_C_DEPS=src/loggers.c src/rrd_common.c \
 	src/yadl-add-rrd-sample.c
 
-YATL_BIN=bin/yadl
-YATL_ADD_RRD_SAMPLE_BIN=bin/yadl-add-rrd-sample
+YADL_BIN=bin/yadl
+YADL_ADD_RRD_SAMPLE_BIN=bin/yadl-add-rrd-sample
 
 .PHONY: all clean install shellcheck
 
-all: ${YATL_BIN} ${YATL_ADD_RRD_SAMPLE_BIN}
+all: ${YADL_BIN} ${YADL_ADD_RRD_SAMPLE_BIN}
 
-${YATL_BIN}: ${YATL_C_DEPS} src/yadl.h
-	gcc -g -Wall -Wextra -pedantic -std=c11 -o ${YATL_BIN} ${YATL_C_DEPS} -lwiringPi -lrrd
+${YADL_BIN}: ${YADL_C_DEPS} src/yadl.h
+	gcc -g -Wall -Wextra -pedantic -std=c11 -o ${YADL_BIN} ${YADL_C_DEPS} -lwiringPi -lrrd
 
-${YATL_ADD_RRD_SAMPLE_BIN}: ${YATL_ADD_RRD_SAMPLE_C_DEPS}
-	gcc -g -Wall -Wextra -pedantic -std=c11 -o ${YATL_ADD_RRD_SAMPLE_BIN} ${YATL_ADD_RRD_SAMPLE_C_DEPS} -lrrd
+${YADL_ADD_RRD_SAMPLE_BIN}: ${YADL_ADD_RRD_SAMPLE_C_DEPS}
+	gcc -g -Wall -Wextra -pedantic -std=c11 -o ${YADL_ADD_RRD_SAMPLE_BIN} ${YADL_ADD_RRD_SAMPLE_C_DEPS} -lrrd
 
 clean:
-	rm -f ${YATL_BIN} ${YATL_ADD_RRD_SAMPLE_BIN}
+	rm -f ${YADL_BIN} ${YADL_ADD_RRD_SAMPLE_BIN}
 
 install:
 	cp -v systemd/* /etc/systemd/system/
