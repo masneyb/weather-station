@@ -6,9 +6,9 @@ following features:
 * Supports various types of sensors and pins:
   * Supports logging raw values from digital or analog pins.
   * Supports logging the number of times that a digital pin either goes high
-    or low. Some sensors, such as rain gauges and wind anemometers, use a reed
-    switch and it is up to the microcontroller to count the number of times that
-    the pin changes state.
+    or low using interrupts. Some sensors, such as rain gauges and wind
+    anemometers, use a reed switch and it is up to the microcontroller to count
+    the number of times that the pin changes state.
   * Supports 4 different temperature and humidity sensors: DHT11, DHT22,
     DS18B20 and TMP36 (analog). Supports multiple temperature units.
   * Supports anemometer, wind direction, and rain gauage for the
@@ -30,7 +30,7 @@ following features:
 
 ## Usage
 
-    usage: yadl --sensor <digital|counter|analog|wind_direction|dht11|dht22|ds18b20|tmp36>
+    usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|wind_direction>
     		[ --gpio_pin <wiringPi pin #. Required for digital sensors.> ]
     		  See http://wiringpi.com/pins/ to lookup the pin number.
     		--output <json|yaml|csv|xml|rrd> [ --output <...> ]
