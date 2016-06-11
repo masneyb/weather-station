@@ -11,6 +11,9 @@ following features:
     the pin changes state.
   * Supports 4 different temperature and humidity sensors: DHT11, DHT22,
     DS18B20 and TMP36 (analog). Supports multiple temperature units.
+  * Supports anemometer, wind direction, and rain gauage for the
+    Argent Data Systems Wind / Rain sensors. Other types of similar sensors
+    should be easily supported.
 * Supports returning the data in JSON, YAML, CSV, XML, and RRD. RRDtool can
   be used to graph the data over time. It also supports writing multiple
   files from a single sensor reading. For example, you may want to write the
@@ -96,47 +99,33 @@ following features:
     
     * Poll a single sample from BCM digital pin 17 (wiringPi pin 0) as JSON
       $ yadl --sensor digital --gpio_pin 0 --output json
-      { "result": [ { "value": 0.0, "timestamp": 1464465651 } ] }
+      { "result": [ { "pin_state": 0.0, "timestamp": 1464465651 } ] }
     
     * Poll 7 results from an analog sensor hooked up to channel 0 of a MCP3008.
       Wait 50 milliseconds between each result shown.
       $ yadl --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 0 \
     	--output csv --num_results 7 --sleep_millis_between_results 50
-      reading_number,timestamp,value
-      0,1464465367,716.0
-      1,1464465367,712.0
-      2,1464465367,712.0
-      3,1464465367,708.0
-      4,1464465367,712.0
-      5,1464465367,712.0
-      6,1464465367,712.0
+      reading_number,timestamp,reading,millivolts
+      0,1465685742,96.0,309.0
+      1,1465685742,96.0,309.0
+      2,1465685742,96.0,309.0
+      3,1465685742,96.0,309.0
+      4,1465685742,92.0,296.0
+      5,1465685742,96.0,309.0
+      6,1465685742,96.0,309.0
     
-    * Show 5 averaged results from a photoresistor hooked up to an ADC.
-      1000 samples are taken for each result shown. 200 samples from each end
-      are removed and the mean is taken of the middle 600 samples. This is
-      useful for removing noise from analog sensors.
+    * Show 5 averaged results from an ADC. 1000 samples are taken for each result
+      shown. 200 samples from each end are removed and the mean is taken of the middle
+      600 samples. This is useful for removing noise from analog sensors.
       $ yadl --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 0 \
     	--output csv --num_results 5 --sleep_millis_between_results 2000 \
     	--num_samples_per_result 1000 --remove_n_samples_from_ends 200 --filter mean
-      reading_number,timestamp,value
-      0,1464469264,779.4
-      1,1464469267,778.7
-      2,1464469269,779.7
-      3,1464469271,779.8
-      4,1464469273,779.2
-    
-    * Hook an anemometer (wind speed meter) up to a digital pin and count the
-      number of times that the switch closes over a 5 second period. Multiply the
-      requests per second by 0.746 to get the wind speed in miles per hour. Show
-      5 different results.
-      $ yadl --sensor counter --gpio_pin 1 --output csv --num_results 5 \
-      	--sleep_millis_between_results 5000 --counter_multiplier 0.746
-      reading_number,timestamp,value
-      0,1465084823,6.9
-      1,1465084828,6.9
-      2,1465084833,7.2
-      3,1465084838,6.9
-      4,1465084843,6.9
+      reading_number,timestamp,reading,millivolts
+      0,1465685840,96.0,309.0
+      1,1465685842,96.0,309.0
+      2,1465685844,96.0,309.0
+      3,1465685846,96.0,309.0
+      4,1465685848,96.0,309.0
     
     * Hook a button up to a digital pin and check for bounce when the button
       is pressed. This polls the digital pin indefinitely until Crtl-C is
@@ -144,7 +133,7 @@ following features:
       presses for illustration purposes.
       $ yadl --sensor digital --gpio_pin 0 --output csv --num_results -1 \
     	--only_log_value_changes
-      reading_number,timestamp,value
+      reading_number,timestamp,pin_state
       0,1464480347,0.0
     
       636673,1464480348,1.0
@@ -212,4 +201,5 @@ data on a separate computer.
 * [DHT22](https://www.sparkfun.com/datasheets/Sensors/Temperature/DHT22.pdf)
 * [DS18B20](http://cdn.sparkfun.com/datasheets/Sensors/Temp/DS18B20.pdf)
 * [TMP36 analog temperature sensor](http://cdn.sparkfun.com/datasheets/Sensors/Temp/TMP35_36_37.pdf)
+* [Argent Data Systems Wind / Rain Sensor Assembly](https://www.argentdata.com/files/80422_datasheet.pdf)
 

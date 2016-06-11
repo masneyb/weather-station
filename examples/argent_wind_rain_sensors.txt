@@ -1,0 +1,55 @@
+This shows how to take readings from the Argent Data Systems Wind / Rain Sensor
+Assembly
+https://www.argentdata.com/catalog/product_info.php?products_id=145
+https://www.argentdata.com/files/80422_datasheet.pdf
+
+* Hook the anemometer (wind speed meter) up to BCM pin 18 (wiringPi pin #1)
+  and count the number of times that the switch closes over a 5 second period.
+  Multiply the requests per second by 1.492 to get the wind speed in miles
+  per hour. Show 5 results.
+  $ yadl --sensor counter --gpio_pin 1 --output csv --num_results 5 \
+  	--sleep_millis_between_results 5000 --counter_multiplier 1.492
+  reading_number,timestamp,num_seen,num_seen_with_multiplier,counts_per_sec,counts_per_sec_with_multiplier
+  0,1465673231,80.0,119.4,16.0,23.9
+  1,1465673236,84.0,125.3,16.8,25.1
+  2,1465673241,76.0,113.4,15.2,22.7
+  3,1465673246,69.0,102.9,13.8,20.6
+  4,1465673251,68.0,101.5,13.6,20.3
+
+  The wind speed in mph is the sixth column labeled
+  counts_per_sec_with_multiplier.
+
+* Hook the wind direction sensor up to an ADC.
+
+  $ yadl --sensor wind_direction --adc mcp3002 --spi_channel 0 \
+	--analog_channel 0 --output csv --num_results 5 \
+	--sleep_millis_between_results 2000 --adc_millivolts 5000
+  reading_number,timestamp,direction,reading,millivolts
+  0,1465673458,180.0,280.0,1367.0
+  1,1465673460,247.5,602.0,2939.0
+  2,1465673462,202.5,239.0,1166.0
+  3,1465673464,180.0,280.0,1367.0
+  4,1465673466,180.0,280.0,1367.0
+
+  The wind direction in degrees is the third column.
+
+* The rain gauge can hooked up to BCM pin 27 (wiringPi pin #2) and count
+  the number of times that the switch closes over a 5 second period. Multiply
+  the number of events seen by 0.2794 to get the number in millimeters.
+
+  $ yadl --sensor counter --gpio_pin 2 --output csv --num_results 5 \
+  	--sleep_millis_between_results 5000 --counter_multiplier 0.2794
+  reading_number,timestamp,num_seen,num_seen_with_multiplier,counts_per_sec,counts_per_sec_with_multiplier
+  0,1465674357,0.0,0.0,0.0,0.0
+  1,1465674362,3.0,0.8,0.6,0.2
+  2,1465674367,2.0,0.6,0.4,0.1
+  3,1465674372,2.0,0.6,0.4,0.1
+  4,1465674377,2.0,0.6,0.4,0.1
+
+  The value in millimeters is the fourth column labeled
+  num_seen_with_multiplier.
+
+When collecting this data long term, the anemometer and the wind direction can
+be ran periodically using a systemd timer. The rain gauage requires the yadl
+program to continuously monitor the sensor. You can run the yadl program with
+the --daemon argument to have it run in the background.
