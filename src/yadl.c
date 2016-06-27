@@ -630,6 +630,9 @@ int main(int argc, char **argv)
 	if (wiringPiSetup() == -1)
 		exit(1);
 
+	if (daemon)
+		_daemonize(&config);
+
 	if (config.sens->init != NULL)
 		config.sens->init(&config);
 
@@ -639,14 +642,6 @@ int main(int argc, char **argv)
 
 		if (output_funcs[output_idx]->write_header != NULL)
 			output_funcs[output_idx]->write_header(output_metadatas[output_idx], &config);
-	}
-
-	if (daemon) {
-		/* don't write duplicate headers to the output file*/
-		for (int output_idx = 0; output_idx < num_output_types; output_idx++) {
-			fflush(output_metadatas[output_idx]->fd);
-		}
-		_daemonize(&config);
 	}
 
 	for (int i = 0; i < config.num_results || config.num_results < 0; i++) {
