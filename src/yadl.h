@@ -91,6 +91,8 @@ struct yadl_config_tag {
 	temperature_unit_converter temperature_converter;
 	char *w1_slave;
 	int analog_scaling_factor;
+	int wind_speed_pin;
+	int rain_gauge_pin;
 };
 
 filter get_filter(char *name);
@@ -99,7 +101,7 @@ outputter *get_outputter(char *name);
 
 sensor analog_sensor_funcs;
 
-sensor wind_direction_sensor_funcs;
+sensor argent_80422_sensor_funcs;
 
 sensor digital_sensor_funcs;
 

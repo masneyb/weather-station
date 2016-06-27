@@ -45,7 +45,7 @@
 
 void usage(void)
 {
-	printf("usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|wind_direction>\n");
+	printf("usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|argent_80422>\n");
 	printf("\t\t[ --gpio_pin <wiringPi pin #. Required for digital sensors.> ]\n");
 	printf("\t\t  See http://wiringpi.com/pins/ to lookup the pin number.\n");
 	printf("\t\t--output <json|yaml|csv|xml|rrd> [ --output <...> ]\n");
@@ -74,6 +74,12 @@ void usage(void)
 	printf("\n");
 	printf("\t\t--adc <see ADC list below. Required for analog>\n");
 	printf("\t\t[ --adc_millivolts <value (default %d)> ]\n", DEFAULT_ADC_MILLIVOLTS);
+	printf("\n");
+	printf("Argent 80422 specific options\n");
+	printf("\n");
+	printf("\t\t--wind_speed_pin <wiringPi pin #.>\n");
+	printf("\t\t--rain_gauage_pin <wiringPi pin #.>\n");
+	printf("\t\tAnalog specific options from above must also be specified for the wind direction.\n");
 	printf("\n");
 	printf("Temperature sensors specific options\n");
 	printf("\t\t--temperature_unit <celsius|fahrenheit|kelvin|rankine>\n");
@@ -406,6 +412,8 @@ int main(int argc, char **argv)
 		{"temperature_unit", required_argument, 0, 0 },
 		{"w1_slave", required_argument, 0, 0 },
 		{"analog_scaling_factor", required_argument, 0, 0 },
+		{"wind_speed_pin", required_argument, 0, 0 },
+		{"rain_gauge_pin", required_argument, 0, 0 },
 		{0, 0, 0, 0 }
 	};
 
@@ -443,6 +451,8 @@ int main(int argc, char **argv)
 	config.interrupt_edge = DEFAULT_INTERRUPT_EDGE;
 	config.adc_millivolts = DEFAULT_ADC_MILLIVOLTS; /* Raspberry Pi GPIO pins are 3.3V */
 	config.analog_scaling_factor = DEFAULT_ANALOG_SCALING_FACTOR;
+	config.wind_speed_pin = -1;
+	config.rain_gauge_pin = -1;
 
 	while ((opt = getopt_long(argc, argv, "", long_options, &long_index)) != -1) {
 		if (opt != 0)
@@ -537,6 +547,12 @@ int main(int argc, char **argv)
 			break;
 		case 27:
 			config.analog_scaling_factor = strtol(optarg, NULL, 10);
+			break;
+		case 28:
+			config.wind_speed_pin = strtol(optarg, NULL, 10);
+			break;
+		case 29:
+			config.rain_gauge_pin = strtol(optarg, NULL, 10);
 			break;
 		default:
 			usage();

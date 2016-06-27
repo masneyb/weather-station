@@ -12,8 +12,8 @@ following features:
   * Supports 4 different temperature and humidity sensors: DHT11, DHT22,
     DS18B20 and TMP36 (analog). Supports multiple temperature units.
   * Supports anemometer, wind direction, and rain gauage for the
-    Argent Data Systems Wind / Rain sensors. Other types of similar sensors
-    should be easily supported.
+    Argent Data Systems 80422 Wind / Rain sensors. Other types of similar
+    sensors should be easily supported.
 * Supports returning the data in JSON, YAML, CSV, XML, and RRD. RRDtool can
   be used to graph the data over time. It also supports writing multiple
   files from a single sensor reading. For example, you may want to write the
@@ -30,7 +30,7 @@ following features:
 
 ## Usage
 
-    usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|wind_direction>
+    usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|argent_80422>
     		[ --gpio_pin <wiringPi pin #. Required for digital sensors.> ]
     		  See http://wiringpi.com/pins/ to lookup the pin number.
     		--output <json|yaml|csv|xml|rrd> [ --output <...> ]
@@ -59,6 +59,12 @@ following features:
     
     		--adc <see ADC list below. Required for analog>
     		[ --adc_millivolts <value (default 3300)> ]
+    
+    Argent 80422 specific options
+    
+    		--wind_speed_pin <wiringPi pin #.>
+    		--rain_gauage_pin <wiringPi pin #.>
+    		Analog specific options from above must also be specified for the wind direction.
     
     Temperature sensors specific options
     		--temperature_unit <celsius|fahrenheit|kelvin|rankine>

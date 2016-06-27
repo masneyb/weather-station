@@ -3,6 +3,22 @@ Assembly
 https://www.argentdata.com/catalog/product_info.php?products_id=145
 https://www.argentdata.com/files/80422_datasheet.pdf
 
+* Read the wind direction, speed and rain gauge values:
+
+    $ yadl --sensor argent_80422 --wind_speed_pin 1 --rain_gauge_pin 2 \
+	--adc mcp3008 --spi_channel 0 --analog_channel 0 \
+	--sleep_millis_between_results 5000 --num_results 5 --output csv 
+    reading_number,timestamp,wind_direction,wind_speed,rain_gauge
+    0,1466985448,135.0,2.4,0.0
+    1,1466985453,135.0,2.4,0.0
+    2,1466985458,135.0,2.4,0.0
+    3,1466985463,135.0,3.0,0.0
+    4,1466985468,135.0,2.7,0.0
+
+
+The wind speed and rain gauge can be read separately using a different method
+if needed.
+
 * Hook the anemometer (wind speed meter) up to BCM pin 18 (wiringPi pin #1)
   and count the number of times that the switch closes over a 5 second period.
   Multiply the requests per second by 1.492 to get the wind speed in miles
@@ -18,20 +34,6 @@ https://www.argentdata.com/files/80422_datasheet.pdf
 
   The wind speed in mph is the sixth column labeled
   counts_per_sec_with_multiplier.
-
-* Hook the wind direction sensor up to an ADC.
-
-  $ yadl --sensor wind_direction --adc mcp3002 --spi_channel 0 \
-	--analog_channel 0 --output csv --num_results 5 \
-	--sleep_millis_between_results 2000 --adc_millivolts 5000
-  reading_number,timestamp,direction,reading,millivolts
-  0,1465673458,180.0,280.0,1367.0
-  1,1465673460,247.5,602.0,2939.0
-  2,1465673462,202.5,239.0,1166.0
-  3,1465673464,180.0,280.0,1367.0
-  4,1465673466,180.0,280.0,1367.0
-
-  The wind direction in degrees is the third column.
 
 * The rain gauge can hooked up to BCM pin 27 (wiringPi pin #2) and count
   the number of times that the switch closes over a 5 second period. Multiply
@@ -49,7 +51,3 @@ https://www.argentdata.com/files/80422_datasheet.pdf
   The value in millimeters is the fourth column labeled
   num_seen_with_multiplier.
 
-When collecting this data long term, the anemometer and the wind direction can
-be ran periodically using a systemd timer. The rain gauage requires the yadl
-program to continuously monitor the sensor. You can run the yadl program with
-the --daemon argument to have it run in the background.

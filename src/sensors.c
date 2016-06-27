@@ -33,8 +33,8 @@ sensor *get_sensor(char *name)
 		return &digital_counter_sensor_funcs;
 	else if (strcmp(name, "analog") == 0)
 		return &analog_sensor_funcs;
-	else if (strcmp(name, "wind_direction") == 0)
-		return &wind_direction_sensor_funcs;
+	else if (strcmp(name, "argent_80422") == 0)
+		return &argent_80422_sensor_funcs;
 	else if (strcmp(name, "dht11") == 0)
 		return &dht11_sensor_funcs;
 	else if (strcmp(name, "dht22") == 0)
