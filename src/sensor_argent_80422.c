@@ -121,16 +121,12 @@ static float _get_wind_direction(int millivolts)
 	return direction;
 }
 
-static float _get_counts_per_sec(int start_counter, int stop_counter, double elapsed_secs)
+static int _get_num_seen(int start_counter, int stop_counter)
 {
-	int num_seen;
 	/* Check to see if the number wrapped */
 	if (stop_counter < start_counter)
-		num_seen = (INT_MAX - start_counter) + stop_counter;
-	else
-		num_seen = stop_counter - start_counter;
-
-	return num_seen / elapsed_secs;
+		return (INT_MAX - start_counter) + stop_counter;
+	return stop_counter - start_counter;
 }
 
 static yadl_result *_argent_80422_read_data(yadl_config *config)
@@ -160,14 +156,15 @@ static yadl_result *_argent_80422_read_data(yadl_config *config)
         _last_time.tv_sec = _current_time.tv_sec;
         _last_time.tv_usec = _current_time.tv_usec;
 
-	float avg_wind_cps = _get_counts_per_sec(start_wind_counter, stop_wind_counter, elapsed_secs);
-	float avg_rain_cps = _get_counts_per_sec(start_rain_counter, stop_rain_counter, elapsed_secs);
-
+	int wind_num_seen = _get_num_seen(start_wind_counter, stop_wind_counter);
+	float avg_wind_cps = wind_num_seen / elapsed_secs;
 	float wind_speed = avg_wind_cps * WIND_SPEED_MULTIPLIER;
-	float rain_gauge = avg_rain_cps * RAIN_GAUGE_MULTIPLIER;
 
-	config->logger("avg_wind_cps=%.1f, wind_speed=%.1f mph, avg_rain_cps=%.1f, rain_gauge=%.1f\n",
-			avg_wind_cps, wind_speed, avg_rain_cps, rain_gauge);
+	int rain_num_seen = _get_num_seen(start_rain_counter, stop_rain_counter);
+	float rain_gauge = rain_num_seen * RAIN_GAUGE_MULTIPLIER;
+
+	config->logger("wind_num_seen=%d, avg_wind_cps=%.1f, wind_speed=%.1f mph, rain_num_seen=%d, rain_gauge=%.1f in\n",
+			wind_num_seen, avg_wind_cps, wind_speed, rain_num_seen, rain_gauge);
 
 	yadl_result *result;
 	result = malloc(sizeof(*result));
