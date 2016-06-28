@@ -69,6 +69,24 @@ static int show_value(yadl_config *config, yadl_result *result)
 	return 1;
 }
 
+/* Don't actually open the file descriptor here. Save the filename
+ * and open it when each result is written.
+ */
+static output_metadata *_open_fd_for_each_result(__attribute__((__unused__)) yadl_config *config,
+					char *outfile)
+{
+	output_metadata *ret = malloc(sizeof(*ret));
+	ret->outfile = outfile;
+
+	if (outfile == NULL) {
+		ret->fd = stdout;
+		return ret;
+	}
+
+	ret->fd = NULL;
+	return ret;
+}
+
 static output_metadata *_open_fd(yadl_config *config, char *outfile)
 {
 	output_metadata *ret = malloc(sizeof(*ret));
@@ -104,12 +122,12 @@ static void _close_fd(output_metadata *meta, __attribute__((__unused__)) yadl_co
 	}
 }
 
-static void _write_json_header(output_metadata *meta, __attribute__((__unused__)) yadl_config *config)
+static void _write_multi_json_header(output_metadata *meta, __attribute__((__unused__)) yadl_config *config)
 {
 	fprintf(meta->fd, "{ \"result\": [ ");
 }
 
-static void _write_json(output_metadata *meta, int reading_number, yadl_result *result, yadl_config *config)
+static void _write_multi_json(output_metadata *meta, int reading_number, yadl_result *result, yadl_config *config)
 {
 	if (!show_value(config, result))
 		return;
@@ -127,9 +145,47 @@ static void _write_json(output_metadata *meta, int reading_number, yadl_result *
 		fprintf(meta->fd, ",\n");
 }
 
-static void _write_json_footer(output_metadata *meta)
+static void _write_multi_json_footer(output_metadata *meta)
 {
 	fprintf(meta->fd, " ] }\n");
+}
+
+/* This format is useful if you want to run yadl in daemon mode and have it
+ * write the values to a RRD database and the current values to a separate
+ * JSON file that can be consumed by a web service. The multi_json format
+ * will write out all of the values that were read while running in daemon
+ * mode.
+ */
+static void _write_single_json(output_metadata *meta, __attribute__((__unused__)) int reading_number,
+				yadl_result *result, yadl_config *config)
+{
+	if (!show_value(config, result))
+		return;
+
+	if (meta->outfile != NULL) {
+		meta->fd = fopen(meta->outfile, "w");
+		if (meta->fd == NULL) {
+			fprintf(stderr, "Error opening %s: %s\n", meta->outfile, strerror(errno));
+			exit(1);
+		}
+	}
+
+	fprintf(meta->fd, "{ \"result\": [ {");
+
+	char **header_names = config->sens->get_value_header_names(config);
+	for (int i = 0; header_names[i] != NULL; i++) {
+		fprintf(meta->fd, " \"%s\": %.1f,", header_names[i], result->value[i]);
+	}
+
+	fprintf(meta->fd, " \"timestamp\": %ld } ] }", _get_current_timestamp());
+
+	if (meta->outfile != NULL) {
+		if (fclose(meta->fd) < 0) {
+			fprintf(stderr, "Error closing %s: %s\n", meta->outfile, strerror(errno));
+			exit(1);
+		}
+		meta->fd = NULL;
+	}
 }
 
 static void _write_yaml_header(output_metadata *meta, __attribute__((__unused__)) yadl_config *config)
@@ -233,12 +289,19 @@ static void _write_xml_footer(output_metadata *meta)
 	fprintf(meta->fd, "</results>\n");
 }
 
-static outputter _json_output_funcs = {
+static outputter _multi_json_output_funcs = {
 	.open = &_open_fd,
-	.write_header = &_write_json_header,
-	.write_result = &_write_json,
-	.write_footer = &_write_json_footer,
+	.write_header = &_write_multi_json_header,
+	.write_result = &_write_multi_json,
+	.write_footer = &_write_multi_json_footer,
 	.close = &_close_fd
+};
+static outputter _single_json_output_funcs = {
+	.open = &_open_fd_for_each_result,
+	.write_header = NULL,
+	.write_result = &_write_single_json,
+	.write_footer = NULL,
+	.close = NULL
 };
 static outputter _yaml_output_funcs = {
 	.open = &_open_fd,
@@ -274,7 +337,9 @@ outputter *get_outputter(char *name)
 	if (name == NULL)
 		return NULL;
 	else if (strcmp(name, "json") == 0)
-		return &_json_output_funcs;
+		return &_multi_json_output_funcs;
+	else if (strcmp(name, "single_json") == 0)
+		return &_single_json_output_funcs;
 	else if (strcmp(name, "yaml") == 0)
 		return &_yaml_output_funcs;
 	else if (strcmp(name, "csv") == 0)

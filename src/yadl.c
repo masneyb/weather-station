@@ -48,7 +48,7 @@ void usage(void)
 	printf("usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|argent_80422>\n");
 	printf("\t\t[ --gpio_pin <wiringPi pin #. Required for digital sensors.> ]\n");
 	printf("\t\t  See http://wiringpi.com/pins/ to lookup the pin number.\n");
-	printf("\t\t--output <json|yaml|csv|xml|rrd> [ --output <...> ]\n");
+	printf("\t\t--output <json|yaml|csv|xml|rrd|single_json> [ --output <...> ]\n");
 	printf("\t\t[ --outfile <optional output filename. Defaults to stdout> [ --outfile <...> ] ]\n");
 	printf("\t\t[ --only_log_value_changes ]\n");
 	printf("\t\t[ --num_results <# results returned (default %d). Set to -1 to poll indefinitely.> ]\n", DEFAULT_NUM_RESULTS);
@@ -661,7 +661,8 @@ int main(int argc, char **argv)
 		if (output_funcs[output_idx]->write_footer != NULL)
 			output_funcs[output_idx]->write_footer(output_metadatas[output_idx]);
 
-		output_funcs[output_idx]->close(output_metadatas[output_idx], &config);
+		if (output_funcs[output_idx]->close != NULL)
+			output_funcs[output_idx]->close(output_metadatas[output_idx], &config);
 	}
 
 	close_logger(logfile);
