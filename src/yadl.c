@@ -55,7 +55,7 @@ void usage(void)
 	printf("\t\t[ --sleep_millis_between_results <milliseconds (default %d)> ]\n", DEFAULT_SLEEP_MILLIS_BETWEEN_RESULTS);
 	printf("\t\t[ --num_samples_per_result <# samples (default %d). See --filter for aggregation.> ]\n", DEFAULT_NUM_SAMPLES_PER_RESULT);
 	printf("\t\t[ --sleep_millis_between_samples <milliseconds (default %d)> ]\n", DEFAULT_SLEEP_MILLIS_BETWEEN_SAMPLES);
-	printf("\t\t[ --filter <median|mean|mode|min|max|range (default median)> ]\n");
+	printf("\t\t[ --filter <median|mean|mode|sum|min|max|range (default median)> ]\n");
 	printf("\t\t[ --remove_n_samples_from_ends <# samples (default %d)> ]\n", DEFAULT_REMOVE_N_SAMPLES_FROM_ENDS);
 	printf("\t\t[ --max_retries <# retries (default %d)> ]\n", DEFAULT_MAX_RETRIES);
 	printf("\t\t[ --sleep_millis_between_retries <milliseconds (default %d)> ]\n", DEFAULT_SLEEP_MILLIS_BETWEEN_RETRIES);

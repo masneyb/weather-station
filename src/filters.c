@@ -34,6 +34,15 @@ static int _list_len(float_node *list)
 	return ret;
 }
 
+float sum_filter(float_node *list)
+{
+	float sum = 0.0;
+
+	for (float_node *node = list; node != NULL; node = node->next)
+		sum += node->value;
+	return sum;
+}
+
 float min_filter(float_node *list)
 {
 	return list->value;
@@ -70,10 +79,7 @@ float median_filter(float_node *list)
 
 float mean_filter(float_node *list)
 {
-	float sum = 0.0;
-
-	for (float_node *node = list; node != NULL; node = node->next)
-		sum += node->value;
+	float sum = sum_filter(list);
 
 	return sum / _list_len(list);
 }
@@ -124,6 +130,8 @@ filter get_filter(char *name)
 		return &range_filter;
 	else if (strcmp(name, "mode") == 0)
 		return &mode_filter;
+	else if (strcmp(name, "sum") == 0)
+		return &sum_filter;
 
 	fprintf(stderr, "Unknown filter '%s'\n", name);
 	return NULL;
