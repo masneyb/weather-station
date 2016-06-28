@@ -34,7 +34,7 @@ static int _list_len(float_node *list)
 	return ret;
 }
 
-float sum_filter(float_node *list)
+static float sum_filter(float_node *list)
 {
 	float sum = 0.0;
 
@@ -43,12 +43,12 @@ float sum_filter(float_node *list)
 	return sum;
 }
 
-float min_filter(float_node *list)
+static float min_filter(float_node *list)
 {
 	return list->value;
 }
 
-float max_filter(float_node *list)
+static float max_filter(float_node *list)
 {
 	float_node *curval = list;
 
@@ -58,7 +58,7 @@ float max_filter(float_node *list)
 }
 
 /* Return the difference between the maximum and minimum number */
-float range_filter(float_node *list)
+static float range_filter(float_node *list)
 {
 	float min = min_filter(list);
 	float max = max_filter(list);
@@ -66,7 +66,7 @@ float range_filter(float_node *list)
 	return max - min;
 }
 
-float median_filter(float_node *list)
+static float median_filter(float_node *list)
 {
 	float_node *curval = list;
 
@@ -77,7 +77,7 @@ float median_filter(float_node *list)
 	return curval->value;
 }
 
-float mean_filter(float_node *list)
+static float mean_filter(float_node *list)
 {
 	float sum = sum_filter(list);
 
@@ -87,7 +87,7 @@ float mean_filter(float_node *list)
 /* Return the number that occurs the most number of times. Fallback to the
  *  mean if no numbers appear more than once.
  */
-float mode_filter(float_node *list)
+static float mode_filter(float_node *list)
 {
 	float cur_number = list->value;
 	float cur_count = 0;
