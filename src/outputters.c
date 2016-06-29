@@ -136,7 +136,7 @@ static void _write_multi_json(output_metadata *meta, int reading_number, yadl_re
 
 	char **header_names = config->sens->get_value_header_names(config);
 	for (int i = 0; header_names[i] != NULL; i++) {
-		fprintf(meta->fd, " \"%s\": %.1f,", header_names[i], result->value[i]);
+		fprintf(meta->fd, " \"%s\": %.2f,", header_names[i], result->value[i]);
 	}
 
 	fprintf(meta->fd, " \"timestamp\": %ld }", _get_current_timestamp());
@@ -174,7 +174,7 @@ static void _write_single_json(output_metadata *meta, __attribute__((__unused__)
 
 	char **header_names = config->sens->get_value_header_names(config);
 	for (int i = 0; header_names[i] != NULL; i++) {
-		fprintf(meta->fd, " \"%s\": %.1f,", header_names[i], result->value[i]);
+		fprintf(meta->fd, " \"%s\": %.2f,", header_names[i], result->value[i]);
 	}
 
 	fprintf(meta->fd, " \"timestamp\": %ld } ] }", _get_current_timestamp());
@@ -201,7 +201,7 @@ static void _write_yaml(output_metadata *meta, __attribute__((__unused__)) int r
 
 	char **header_names = config->sens->get_value_header_names(config);
 	for (int i = 0; header_names[i] != NULL; i++) {
-		fprintf(meta->fd, "%c %s: %.1f\n", i == 0 ? '-' : ' ', header_names[i], result->value[i]);
+		fprintf(meta->fd, "%c %s: %.2f\n", i == 0 ? '-' : ' ', header_names[i], result->value[i]);
 	}
 	fprintf(meta->fd, "  timestamp: %ld\n",
 		_get_current_timestamp());
@@ -229,7 +229,7 @@ static void _write_csv(output_metadata *meta, int reading_number,
 
 	char **header_names = config->sens->get_value_header_names(config);
 	for (int i = 0; header_names[i] != NULL; i++) {
-		fprintf(meta->fd, ",%.1f", result->value[i]);
+		fprintf(meta->fd, ",%.2f", result->value[i]);
 	}
 	fprintf(meta->fd, "\n");
 }
@@ -278,7 +278,7 @@ static void _write_xml(output_metadata *meta, __attribute__((__unused__)) int re
 
 	char **header_names = config->sens->get_value_header_names(config);
 	for (int i = 0; header_names[i] != NULL; i++) {
-		fprintf(meta->fd, "<%s>%.1f</%s>", header_names[i], result->value[i], header_names[i]);
+		fprintf(meta->fd, "<%s>%.2f</%s>", header_names[i], result->value[i], header_names[i]);
 	}
 
 	fprintf(meta->fd, "</result>\n");
