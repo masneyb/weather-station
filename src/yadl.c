@@ -253,18 +253,6 @@ static float_node *_add_sample_to_sorted_list(float value, float_node *list)
 	return list;
 }
 
-static void _free_list(float_node *list)
-{
-	float_node *val = list;
-
-	while (val != NULL) {
-		float_node *nextval = val->next;
-
-		free(val);
-		val = nextval;
-	}
-}
-
 static void _dump_list(char *description, float_node *list, yadl_config *config)
 {
 	config->logger("%s: Sorted values are:", description);
@@ -288,14 +276,14 @@ static float_node *_remove_outliers(float_node *list, yadl_config *config)
 	}
 
 	/* Chop off the end of the list */
-	_free_list(cur->next);
+	free_list(cur->next);
 	cur->next = NULL;
 
 	/* Chop off the head of the list */
 	float_node *new_head_of_list = last_node_on_head_of_list->next;
 
 	last_node_on_head_of_list->next = NULL;
-	_free_list(list);
+	free_list(list);
 
 	return new_head_of_list;
 }
@@ -334,7 +322,7 @@ static yadl_result *_perform_all_readings(yadl_config *config)
 	result->value = malloc(sizeof(float) * num_values);
 	for (int num = 0; num < num_values; num++) {
 		result->value[num] = config->filter_func(value_list[num]);
-		_free_list(value_list[num]);
+		free_list(value_list[num]);
 	}
 	free(value_list);
 

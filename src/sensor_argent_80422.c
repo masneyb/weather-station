@@ -129,6 +129,36 @@ static int _get_num_seen(int start_counter, int stop_counter)
 	return stop_counter - start_counter;
 }
 
+static void _argent_80422_rain_gauge_total(float_node **list, int *num_samples, int interval_millis, float rain_gauge_cur, yadl_config *config)
+{
+	if (*num_samples == 0) {
+		*list = new_list_node(rain_gauge_cur);
+		*num_samples = 1;
+		return;
+	}
+	else if (interval_millis < config->sleep_millis_between_results) {
+		(*list)->value = rain_gauge_cur;
+		return;
+	}
+
+	/* Add the new sample to the end of the list */
+	float_node *last_list_node = list_last_node(*list);
+	last_list_node->next = new_list_node(rain_gauge_cur);
+
+	/* Remove the first sample if needed */
+	int num_samples_to_keep = interval_millis / config->sleep_millis_between_results;
+	if (*num_samples == num_samples_to_keep) {
+		float_node *del_node = *list;
+		*list = (*list)->next;
+		free(del_node);
+	}
+	else {
+		(*num_samples)++;
+	}
+	config->logger("rain gauge list: num_samples=%d, interval_millis=%d, num_samples_to_keep=%d\n",
+			*num_samples, interval_millis, num_samples_to_keep);
+}
+
 static yadl_result *_argent_80422_read_data(yadl_config *config)
 {
 	/* Poll wind direction */
@@ -163,19 +193,36 @@ static yadl_result *_argent_80422_read_data(yadl_config *config)
 	int rain_num_seen = _get_num_seen(start_rain_counter, stop_rain_counter);
 	float rain_gauge = rain_num_seen * RAIN_GAUGE_MULTIPLIER;
 
-	config->logger("wind_num_seen=%d, avg_wind_cps=%.1f, wind_speed=%.1f mph, rain_num_seen=%d, rain_gauge=%.1f in\n",
-			wind_num_seen, avg_wind_cps, wind_speed, rain_num_seen, rain_gauge);
+	_argent_80422_rain_gauge_total(&config->rain_gauge_30m, &config->num_rain_gauge_30m_samples,
+					1800000, rain_gauge, config);
+	_argent_80422_rain_gauge_total(&config->rain_gauge_6h, &config->num_rain_gauge_6h_samples,
+					21600000, rain_gauge, config);
+	_argent_80422_rain_gauge_total(&config->rain_gauge_24h, &config->num_rain_gauge_24h_samples,
+					86400000, rain_gauge, config);
 
 	yadl_result *result;
 	result = malloc(sizeof(*result));
-	result->value = malloc(sizeof(float) * 3);
+	result->value = malloc(sizeof(float) * 6);
 	result->value[0] = wind_direction;
 	result->value[1] = wind_speed;
 	result->value[2] = rain_gauge;
+	result->value[3] = list_sum(config->rain_gauge_30m);
+	result->value[4] = list_sum(config->rain_gauge_6h);
+	result->value[5] = list_sum(config->rain_gauge_24h);
+
+	config->logger("wind_num_seen=%d, avg_wind_cps=%.1f, wind_speed=%.1f mph\n",
+			wind_num_seen, avg_wind_cps, wind_speed);
+
+	config->logger("rain_num_seen=%d, rain_gauge (in): cur=%.1f, 30m=%.1f, 6h=%.1f, 24h=%.1f\n",
+			rain_num_seen, rain_gauge, result->value[3], result->value[4],
+			result->value[5]);
+
 	return result;
 }
 
-static char * _argent_80422_value_header_names[] = { "wind_direction", "wind_speed", "rain_gauge", NULL };
+static char * _argent_80422_value_header_names[] = { "wind_direction", "wind_speed", "rain_gauge_cur",
+							"rain_gauge_30m", "rain_gauge_6h", "rain_gauge_24h",
+							NULL };
 
 static char ** _argent_80422_get_value_header_names(__attribute__((__unused__)) yadl_config *config)
 {

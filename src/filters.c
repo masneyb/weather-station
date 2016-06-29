@@ -25,24 +25,6 @@
 #include <string.h>
 #include "yadl.h"
 
-static int _list_len(float_node *list)
-{
-	int ret = 0;
-
-	for (float_node *node = list; node != NULL; node = node->next)
-		ret++;
-	return ret;
-}
-
-static float sum_filter(float_node *list)
-{
-	float sum = 0.0;
-
-	for (float_node *node = list; node != NULL; node = node->next)
-		sum += node->value;
-	return sum;
-}
-
 static float min_filter(float_node *list)
 {
 	return list->value;
@@ -70,7 +52,7 @@ static float median_filter(float_node *list)
 {
 	float_node *curval = list;
 
-	int median_pos = _list_len(list) / 2;
+	int median_pos = list_len(list) / 2;
 
 	for (int i = 0; i < median_pos; i++)
 		curval = curval->next;
@@ -79,9 +61,9 @@ static float median_filter(float_node *list)
 
 static float mean_filter(float_node *list)
 {
-	float sum = sum_filter(list);
+	float sum = list_sum(list);
 
-	return sum / _list_len(list);
+	return sum / list_len(list);
 }
 
 /* Return the number that occurs the most number of times. Fallback to the
@@ -131,7 +113,7 @@ filter get_filter(char *name)
 	else if (strcmp(name, "mode") == 0)
 		return &mode_filter;
 	else if (strcmp(name, "sum") == 0)
-		return &sum_filter;
+		return &list_sum;
 
 	fprintf(stderr, "Unknown filter '%s'\n", name);
 	return NULL;

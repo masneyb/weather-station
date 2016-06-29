@@ -20,18 +20,12 @@
  */
 
 #include <stdio.h>
+#include "float_list.h"
 #include "loggers.h"
 
 typedef struct yadl_result_tag {
 	float *value;
 } yadl_result;
-
-typedef struct float_node_tag float_node;
-
-struct float_node_tag {
-	float value;
-	float_node *next;
-};
 
 typedef struct yadl_config_tag yadl_config;
 
@@ -93,6 +87,15 @@ struct yadl_config_tag {
 	int analog_scaling_factor;
 	int wind_speed_pin;
 	int rain_gauge_pin;
+
+	float_node *rain_gauge_30m;
+	int num_rain_gauge_30m_samples;
+
+	float_node *rain_gauge_6h;
+	int num_rain_gauge_6h_samples;
+
+	float_node *rain_gauge_24h;
+	int num_rain_gauge_24h_samples;
 };
 
 filter get_filter(char *name);
