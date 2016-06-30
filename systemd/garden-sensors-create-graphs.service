@@ -1,0 +1,7 @@
+[Unit]
+Description=Garden sensors graph creator
+
+[Service]
+User=masneyb
+Type=simple
+ExecStart=/home/masneyb/data/garden-sensors/bin/create-graphs.sh

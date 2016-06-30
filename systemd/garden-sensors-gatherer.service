@@ -1,0 +1,7 @@
+[Unit]
+Description=Garden sensors data gatherer
+
+[Service]
+User=root
+Type=simple
+ExecStart=/home/masneyb/data/garden-sensors/bin/gather-data.sh
