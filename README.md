@@ -1,6 +1,6 @@
 # weather-station
 
-A weather station with the following sensors that runs on a Raspberry Pi:
+A weather station for the Raspberry Pi that supports the following sensors:
 
 - [Argent Data Systems Weather Sensor Assembly](https://www.sparkfun.com/products/8942) -
   Supports wind direction, wind speed, and rain gauge.
