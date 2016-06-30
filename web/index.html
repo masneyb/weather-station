@@ -1,0 +1,67 @@
+<html>
+<head>
+  <meta charset="UTF-8"/>
+  <meta http-equiv="cache-control" content="no-cache"/>
+  <meta http-equiv="refresh" content="3600"/>
+  <title>Outside Weather</title>
+  <style>
+    h2 { text-align: center; }
+    .graph { width: 481px; float: left; padding: 10px; }
+    #wind_direction { width: 60px; height: 60px; text-align: center; vertical-align: middle; line-height: 60px; }
+    td, th { padding-left: 50px; padding-right: 50px; }
+    th { color: #777; }
+    #temperature { font-size: 120%; font-weight: bold; }
+  </style>
+  <script src="scripts/jquery.min.js"></script>
+  <script>
+    function update_stats() {
+      $.getJSON("wind_rain.json", function(data) {
+        $('#wind_direction').text(data.result[0].wind_speed.toFixed(1));
+        $('#wind_direction').css("background-image", "url(\"images/wind-" + data.result[0].wind_direction + ".png\")");
+        $('#rain_30m').text(data.result[0].rain_gauge_30m);
+        $('#rain_6h').text(data.result[0].rain_gauge_6h);
+        $('#rain_24h').text(data.result[0].rain_gauge_24h);
+      });
+
+      $.getJSON("temperature.json", function(data) {
+        $('#temperature_number').text(data.result[0].temperature.toFixed(1));
+      });
+    }
+
+    $(document).ready(function() {
+      update_stats();
+      window.setInterval(update_stats, 10000);
+    });
+  </script>
+</head>
+
+<body>
+  <table>
+    <tr>
+      <th>Temperature</th>
+      <th>Wind</th>
+      <th>Rain</th>
+    </tr>
+    <tr>
+      <td>
+        <div id="temperature"><span id="temperature_number"></span> F</div>
+      </td>
+      <td>
+        <div id="wind_direction"></div>
+      </td>
+      <td>
+        <div>Last 30 minutes: <span id="rain_30m"></span> in</div>
+        <div>Last 6 hours: <span id="rain_6h"></span> in</div>
+        <div>Last 24 hours: <span id="rain_24h"></span> in</div>
+      </td>
+    </tr>
+  </table>
+
+  <div>
+    <div class="graph"><img src="temperature_daily.png"/></div>
+    <div class="graph"><img src="wind_speed_daily.png"/></div>
+    <div class="graph"><img src="wind_direction_daily.png"/></div>
+    <div class="graph"><img src="rain_gauge_daily.png"/></div>
+  </div>
+</body>
+</html>
