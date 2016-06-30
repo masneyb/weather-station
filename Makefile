@@ -6,13 +6,13 @@ install:
 	cp -v systemd/* /etc/systemd/system/
 	systemctl daemon-reload
 
-	systemctl start garden-sensors-gatherer.service
-	systemctl start garden-sensors-gatherer.timer
-	systemctl enable garden-sensors-gatherer.timer
+	systemctl start weather-station-gatherer.service
+	systemctl start weather-station-gatherer.timer
+	systemctl enable weather-station-gatherer.timer
 
-	systemctl start garden-sensors-create-graphs.service
-	systemctl start garden-sensors-create-graphs.timer
-	systemctl enable garden-sensors-create-graphs.timer
+	systemctl start weather-station-create-graphs.service
+	systemctl start weather-station-create-graphs.timer
+	systemctl enable weather-station-create-graphs.timer
 
 	systemctl start argent-80422-gatherer.service
 	systemctl enable argent-80422-gatherer.service

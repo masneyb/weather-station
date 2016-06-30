@@ -5,7 +5,7 @@ After=network.target network-online.target multi-user.target
 
 [Service]
 User=root
-ExecStart=/home/masneyb/data/pi-yadl/bin/yadl --sensor argent_80422 --wind_speed_pin 1 --rain_gauge_pin 2 --adc mcp3008 --spi_channel 0 --analog_channel 0 --sleep_millis_between_results 30000 --num_results -1 --output rrd --outfile /home/masneyb/data/garden-sensors/web/argent_80422.rrd --output single_json --outfile /home/masneyb/data/garden-sensors/web/wind_rain.json --debug
+ExecStart=/home/masneyb/data/pi-yadl/bin/yadl --sensor argent_80422 --wind_speed_pin 1 --rain_gauge_pin 2 --adc mcp3008 --spi_channel 0 --analog_channel 0 --sleep_millis_between_results 30000 --num_results -1 --output rrd --outfile /home/masneyb/data/weather-station/web/argent_80422.rrd --output single_json --outfile /home/masneyb/data/weather-station/web/wind_rain.json
 
 [Install]
 WantedBy=multi-user.target

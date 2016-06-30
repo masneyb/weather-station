@@ -4,4 +4,4 @@ Description=Garden sensors data gatherer
 [Service]
 User=root
 Type=simple
-ExecStart=/home/masneyb/data/garden-sensors/bin/gather-data.sh
+ExecStart=/home/masneyb/data/weather-station/bin/gather-data.sh
