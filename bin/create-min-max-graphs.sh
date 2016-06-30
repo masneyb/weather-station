@@ -19,14 +19,17 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
 # 02110-1301, USA.
 
-BASE_NAME="${1:-}"
-DESCRIPTION="${2:-}"
-if [ "${BASE_NAME}" = "" ] || [ "${DESCRIPTION}" = "" ] ; then
-	echo "usage: $0 <path to RRD file without .rrd extension> <description or location for graph title>" >&2
+RRD_FILE="${1:-}"
+RRD_FIELD="${2:-}"
+BASE_NAME="${3:-}"
+DESCRIPTION="${4:-}"
+if [ "${RRD_FILE}" = "" ] || [ "${RRD_FIELD}" = "" ] ||
+	[ "${BASE_NAME}" = "" ] || [ "${DESCRIPTION}" = "" ] ; then
+	echo "usage: $0 <path to RRD file> <RRD field name> <base path of created resources> <description or location for graph title>" >&2
 	exit 1
 fi
 
-RRDFILE="${BASE_NAME}".rrd
+RRDFILE="${RRD_FILE}"
 INDEX_HTML="${BASE_NAME}.html"
 
 create_graph()
@@ -39,11 +42,11 @@ create_graph()
 	rrdtool graph "${OUTFILE}" \
 		--start "-${SCALE}" \
 		--title "${GRAPH_TITLE}" \
-		DEF:valuemax="${RRDFILE}":value:MAX \
-		DEF:valuemin="${RRDFILE}":value:MIN \
-		AREA:valuemax#FF0000:"Max Reading" \
-		AREA:valuemin#FFFF00:"Min Reading" \
-		GPRINT:valuemax:LAST:"Last Reading %2.1lf"
+		DEF:"${RRD_FIELD}"max="${RRDFILE}":"${RRD_FIELD}":MAX \
+		DEF:"${RRD_FIELD}"min="${RRDFILE}":"${RRD_FIELD}":MIN \
+		AREA:"${RRD_FIELD}"max#FF0000:"Max Reading" \
+		AREA:"${RRD_FIELD}"min#FFFF00:"Min Reading" \
+		GPRINT:"${RRD_FIELD}"max:LAST:"Last Reading %2.1lf"
 
 	# Add the graph to the HTML file
 	BASENAME=$(basename "${OUTFILE}")
