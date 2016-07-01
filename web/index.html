@@ -15,7 +15,7 @@
   <script src="scripts/jquery.min.js"></script>
   <script>
     function update_stats() {
-      $.getJSON("wind_rain.json", function(data) {
+      $.getJSON("argent_80422.json", function(data) {
         $('#wind_direction').text(data.result[0].wind_speed.toFixed(1));
         $('#wind_direction').css("background-image", "url(\"images/wind-" + data.result[0].wind_direction + ".png\")");
         $('#rain_30m').text(data.result[0].rain_gauge_30m);
