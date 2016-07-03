@@ -29,55 +29,71 @@
 #include "rrd_common.h"
 #include "yadl.h"
 
-static void _create_rrd_database(logger log, char *rrd_database, char **names)
+static void _create_rrd_database(char *rrd_database, char **names)
 {
-	char **create_params;
+	printf("Error: The RRD database %s does not exist. Please manually\n", rrd_database);
+	printf("create this first with your desired parameters. If you would like to poll every\n");
+	printf("30 seconds, then you may want to consider creating a database with this command:\n");
+	printf("\n");
 
-	log("Creating RRD database %s\n", rrd_database);
+	printf("\trrdtool create %s \\\n", rrd_database);
+	printf("\t\t--start N --step 30 \\\n");
 
 	int num_headers = 0;
 	for (; names[num_headers] != NULL; num_headers++);
 
-	void **to_free = malloc(sizeof(void *) * num_headers);
-
-	int argc = 16 + num_headers;
-	int i = 0;
-
-	create_params = malloc(sizeof(char *) * (argc + 1));
-
-	create_params[i++] = "rrdcreate";
-	create_params[i++] = rrd_database;
-	create_params[i++] = "--start";
-	create_params[i++] = "N";
-	create_params[i++] = "--step";
-	create_params[i++] = "300";
-
 	for (int j = 0; j < num_headers; j++) {
-		char *buf = malloc(100);
-		snprintf(buf, 100, "DS:%s:GAUGE:600:U:U", names[j]);
-		create_params[i++] = buf;
-		to_free[j] = buf;
+		printf("\t\tDS:%s:GAUGE:600:U:U \\\n", names[j]);
 	}
 
-	create_params[i++] = "RRA:MIN:0.5:1:12";
-	create_params[i++] = "RRA:MIN:0.5:1:288";
-	create_params[i++] = "RRA:MIN:0.5:12:168";
-	create_params[i++] = "RRA:MIN:0.5:12:720";
-	create_params[i++] = "RRA:MIN:0.5:288:365";
-	create_params[i++] = "RRA:MAX:0.5:1:12";
-	create_params[i++] = "RRA:MAX:0.5:1:288";
-	create_params[i++] = "RRA:MAX:0.5:12:168";
-	create_params[i++] = "RRA:MAX:0.5:12:720";
-	create_params[i++] = "RRA:MAX:0.5:288:365";
-	create_params[i++] = NULL;
+	printf("\t\tRRA:MIN:0.5:1:120 \\\n");
+	printf("\t\tRRA:MIN:0.5:2:120 \\\n");
+	printf("\t\tRRA:MIN:0.5:4:120 \\\n");
+	printf("\t\tRRA:MIN:0.5:10:288 \\\n");
+	printf("\t\tRRA:MIN:0.5:20:1008 \\\n");
+	printf("\t\tRRA:MIN:0.5:60:1440 \\\n");
+	printf("\t\tRRA:MIN:0.5:80:3240 \\\n");
+	printf("\t\tRRA:MIN:0.5:100:5184 \\\n");
+	printf("\t\tRRA:MIN:0.5:120:8760 \\\n");
+	printf("\t\tRRA:MIN:0.5:240:8760 \\\n");
+	printf("\t\tRRA:MIN:0.5:360:8760 \\\n");
 
-	rrd_clear_error();
-	rrd_create(argc, create_params);
+	printf("\t\tRRA:MAX:0.5:1:120 \\\n");
+	printf("\t\tRRA:MAX:0.5:2:120 \\\n");
+	printf("\t\tRRA:MAX:0.5:4:120 \\\n");
+	printf("\t\tRRA:MAX:0.5:10:288 \\\n");
+	printf("\t\tRRA:MAX:0.5:20:1008 \\\n");
+	printf("\t\tRRA:MAX:0.5:60:1440 \\\n");
+	printf("\t\tRRA:MAX:0.5:80:3240 \\\n");
+	printf("\t\tRRA:MAX:0.5:100:5184 \\\n");
+	printf("\t\tRRA:MAX:0.5:120:8760 \\\n");
+	printf("\t\tRRA:MAX:0.5:240:8760 \\\n");
+	printf("\t\tRRA:MAX:0.5:360:8760\n");
+	printf("\n");
+
+	printf("A different solution when polling every 5 minutes and keeping less data\n");
+	printf("would be:\n");
+	printf("\n");
+
+	printf("\trrdtool create %s \\\n", rrd_database);
+	printf("\t\t--start N --step 300 \\\n");
 
 	for (int j = 0; j < num_headers; j++) {
-		free(to_free[j]);
+		printf("\t\tDS:%s:GAUGE:600:U:U \\\n", names[j]);
 	}
-	free(to_free);
+
+	printf("\t\tRRA:MIN:0.5:1:288 \\\n");
+	printf("\t\tRRA:MIN:0.5:12:720 \\\n");
+	printf("\t\tRRA:MIN:0.5:288:365 \\\n");
+
+	printf("\t\tRRA:MAX:0.5:1:288 \\\n");
+	printf("\t\tRRA:MAX:0.5:12:720 \\\n");
+	printf("\t\tRRA:MAX:0.5:288:365\n");
+
+	printf("\n");
+	printf("See https://stackoverflow.com/questions/15774423/how-set-rrd-to-store-for-2-years for\n");
+	printf("more details.\n");
+	exit(1);
 }
 
 void write_to_rrd_database(logger log, char *rrd_database, char **names, float *values)
@@ -92,7 +108,7 @@ void write_to_rrd_database(logger log, char *rrd_database, char **names, float *
 	};
 
 	if (stat(rrd_database, &st) == -1)
-		_create_rrd_database(log, rrd_database, names);
+		_create_rrd_database(rrd_database, names);
 
 	snprintf(update_buf, sizeof(update_buf), "N");
 	for (int i = 0; names[i] != NULL; i++) {
