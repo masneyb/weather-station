@@ -33,20 +33,32 @@
 #define RAIN_GAUGE_MULTIPLIER 0.011
 #define WIND_SPEED_MULTIPLIER 1.492
 
+static volatile unsigned int _wind_last_millis = 0;
 static volatile int _wind_current_counter = 0;
-static volatile int _rain_current_counter = 0;
 static int _wind_last_counter = 0;
+
+static volatile unsigned int _rain_last_millis = 0;
+static volatile int _rain_current_counter = 0;
 static int _rain_last_counter = 0;
+
 static struct timeval _last_time;
 
 static void _wind_speed_handler(void)
 {
-        _wind_current_counter++;
+	unsigned int cur_millis = millis();
+	if (cur_millis - _wind_last_millis > 10) {
+		_wind_current_counter++;
+		_wind_last_millis = cur_millis;
+	}
 }
 
 static void _rain_gauge_handler(void)
 {
-        _rain_current_counter++;
+	unsigned int cur_millis = millis();
+	if (cur_millis - _rain_last_millis > 10) {
+	        _rain_current_counter++;
+		_rain_last_millis = cur_millis;
+	}
 }
 
 static void _argent_80422_init(yadl_config *config)
