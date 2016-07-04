@@ -33,14 +33,14 @@ following features:
     usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|argent_80422>
     		[ --gpio_pin <wiringPi pin #. Required for digital sensors.> ]
     		  See http://wiringpi.com/pins/ to lookup the pin number.
-    		--output <json|yaml|csv|xml|rrd> [ --output <...> ]
+    		--output <json|yaml|csv|xml|rrd|single_json> [ --output <...> ]
     		[ --outfile <optional output filename. Defaults to stdout> [ --outfile <...> ] ]
     		[ --only_log_value_changes ]
     		[ --num_results <# results returned (default 1). Set to -1 to poll indefinitely.> ]
     		[ --sleep_millis_between_results <milliseconds (default 0)> ]
     		[ --num_samples_per_result <# samples (default 1). See --filter for aggregation.> ]
     		[ --sleep_millis_between_samples <milliseconds (default 0)> ]
-    		[ --filter <median|mean|mode|min|max|range (default median)> ]
+    		[ --filter <median|mean|mode|sum|min|max|range (default median)> ]
     		[ --remove_n_samples_from_ends <# samples (default 0)> ]
     		[ --max_retries <# retries (default 10)> ]
     		[ --sleep_millis_between_retries <milliseconds (default 500)> ]
@@ -101,7 +101,7 @@ following features:
     
     * Poll a DHT22 temperature sensor on BCM pin 17 (wiringPi pin 0) as JSON.
       $ sudo yadl --gpio_pin 0 --sensor dht22 --temperature_unit fahrenheit --output json
-      { "result": [  { "temperature": 63.9, "humidity": 49.0, "timestamp": 1465605522 } ] }
+      { "result": [  { "temperature": 68.18, "humidity": 55.30, "dew_point": 51.55, "timestamp": 1467648942 } ] }
     
     * Poll a single sample from BCM digital pin 17 (wiringPi pin 0) as JSON
       $ yadl --sensor digital --gpio_pin 0 --output json

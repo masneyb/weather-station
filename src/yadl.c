@@ -116,7 +116,7 @@ void usage(void)
 	printf("\n");
 	printf("* Poll a DHT22 temperature sensor on BCM pin 17 (wiringPi pin 0) as JSON.\n");
 	printf("  $ sudo yadl --gpio_pin 0 --sensor dht22 --temperature_unit fahrenheit --output json\n");
-	printf("  { \"result\": [  { \"temperature\": 63.9, \"humidity\": 49.0, \"timestamp\": 1465605522 } ] }\n");
+	printf("  { \"result\": [  { \"temperature\": 68.18, \"humidity\": 55.30, \"dew_point\": 51.55, \"timestamp\": 1467648942 } ] }\n");
 	printf("\n");
 	printf("* Poll a single sample from BCM digital pin 17 (wiringPi pin 0) as JSON\n");
 	printf("  $ yadl --sensor digital --gpio_pin 0 --output json\n");
