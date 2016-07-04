@@ -48,12 +48,11 @@ static int mcp3004_analog_read(yadl_config *config)
 {
 	int chan = PIN_BASE + config->analog_channel;
 
-	config->logger("mcp3004: Reading from pin base %d and analog channel %d\n",
-			PIN_BASE, config->analog_channel);
-
 	int ret = analogRead(chan);
 
-	config->logger("mcp3004: Read value %d\n", ret);
+        config->logger("mcp3004: Read value %d from pi base %d and analog channel %d\n",
+                        ret, PIN_BASE, config->analog_channel);
+
 	return ret;
 }
 

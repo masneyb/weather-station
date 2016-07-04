@@ -48,12 +48,11 @@ static int pcf8591_analog_read(yadl_config *config)
 {
 	int chan = PIN_BASE + config->analog_channel;
 
-	config->logger("pcf8591: Reading from pin base %d and analog channel %d\n",
-			PIN_BASE, config->analog_channel);
-
 	int ret = analogRead(chan);
 
-	config->logger("pcf8591: Read value %d\n", ret);
+	config->logger("pcf8591: Read value %d from pi base %d and analog channel %d\n",
+			ret, PIN_BASE, config->analog_channel);
+
 	return ret;
 }
 
