@@ -2,13 +2,13 @@
 
 /home/masneyb/data/pi-yadl/bin/create-min-max-graphs.sh \
 	/home/masneyb/data/weather-station/web/argent_80422.rrd \
-	wind_speed \
+	wind_speed_cur \
 	/home/masneyb/data/weather-station/web/wind_speed \
 	"Wind Speed (mph)"
 
 /home/masneyb/data/pi-yadl/bin/create-min-max-graphs.sh \
 	/home/masneyb/data/weather-station/web/argent_80422.rrd \
-	wind_direction \
+	wind_dir_cur \
 	/home/masneyb/data/weather-station/web/wind_direction \
 	"Wind Direction (degrees)"
 
