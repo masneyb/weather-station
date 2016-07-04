@@ -16,7 +16,7 @@ YADL_ADD_RRD_SAMPLE_BIN=bin/yadl-add-rrd-sample
 all: ${YADL_BIN} ${YADL_ADD_RRD_SAMPLE_BIN}
 
 ${YADL_BIN}: ${YADL_C_DEPS} src/yadl.h
-	gcc -g -Wall -Wextra -pedantic -std=c11 -o ${YADL_BIN} ${YADL_C_DEPS} -lwiringPi -lrrd -lm
+	gcc -g -Wall -Wextra -pedantic -std=c11 -o ${YADL_BIN} ${YADL_C_DEPS} -lwiringPi -lrrd -lm -lpthread
 
 ${YADL_ADD_RRD_SAMPLE_BIN}: ${YADL_ADD_RRD_SAMPLE_C_DEPS}
 	gcc -g -Wall -Wextra -pedantic -std=c11 -o ${YADL_ADD_RRD_SAMPLE_BIN} ${YADL_ADD_RRD_SAMPLE_C_DEPS} -lrrd
