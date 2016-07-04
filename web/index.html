@@ -7,8 +7,8 @@
   <style>
     h2 { text-align: center; }
     .graph { width: 481px; float: left; padding: 10px; }
-    #wind_direction { width: 60px; height: 60px; text-align: center; vertical-align: middle; line-height: 60px; }
-    td, th { padding-left: 50px; padding-right: 50px; }
+    #wind_dir_cur, #wind_avg_2m, #wind_gust_2m, #wind_avg_60m, #wind_gust_60m { width: 60px; height: 60px; text-align: center; vertical-align: middle; line-height: 60px; }
+    td, th { padding-left: 20px; padding-right: 20px; }
     th { color: #777; }
     #temperature { font-size: 120%; font-weight: bold; }
   </style>
@@ -16,8 +16,21 @@
   <script>
     function update_stats() {
       $.getJSON("argent_80422.json", function(data) {
-        $('#wind_direction').text(data.result[0].wind_speed.toFixed(1));
-        $('#wind_direction').css("background-image", "url(\"images/wind-" + data.result[0].wind_direction + ".png\")");
+        $('#wind_dir_cur').text(data.result[0].wind_speed_cur.toFixed(1));
+        $('#wind_dir_cur').css("background-image", "url(\"images/wind-" + data.result[0].wind_dir_cur + ".png\")");
+
+        $('#wind_gust_2m').text(data.result[0].wind_speed_gust_2m.toFixed(1));
+        $('#wind_gust_2m').css("background-image", "url(\"images/wind-" + data.result[0].wind_dir_gust_2m + ".png\")");
+
+        $('#wind_avg_2m').text(data.result[0].wind_speed_avg_2m.toFixed(1));
+        $('#wind_avg_2m').css("background-image", "url(\"images/wind-" + (Math.round(data.result[0].wind_dir_avg_2m / 22.5) * 22.5) + ".png\")");
+
+        $('#wind_gust_60m').text(data.result[0].wind_speed_gust_60m.toFixed(1));
+        $('#wind_gust_60m').css("background-image", "url(\"images/wind-" + data.result[0].wind_dir_gust_60m + ".png\")");
+
+        $('#wind_avg_60m').text(data.result[0].wind_speed_avg_60m.toFixed(1));
+        $('#wind_avg_60m').css("background-image", "url(\"images/wind-" + (Math.round(data.result[0].wind_dir_avg_60m / 22.5) * 22.5) + ".png\")");
+
         $('#rain_30m').text(data.result[0].rain_gauge_30m);
         $('#rain_6h').text(data.result[0].rain_gauge_6h);
         $('#rain_24h').text(data.result[0].rain_gauge_24h);
@@ -39,7 +52,11 @@
   <table>
     <tr>
       <th>Temperature</th>
-      <th>Wind</th>
+      <th>Wind (Current)</th>
+      <th>Wind (2 min average)</th>
+      <th>Wind (2 min gust)</th>
+      <th>Wind (60 min average)</th>
+      <th>Wind (60 min gust)</th>
       <th>Rain</th>
     </tr>
     <tr>
@@ -47,7 +64,19 @@
         <div id="temperature"><span id="temperature_number"></span> F</div>
       </td>
       <td>
-        <div id="wind_direction"></div>
+        <div id="wind_dir_cur"></div>
+      </td>
+      <td>
+        <div id="wind_avg_2m"></div>
+      </td>
+      <td>
+        <div id="wind_gust_2m"></div>
+      </td>
+      <td>
+        <div id="wind_avg_60m"></div>
+      </td>
+      <td>
+        <div id="wind_gust_60m"></div>
       </td>
       <td>
         <div>Last 30 minutes: <span id="rain_30m"></span> in</div>
@@ -60,7 +89,6 @@
   <div>
     <div class="graph"><img src="temperature_daily.png"/></div>
     <div class="graph"><img src="wind_speed_daily.png"/></div>
-    <div class="graph"><img src="wind_direction_daily.png"/></div>
     <div class="graph"><img src="rain_gauge_daily.png"/></div>
   </div>
 </body>
