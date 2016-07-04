@@ -20,6 +20,7 @@
  */
 
 #include <wiringPi.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -57,6 +58,14 @@ static int _get_usecs_pin_is_in_state(yadl_config *config, int state)
 			return -1;
 	}
 	return microsecs_in_current_state;
+}
+
+float _calculate_dew_point(float temperature, float humidity)
+{
+	// This uses the August-Roche-Magnus approximation to calulate the dew point
+	// based on the temperature and humidity.
+	// See http://andrew.rsmas.miami.edu/bmcnoldy/Humidity.html
+	return 243.04*(log(humidity/100)+((17.625*temperature)/(243.04+temperature)))/(17.625-log(humidity/100)-((17.625*temperature)/(243.04+temperature)));
 }
 
 /*
@@ -154,11 +163,13 @@ static yadl_result *_dht_read_data(char *sensor_descr,
 			sensor_descr, checksum, data[4]);
 
 	yadl_result *result = malloc(sizeof(*result));
-	result->value = malloc(sizeof(float) * 2);
+	result->value = malloc(sizeof(float) * 3);
 	dht_parser(data, result);
-	config->logger("%s: temperature=%.2fC, humidity=%.2f%%\n",
-			sensor_descr, result->value[0], result->value[1]);
+	result->value[2] = _calculate_dew_point(result->value[0], result->value[1]);
+	config->logger("%s: temperature=%.2fC, humidity=%.2f%%, dew_point=%.2fC\n",
+			sensor_descr, result->value[0], result->value[1], result->value[2]);
 	result->value[0] = config->temperature_converter(result->value[0]);
+	result->value[2] = config->temperature_converter(result->value[2]);
 	return result;
 }
 
@@ -185,7 +196,7 @@ static void _dht_init(__attribute__((__unused__)) yadl_config *config)
 	}
 }
 
-static char * _dht_value_header_names[] = { "temperature", "humidity", NULL };
+static char * _dht_value_header_names[] = { "temperature", "humidity", "dew_point", NULL };
 
 static char ** _dht_get_value_header_names(__attribute__((__unused__)) yadl_config *config)
 {
