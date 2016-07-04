@@ -344,11 +344,11 @@ static yadl_result *_argent_80422_read_data(yadl_config *config)
 	return result;
 }
 
-static char * _argent_80422_value_header_names[] = { "wind_direction_cur", "wind_speed_cur",
-							"wind_direction_avg_2m", "wind_speed_avg_2m",
-							"wind_direction_gust_2m", "wind_speed_gust_2m",
-							"wind_direction_avg_60m", "wind_speed_avg_60m",
-							"wind_direction_gust_60m", "wind_speed_gust_60m", 
+static char * _argent_80422_value_header_names[] = { "wind_dir_cur", "wind_speed_cur",
+							"wind_dir_avg_2m", "wind_speed_avg_2m",
+							"wind_dir_gust_2m", "wind_speed_gust_2m",
+							"wind_dir_avg_60m", "wind_speed_avg_60m",
+							"wind_dir_gust_60m", "wind_speed_gust_60m", 
 							"rain_gauge_cur", "rain_gauge_30m",
 							"rain_gauge_6h", "rain_gauge_24h",
 							NULL };
