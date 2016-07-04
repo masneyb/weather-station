@@ -311,15 +311,15 @@ static yadl_result *_argent_80422_read_data(yadl_config *config)
 	result->value[3] = _get_average_values(config->wind_speeds_2m, NUM_WIND_2_MIN_SAMPLES);
 
 	int wind_gust_2m_idx = _get_wind_gust_index(config->wind_speeds_2m, NUM_WIND_2_MIN_SAMPLES);
-	result->value[4] = config->wind_speeds_2m[wind_gust_2m_idx];
-	result->value[5] = config->wind_directions_2m[wind_gust_2m_idx];
+	result->value[4] = config->wind_directions_2m[wind_gust_2m_idx];
+	result->value[5] = config->wind_speeds_2m[wind_gust_2m_idx];
 
 	result->value[6] = _get_average_values(config->wind_directions_60m, NUM_WIND_60_MIN_SAMPLES);
 	result->value[7] = _get_average_values(config->wind_speeds_60m, NUM_WIND_60_MIN_SAMPLES);
 
 	int wind_gust_60m_idx = _get_wind_gust_index(config->wind_speeds_60m, NUM_WIND_60_MIN_SAMPLES);
-	result->value[8] = config->wind_speeds_60m[wind_gust_60m_idx];
-	result->value[9] = config->wind_directions_60m[wind_gust_60m_idx];
+	result->value[8] = config->wind_directions_60m[wind_gust_60m_idx];
+	result->value[9] = config->wind_speeds_60m[wind_gust_60m_idx];
 
 	pthread_mutex_unlock(&_wind_mutex);
 
