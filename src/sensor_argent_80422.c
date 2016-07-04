@@ -107,10 +107,16 @@ static void _check_wind_direction(int read_millivolts, int compare_millivolts,
  * https://www.sparkfun.com/products/8942
  * http://www.sparkfun.com/datasheets/Sensors/Weather/Weather%20Sensor%20Assembly..pdf
  */
-static float _get_wind_direction(int millivolts)
+static float _get_wind_direction(yadl_config *config)
 {
 	float direction = -1.0;
 	int distance = 0;
+
+	config->logger("Beginning to perform analog read. adc_millivolts=%d, adc_resolution=%d\n",
+			config->adc_millivolts, config->adc->adc_resolution);
+
+	int reading = config->adc->adc_read(config);
+	int millivolts = (float) reading * ((float) config->adc_millivolts / (float) config->adc->adc_resolution);
 
 	/* Find the closest reading to the values listed in the datasheet */
 	_check_wind_direction(millivolts, 3840, 0.0, &direction, &distance);
@@ -129,6 +135,9 @@ static float _get_wind_direction(int millivolts)
 	_check_wind_direction(millivolts, 4040, 292.5, &direction, &distance);
 	_check_wind_direction(millivolts, 4780, 315.0, &direction, &distance);
 	_check_wind_direction(millivolts, 3430, 337.5, &direction, &distance);
+
+	config->logger("Wind direction: analog reading=%d; %d millivolts; direction (degrees)=%.1f\n",
+			reading, millivolts, direction);
 
 	return direction;
 }
@@ -173,15 +182,7 @@ static void _argent_80422_rain_gauge_total(float_node **list, int *num_samples, 
 
 static yadl_result *_argent_80422_read_data(yadl_config *config)
 {
-	/* Poll wind direction */
-	config->logger("Beginning to perform analog read. adc_millivolts=%d, adc_resolution=%d\n",
-			config->adc_millivolts, config->adc->adc_resolution);
-
-	int reading = config->adc->adc_read(config);
-	int read_millivolts = (float) reading * ((float) config->adc_millivolts / (float) config->adc->adc_resolution);
-	float wind_direction = _get_wind_direction(read_millivolts);
-	config->logger("Wind direction: analog reading=%d; %d millivolts; direction (degrees)=%.1f\n",
-			reading, read_millivolts, wind_direction);
+	float wind_direction = _get_wind_direction(config);
 
 	/* Poll wind speed and rain gauge */
 	int start_wind_counter = _wind_last_counter;
