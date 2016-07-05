@@ -7,8 +7,8 @@
   <style>
     h2 { text-align: center; }
     .graph { width: 481px; float: left; padding: 10px; }
-    #wind_dir_cur, #wind_avg_2m, #wind_gust_2m, #wind_avg_60m, #wind_gust_60m { width: 60px; height: 60px; text-align: center; vertical-align: middle; line-height: 60px; }
-    td, th { padding-left: 20px; padding-right: 20px; }
+    #wind_dir_cur, #wind_avg_2m, #wind_gust_2m, #wind_avg_10m, #wind_gust_10m, #wind_avg_60m, #wind_gust_60m { width: 60px; height: 60px; text-align: center; vertical-align: middle; line-height: 60px; }
+    td, th { padding-left: 10px; padding-right: 10px; }
     th { color: #777; }
     #temperature { font-size: 120%; font-weight: bold; }
   </style>
@@ -25,13 +25,19 @@
         $('#wind_avg_2m').text(data.result[0].wind_speed_avg_2m.toFixed(1));
         $('#wind_avg_2m').css("background-image", "url(\"images/wind-" + (Math.round(data.result[0].wind_dir_avg_2m / 22.5) * 22.5) + ".png\")");
 
+        $('#wind_gust_10m').text(data.result[0].wind_speed_gust_10m.toFixed(1));
+        $('#wind_gust_10m').css("background-image", "url(\"images/wind-" + data.result[0].wind_dir_gust_10m + ".png\")");
+
+        $('#wind_avg_10m').text(data.result[0].wind_speed_avg_10m.toFixed(1));
+        $('#wind_avg_10m').css("background-image", "url(\"images/wind-" + (Math.round(data.result[0].wind_dir_avg_10m / 22.5) * 22.5) + ".png\")");
+
         $('#wind_gust_60m').text(data.result[0].wind_speed_gust_60m.toFixed(1));
         $('#wind_gust_60m').css("background-image", "url(\"images/wind-" + data.result[0].wind_dir_gust_60m + ".png\")");
 
         $('#wind_avg_60m').text(data.result[0].wind_speed_avg_60m.toFixed(1));
         $('#wind_avg_60m').css("background-image", "url(\"images/wind-" + (Math.round(data.result[0].wind_dir_avg_60m / 22.5) * 22.5) + ".png\")");
 
-        $('#rain_30m').text(data.result[0].rain_gauge_30m);
+        $('#rain_1h').text(data.result[0].rain_gauge_1h);
         $('#rain_6h').text(data.result[0].rain_gauge_6h);
         $('#rain_24h').text(data.result[0].rain_gauge_24h);
       });
@@ -55,6 +61,8 @@
       <th>Wind (Current)</th>
       <th>Wind (2 min average)</th>
       <th>Wind (2 min gust)</th>
+      <th>Wind (10 min average)</th>
+      <th>Wind (10 min gust)</th>
       <th>Wind (60 min average)</th>
       <th>Wind (60 min gust)</th>
       <th>Rain</th>
@@ -73,13 +81,19 @@
         <div id="wind_gust_2m"></div>
       </td>
       <td>
+        <div id="wind_avg_10m"></div>
+      </td>
+      <td>
+        <div id="wind_gust_10m"></div>
+      </td>
+      <td>
         <div id="wind_avg_60m"></div>
       </td>
       <td>
         <div id="wind_gust_60m"></div>
       </td>
       <td>
-        <div>Last 30 minutes: <span id="rain_30m"></span> in</div>
+        <div>Last 1 hour: <span id="rain_1h"></span> in</div>
         <div>Last 6 hours: <span id="rain_6h"></span> in</div>
         <div>Last 24 hours: <span id="rain_24h"></span> in</div>
       </td>
