@@ -59,6 +59,7 @@ typedef float (*filter)(float_node *list);
 typedef float (*temperature_unit_converter)(float input);
 
 #define NUM_WIND_2_MIN_SAMPLES   120
+#define NUM_WIND_10_MIN_SAMPLES  600
 #define NUM_WIND_60_MIN_SAMPLES 3600
 
 struct yadl_config_tag {
@@ -91,8 +92,8 @@ struct yadl_config_tag {
 	int wind_speed_pin;
 	int rain_gauge_pin;
 
-	float_node *rain_gauge_30m;
-	int num_rain_gauge_30m_samples;
+	float_node *rain_gauge_1h;
+	int num_rain_gauge_1h_samples;
 
 	float_node *rain_gauge_6h;
 	int num_rain_gauge_6h_samples;
@@ -104,6 +105,10 @@ struct yadl_config_tag {
 	float wind_directions_2m[NUM_WIND_2_MIN_SAMPLES];
 	float wind_speeds_2m[NUM_WIND_2_MIN_SAMPLES];
 	int wind_2m_idx;
+
+	float wind_directions_10m[NUM_WIND_10_MIN_SAMPLES];
+	float wind_speeds_10m[NUM_WIND_10_MIN_SAMPLES];
+	int wind_10m_idx;
 
 	float wind_directions_60m[NUM_WIND_60_MIN_SAMPLES];
 	float wind_speeds_60m[NUM_WIND_60_MIN_SAMPLES];

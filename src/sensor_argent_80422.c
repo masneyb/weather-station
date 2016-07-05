@@ -142,6 +142,10 @@ static void *_argent_80422_wind_thread(void *arg)
 		config->wind_speeds_2m[config->wind_2m_idx] = wind_speed;
 		config->wind_2m_idx = (config->wind_2m_idx + 1) % NUM_WIND_2_MIN_SAMPLES;
 
+		config->wind_directions_10m[config->wind_10m_idx] = wind_direction;
+		config->wind_speeds_10m[config->wind_10m_idx] = wind_speed;
+		config->wind_10m_idx = (config->wind_10m_idx + 1) % NUM_WIND_10_MIN_SAMPLES;
+
 		config->wind_directions_60m[config->wind_60m_idx] = wind_direction;
 		config->wind_speeds_60m[config->wind_60m_idx] = wind_speed;
 		config->wind_60m_idx = (config->wind_60m_idx + 1) % NUM_WIND_60_MIN_SAMPLES;
@@ -161,6 +165,10 @@ static void _create_wind_thread(yadl_config *config)
 	for (int i = 0; i < NUM_WIND_2_MIN_SAMPLES; i++) {
 		config->wind_directions_2m[i] = -1;
 		config->wind_speeds_2m[i] = -1;
+	}
+	for (int i = 0; i < NUM_WIND_10_MIN_SAMPLES; i++) {
+		config->wind_directions_10m[i] = -1;
+		config->wind_speeds_10m[i] = -1;
 	}
 	for (int i = 0; i < NUM_WIND_60_MIN_SAMPLES; i++) {
 		config->wind_directions_60m[i] = -1;
@@ -291,8 +299,8 @@ static yadl_result *_argent_80422_read_data(yadl_config *config)
 	int rain_num_seen = _get_num_seen(start_rain_counter, stop_rain_counter);
 	float rain_gauge = rain_num_seen * RAIN_GAUGE_MULTIPLIER;
 
-	_argent_80422_rain_gauge_total(&config->rain_gauge_30m, &config->num_rain_gauge_30m_samples,
-					1800000, rain_gauge, config);
+	_argent_80422_rain_gauge_total(&config->rain_gauge_1h, &config->num_rain_gauge_1h_samples,
+					3600000, rain_gauge, config);
 	_argent_80422_rain_gauge_total(&config->rain_gauge_6h, &config->num_rain_gauge_6h_samples,
 					21600000, rain_gauge, config);
 	_argent_80422_rain_gauge_total(&config->rain_gauge_24h, &config->num_rain_gauge_24h_samples,
@@ -300,7 +308,7 @@ static yadl_result *_argent_80422_read_data(yadl_config *config)
 
 	yadl_result *result;
 	result = malloc(sizeof(*result));
-	result->value = malloc(sizeof(float) * 14);
+	result->value = malloc(sizeof(float) * 18);
 
 	result->value[0] = wind_direction;
 	result->value[1] = wind_speed;
@@ -314,19 +322,26 @@ static yadl_result *_argent_80422_read_data(yadl_config *config)
 	result->value[4] = config->wind_directions_2m[wind_gust_2m_idx];
 	result->value[5] = config->wind_speeds_2m[wind_gust_2m_idx];
 
-	result->value[6] = _get_average_values(config->wind_directions_60m, NUM_WIND_60_MIN_SAMPLES);
-	result->value[7] = _get_average_values(config->wind_speeds_60m, NUM_WIND_60_MIN_SAMPLES);
+	result->value[6] = _get_average_values(config->wind_directions_10m, NUM_WIND_10_MIN_SAMPLES);
+	result->value[7] = _get_average_values(config->wind_speeds_10m, NUM_WIND_10_MIN_SAMPLES);
+
+	int wind_gust_10m_idx = _get_wind_gust_index(config->wind_speeds_10m, NUM_WIND_10_MIN_SAMPLES);
+	result->value[8] = config->wind_directions_10m[wind_gust_10m_idx];
+	result->value[9] = config->wind_speeds_10m[wind_gust_10m_idx];
+
+	result->value[10] = _get_average_values(config->wind_directions_60m, NUM_WIND_60_MIN_SAMPLES);
+	result->value[11] = _get_average_values(config->wind_speeds_60m, NUM_WIND_60_MIN_SAMPLES);
 
 	int wind_gust_60m_idx = _get_wind_gust_index(config->wind_speeds_60m, NUM_WIND_60_MIN_SAMPLES);
-	result->value[8] = config->wind_directions_60m[wind_gust_60m_idx];
-	result->value[9] = config->wind_speeds_60m[wind_gust_60m_idx];
+	result->value[12] = config->wind_directions_60m[wind_gust_60m_idx];
+	result->value[13] = config->wind_speeds_60m[wind_gust_60m_idx];
 
 	pthread_mutex_unlock(&_wind_mutex);
 
-	result->value[10] = rain_gauge;
-	result->value[11] = list_sum(config->rain_gauge_30m);
-	result->value[12] = list_sum(config->rain_gauge_6h);
-	result->value[13] = list_sum(config->rain_gauge_24h);
+	result->value[14] = rain_gauge;
+	result->value[15] = list_sum(config->rain_gauge_1h);
+	result->value[16] = list_sum(config->rain_gauge_6h);
+	result->value[17] = list_sum(config->rain_gauge_24h);
 
 	config->logger("current wind stats: wind_num_seen=%d, avg_wind_cps=%.1f, wind_speed=%.1f mph\n",
 			wind_num_seen, avg_wind_cps, wind_speed);
@@ -334,12 +349,15 @@ static yadl_result *_argent_80422_read_data(yadl_config *config)
 	config->logger("2 minute wind stats: average direction=%.1f, average speed=%.1f mph, gust direction=%.1f, gust speed=%.1f\n",
 			result->value[2], result->value[3], result->value[4], result->value[5]);
 
-	config->logger("60 minute wind stats: average direction=%.1f, average speed=%.1f mph, gust direction=%.1f, gust speed=%.1f\n",
+	config->logger("10 minute wind stats: average direction=%.1f, average speed=%.1f mph, gust direction=%.1f, gust speed=%.1f\n",
 			result->value[6], result->value[7], result->value[8], result->value[9]);
 
-	config->logger("rain_num_seen=%d, rain_gauge (in): cur=%.1f, 30m=%.1f, 6h=%.1f, 24h=%.1f\n",
-			rain_num_seen, rain_gauge, result->value[11], result->value[12],
-			result->value[13]);
+	config->logger("60 minute wind stats: average direction=%.1f, average speed=%.1f mph, gust direction=%.1f, gust speed=%.1f\n",
+			result->value[10], result->value[11], result->value[12], result->value[13]);
+
+	config->logger("rain_num_seen=%d, rain_gauge (in): cur=%.1f, 1h=%.1f, 6h=%.1f, 24h=%.1f\n",
+			rain_num_seen, rain_gauge, result->value[15], result->value[16],
+			result->value[17]);
 
 	return result;
 }
@@ -347,9 +365,11 @@ static yadl_result *_argent_80422_read_data(yadl_config *config)
 static char * _argent_80422_value_header_names[] = { "wind_dir_cur", "wind_speed_cur",
 							"wind_dir_avg_2m", "wind_speed_avg_2m",
 							"wind_dir_gust_2m", "wind_speed_gust_2m",
+							"wind_dir_avg_10m", "wind_speed_avg_10m",
+							"wind_dir_gust_10m", "wind_speed_gust_10m",
 							"wind_dir_avg_60m", "wind_speed_avg_60m",
 							"wind_dir_gust_60m", "wind_speed_gust_60m", 
-							"rain_gauge_cur", "rain_gauge_30m",
+							"rain_gauge_cur", "rain_gauge_1h",
 							"rain_gauge_6h", "rain_gauge_24h",
 							NULL };
 
