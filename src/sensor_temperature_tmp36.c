@@ -27,6 +27,11 @@
 
 static void _tmp36_init(yadl_config *config)
 {
+	if (config->temperature_converter == NULL) {
+		fprintf(stderr, "You must specify the --temperature_unit flag\n");
+		usage();
+	}
+
 	if (config->adc == NULL) {
 		fprintf(stderr, "You must specify the --adc argument\n");
 		usage();
