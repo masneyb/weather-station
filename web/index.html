@@ -6,14 +6,25 @@
   <title>Outside Weather</title>
   <style>
     h2 { text-align: center; }
-    .graph { width: 481px; height: 210px; float: left; padding: 10px; }
+    .graph { width: 481px; height: 210px; float: left; padding: 10px; background-repeat: no-repeat; background-position: center; }
     #wind { width: 60px; height: 60px; text-align: center; vertical-align: middle; line-height: 60px; }
     td, th { padding-left: 30px; padding-right: 30px; text-align: center; vertical-align: middle; }
     th { color: #777; }
     .stat, #wind { font-size: 120%; font-weight: bold; }
+    .graphs_interval_div { text-align: right; padding: 5px; }
   </style>
   <script src="scripts/jquery.min.js"></script>
   <script>
+    function update_graphs() {
+        var graphs_interval = $('#graphs_interval').val();
+        $('#temperature_graph').css("background-image", "url(\"temperature_humidity_" + graphs_interval + ".png\")");
+        $('#wind_speed_graph').css("background-image", "url(\"wind_speed_" + graphs_interval + ".png\")");
+        $('#rain_gauge_graph').css("background-image", "url(\"rain_gauge_" + graphs_interval + ".png\")");
+        $('#pressure_in_graph').css("background-image", "url(\"pressure_in_" + graphs_interval + ".png\")");
+        $('#battery_graph').css("background-image", "url(\"battery_" + graphs_interval + ".png\")");
+        $('#booster_graph').css("background-image", "url(\"booster_" + graphs_interval + ".png\")");
+    }
+
     function update_stats() {
       $.getJSON("argent_80422.json", function(data) {
         var wind_profile = $('#wind_profile').val();
@@ -77,12 +88,27 @@
 
     $(document).ready(function() {
       update_stats();
+      update_graphs();
       window.setInterval(update_stats, 10000);
     });
   </script>
 </head>
 
 <body>
+  <form>
+
+  <div class="header">
+    <div class="graphs_interval_div">
+      <select name="graphs_interval" id="graphs_interval" onchange="update_graphs();">
+        <option value="hourly">Hourly Graphs</input>
+        <option value="daily">Daily Graphs</input>
+        <option value="weekly">Weekly Graphs</input>
+        <option value="monthly">Monthly Graphs</input>
+        <option value="yearly">Yearly Graphs</input>
+      <select>
+    </div>
+  </div>
+
   <table>
     <tr>
       <th>Temperature</th>
@@ -127,17 +153,15 @@
       <td></td>
       <td></td>
       <td>
-        <form>
-          <select name="wind_profile" id="wind_profile" onchange="update_stats();">
-            <option value="cur" checked="1">Current Speed</input>
-            <option value="avg_2m">2 minute average</input>
-            <option value="gust_2m">2 minute gust</input>
-            <option value="avg_10m">10 minute average</input>
-            <option value="gust_10m">10 minute gust</input>
-            <option value="avg_60m">60 minute average</input>
-            <option value="gust_60m">60 minute gust</input>
-          <select>
-        </form>
+        <select name="wind_profile" id="wind_profile" onchange="update_stats();">
+          <option value="cur" checked="1">Current Speed</input>
+          <option value="avg_2m">2 minute average</input>
+          <option value="gust_2m">2 minute gust</input>
+          <option value="avg_10m">10 minute average</input>
+          <option value="gust_10m">10 minute gust</input>
+          <option value="avg_60m">60 minute average</input>
+          <option value="gust_60m">60 minute gust</input>
+        <select>
       </td>
       <td></td>
       <td></td>
@@ -146,12 +170,13 @@
   </table>
 
   <div>
-    <div class="graph"><img src="temperature_humidity_daily.png"/></div>
-    <div class="graph"><img src="wind_speed_daily.png"/></div>
-    <div class="graph"><img src="rain_gauge_daily.png"/></div>
-    <div class="graph"><img src="pressure_in_daily.png"/></div>
-    <div class="graph"><img src="battery_daily.png"/></div>
-    <div class="graph"><img src="booster_daily.png"/></div>
+    <div id="temperature_graph" class="graph"></div>
+    <div id="wind_speed_graph" class="graph"></div>
+    <div id="rain_gauge_graph" class="graph"></div>
+    <div id="pressure_in_graph" class="graph"></div>
+    <div id="battery_graph" class="graph"></div>
+    <div id="booster_graph" class="graph"></div>
   </div>
+  </form>
 </body>
 </html>
