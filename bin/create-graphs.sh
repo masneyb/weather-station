@@ -1,25 +1,45 @@
 #!/bin/bash
 
-/home/masneyb/data/pi-yadl/bin/create-min-max-graphs.sh \
-	/home/masneyb/data/weather-station/web/argent_80422.rrd \
+YADL_BIN_DIR=/home/masneyb/data/pi-yadl/bin
+CREATE_MIN_MAX_GRAPHS="${YADL_BIN_DIR}"/create-min-max-graphs.sh
+WEB_BASE_DIR=/home/masneyb/data/weather-station/web
+
+"${YADL_BIN_DIR}"/create-temperature-humidity-graphs.sh \
+	"${WEB_BASE_DIR}"/temperature_humidity "Temperature and Humidity"
+
+"${CREATE_MIN_MAX_GRAPHS}" \
+	"${WEB_BASE_DIR}"/argent_80422.rrd \
 	wind_speed_cur \
-	/home/masneyb/data/weather-station/web/wind_speed \
+	"${WEB_BASE_DIR}"/wind_speed \
 	"Wind Speed (mph)"
 
-/home/masneyb/data/pi-yadl/bin/create-min-max-graphs.sh \
-	/home/masneyb/data/weather-station/web/argent_80422.rrd \
+"${CREATE_MIN_MAX_GRAPHS}" \
+	"${WEB_BASE_DIR}"/argent_80422.rrd \
 	wind_dir_cur \
-	/home/masneyb/data/weather-station/web/wind_direction \
+	"${WEB_BASE_DIR}"/wind_direction \
 	"Wind Direction (degrees)"
 
-/home/masneyb/data/pi-yadl/bin/create-min-max-graphs.sh \
-	/home/masneyb/data/weather-station/web/argent_80422.rrd \
+"${CREATE_MIN_MAX_GRAPHS}" \
+	"${WEB_BASE_DIR}"/argent_80422.rrd \
 	rain_gauge_cur \
-	/home/masneyb/data/weather-station/web/rain_gauge \
+	"${WEB_BASE_DIR}"/rain_gauge \
 	"Rain Gauge (in)"
 
-/home/masneyb/data/pi-yadl/bin/create-min-max-graphs.sh \
-	/home/masneyb/data/weather-station/web/temperature.rrd \
-	temperature \
-	/home/masneyb/data/weather-station/web/temperature \
-	"Temperature (F)"
+"${CREATE_MIN_MAX_GRAPHS}" \
+	"${WEB_BASE_DIR}"/bmp180.rrd \
+	pressure_in \
+	"${WEB_BASE_DIR}"/pressure_in \
+	"Pressure (in)"
+
+"${CREATE_MIN_MAX_GRAPHS}" \
+	"${WEB_BASE_DIR}"/battery.rrd \
+	millivolts \
+	"${WEB_BASE_DIR}"/battery \
+	"Battery Charge (mV)"
+
+"${CREATE_MIN_MAX_GRAPHS}" \
+	"${WEB_BASE_DIR}"/booster.rrd \
+	millivolts \
+	"${WEB_BASE_DIR}"/booster \
+	"Booster (mV)"
+

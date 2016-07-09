@@ -6,11 +6,11 @@
   <title>Outside Weather</title>
   <style>
     h2 { text-align: center; }
-    .graph { width: 481px; float: left; padding: 10px; }
+    .graph { width: 481px; height: 210px; float: left; padding: 10px; }
     #wind { width: 60px; height: 60px; text-align: center; vertical-align: middle; line-height: 60px; }
-    td, th { padding-left: 60px; padding-right: 60px; text-align: center; vertical-align: middle; }
+    td, th { padding-left: 30px; padding-right: 30px; text-align: center; vertical-align: middle; }
     th { color: #777; }
-    #temperature { font-size: 120%; font-weight: bold; }
+    .stat, #wind { font-size: 120%; font-weight: bold; }
   </style>
   <script src="scripts/jquery.min.js"></script>
   <script>
@@ -18,8 +18,8 @@
       $.getJSON("argent_80422.json", function(data) {
         var wind_profile = $('#wind_profile').val();
         if (wind_profile == 'cur') {
-          $('#wind').text(data.result[0].wind_speed_cur.toFixed(1));
-          $('#wind').css("background-image", "url(\"images/wind-" + data.result[0].wind_dir_cur + ".png\")");
+		$('#wind').text(data.result[0].wind_speed_cur.toFixed(1));
+		$('#wind').css("background-image", "url(\"images/wind-" + data.result[0].wind_dir_cur + ".png\")");
         }
         else if (wind_profile == 'gust_2m') {
                 $('#wind').text(data.result[0].wind_speed_gust_2m.toFixed(1));
@@ -55,8 +55,23 @@
         $('#rain_24h').text(data.result[0].rain_gauge_24h);
       });
 
-      $.getJSON("temperature.json", function(data) {
+      $.getJSON("temperature_humidity.json", function(data) {
         $('#temperature_number').text(data.result[0].temperature.toFixed(1));
+        $('#humidity_number').text(data.result[0].humidity.toFixed(1));
+        $('#dew_point_number').text(data.result[0].dew_point.toFixed(1));
+      });
+
+      $.getJSON("bmp180.json", function(data) {
+        $('#pressure_in_number').text(data.result[0].pressure_in.toFixed(2));
+        $('#pressure_mb_number').text(data.result[0].pressure_millibars.toFixed(1));
+      });
+
+      $.getJSON("battery.json", function(data) {
+        $('#battery_number').text(data.result[0].millivolts.toFixed(0));
+      });
+
+      $.getJSON("booster.json", function(data) {
+        $('#booster_number').text(data.result[0].millivolts.toFixed(0));
       });
     }
 
@@ -71,12 +86,20 @@
   <table>
     <tr>
       <th>Temperature</th>
+      <th>Humidity</th>
       <th>Wind</th>
       <th>Rain</th>
+      <th>Pressure</th>
+      <th>Dew Point</th>
+      <th>Battery</th>
+      <th>Booster</th>
     </tr>
     <tr>
       <td>
-        <div id="temperature"><span id="temperature_number"></span> F</div>
+        <div class="stat"><span id="temperature_number"></span> F</div>
+      </td>
+      <td>
+        <div class="stat"><span id="humidity_number"></span> %</div>
       </td>
       <td>
         <div id="wind"></div>
@@ -86,8 +109,22 @@
         <div>Last 6 hours: <span id="rain_6h"></span> in</div>
         <div>Last 24 hours: <span id="rain_24h"></span> in</div>
       </td>
+      <td>
+        <div class="stat"><span id="pressure_in_number"></span> in</div>
+        <div class="stat"><span id="pressure_mb_number"></span> millibars</div>
+      </td>
+      <td>
+        <div class="stat"><span id="dew_point_number"></span> F</div>
+      </td>
+      <td>
+        <div class="stat"><span id="battery_number"></span> mV</div>
+      </td>
+      <td>
+        <div class="stat"><span id="booster_number"></span> mV</div>
+      </td>
     </tr>
     <tr>
+      <td></td>
       <td></td>
       <td>
         <form>
@@ -103,13 +140,18 @@
         </form>
       </td>
       <td></td>
+      <td></td>
+      <td></td>
     </tr>
   </table>
 
   <div>
-    <div class="graph"><img src="temperature_daily.png"/></div>
+    <div class="graph"><img src="temperature_humidity_daily.png"/></div>
     <div class="graph"><img src="wind_speed_daily.png"/></div>
     <div class="graph"><img src="rain_gauge_daily.png"/></div>
+    <div class="graph"><img src="pressure_in_daily.png"/></div>
+    <div class="graph"><img src="battery_daily.png"/></div>
+    <div class="graph"><img src="booster_daily.png"/></div>
   </div>
 </body>
 </html>
