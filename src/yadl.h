@@ -69,6 +69,7 @@ struct yadl_config_tag {
 	int max_valid_reading;
 	logger logger;
 	int spi_channel;
+	char *i2c_device;
 	int i2c_address;
 	int analog_channel;
 	adc_converter *adc;
@@ -118,6 +119,8 @@ struct yadl_config_tag {
 filter get_filter(char *name);
 
 outputter *get_outputter(char *name);
+
+sensor bmp180_sensor_funcs;
 
 sensor analog_sensor_funcs;
 

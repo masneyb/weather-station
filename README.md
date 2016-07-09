@@ -187,7 +187,7 @@ The associated [gnuplot](http://www.gnuplot.info/) script.
 
 ## Single Node Installation
 
-* `sudo apt-get install wiringpi librrd-dev`
+* `sudo apt-get install wiringpi librrd-dev libi2c-dev`
 * `make`
 
 

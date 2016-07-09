@@ -43,6 +43,8 @@ sensor *get_sensor(char *name)
 		return &ds18b20_sensor_funcs;
 	else if (strcmp(name, "tmp36") == 0)
 		return &tmp36_sensor_funcs;
+	else if (strcmp(name, "bmp180") == 0)
+		return &bmp180_sensor_funcs;
 
 	fprintf(stderr, "Unknown sensor type '%s'\n", name);
 	return NULL;

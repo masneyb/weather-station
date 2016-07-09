@@ -45,7 +45,7 @@
 
 void usage(void)
 {
-	printf("usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|argent_80422>\n");
+	printf("usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|argent_80422|bmp180>\n");
 	printf("\t\t[ --gpio_pin <wiringPi pin #. Required for digital sensors.> ]\n");
 	printf("\t\t  See http://wiringpi.com/pins/ to lookup the pin number.\n");
 	printf("\t\t--output <json|yaml|csv|xml|rrd|single_json> [ --output <...> ]\n");
@@ -402,6 +402,7 @@ int main(int argc, char **argv)
 		{"analog_scaling_factor", required_argument, 0, 0 },
 		{"wind_speed_pin", required_argument, 0, 0 },
 		{"rain_gauge_pin", required_argument, 0, 0 },
+		{"i2c_device", required_argument, 0, 0 },
 		{0, 0, 0, 0 }
 	};
 
@@ -541,6 +542,9 @@ int main(int argc, char **argv)
 			break;
 		case 29:
 			config.rain_gauge_pin = strtol(optarg, NULL, 10);
+			break;
+		case 30:
+			config.i2c_device = optarg;
 			break;
 		default:
 			usage();
