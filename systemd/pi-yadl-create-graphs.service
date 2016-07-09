@@ -4,4 +4,4 @@ Description=pi-yadl graph creator
 [Service]
 User=masneyb
 Type=simple
-ExecStart=/home/masneyb/data/pi-yadl/bin/create-graphs.sh /home/masneyb/data/pi-yadl/web/humiture "Basement Temperature and Humidity"
+ExecStart=/home/masneyb/data/pi-yadl/bin/create-temperature-humidity-graphs.sh /home/masneyb/data/pi-yadl/web/humiture "Basement Temperature and Humidity"
