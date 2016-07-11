@@ -17,6 +17,9 @@ install:
 	systemctl start argent-80422-gatherer.service
 	systemctl enable argent-80422-gatherer.service
 
+	systemctl start power-savings.service
+	systemctl enable power-savings.service
+
 shellcheck:
 	shellcheck bin/create-graphs.sh
 	shellcheck bin/create-rrds.sh

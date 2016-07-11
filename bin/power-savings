@@ -1,0 +1,11 @@
+#!/bin/bash -ev
+
+/usr/sbin/powertop --auto-tune
+
+# Disable display
+tvservice -o
+
+# Turn off LEDs on Pi zero. From
+# http://www.jeffgeerling.com/blogs/jeff-geerling/controlling-pwr-act-leds-raspberry-pi
+echo none | sudo tee /sys/class/leds/led0/trigger
+echo 1 | sudo tee /sys/class/leds/led0/brightness

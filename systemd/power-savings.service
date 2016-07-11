@@ -1,0 +1,12 @@
+[Unit]
+Description=Raspberry Pi power savings
+Requires=network-online.target
+After=network.target network-online.target multi-user.target
+
+[Service]
+User=root
+Type=simple
+ExecStart=/home/masneyb/data/weather-station/bin/power-savings
+
+[Install]
+WantedBy=multi-user.target
