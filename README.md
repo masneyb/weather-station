@@ -14,6 +14,7 @@ following features:
   * Supports anemometer, wind direction, and rain gauage for the
     Argent Data Systems 80422 Wind / Rain sensors. Other types of similar
     sensors should be easily supported.
+  * Supports BMP180 pressure, altitude and temperature sensor.
 * Supports returning the data in JSON, YAML, CSV, XML, and RRD. RRDtool can
   be used to graph the data over time. It also supports writing multiple
   files from a single sensor reading. For example, you may want to write the
@@ -30,7 +31,7 @@ following features:
 
 ## Usage
 
-    usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|argent_80422>
+    usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|argent_80422|bmp180>
     		[ --gpio_pin <wiringPi pin #. Required for digital sensors.> ]
     		  See http://wiringpi.com/pins/ to lookup the pin number.
     		--output <json|yaml|csv|xml|rrd|single_json> [ --output <...> ]
@@ -154,35 +155,10 @@ following features:
       a RRD database.
 
 
-## Using RRDtool to graph the data
+## Graphing
 
-If you plan to graph one or more sensors over a long period of time, then
-you may want to consider storing the database in a RRD database.
-
-![Screenshot](images/pi-yadl-screenshot.png?raw=1)
-
-
-## Using gnuplot to graph the data
-
-Here is an example using the pi-yadl project to log the output from an analog
-potentiometer hooked up to a 10-bit ADC.
-
-    $ yadl --sensor analog --adc mcp3002 --spi_channel 0 --analog_channel 0 --num_results 7000 \
-    				--sleep_usecs_between_results 500 --output csv --outfile data.csv
-
-The associated [gnuplot](http://www.gnuplot.info/) script.
-
-    set datafile separator ","
-    set autoscale
-    set yrange [-10:1100]
-    set xtic auto
-    set ytic auto
-    set title "Logging an analog potentiometer using the pi-yadl project"
-    set xlabel "Sample Number"
-    set ylabel "ADC Reading"
-    plot 'data.csv' using 1:3 with lines
-
-![Example using GNUplot to log the data](images/pi-yadl-analog-pot-example.png?raw=1)
+See the [GRAPHING.md](GRAPHING.md) file for some tips about ways to graph the data
+over time.
 
 
 ## Single Node Installation
@@ -208,4 +184,5 @@ data on a separate computer.
 * [DS18B20](http://cdn.sparkfun.com/datasheets/Sensors/Temp/DS18B20.pdf)
 * [TMP36 analog temperature sensor](http://cdn.sparkfun.com/datasheets/Sensors/Temp/TMP35_36_37.pdf)
 * [Argent Data Systems Wind / Rain Sensor Assembly](https://www.argentdata.com/files/80422_datasheet.pdf)
+* [BMP180](http://cdn.sparkfun.com/datasheets/Sensors/Pressure/BMP180.pdf)
 
