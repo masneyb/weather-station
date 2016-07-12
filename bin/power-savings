@@ -1,4 +1,4 @@
-#!/bin/bash -ev
+#!/bin/bash -v
 
 /usr/sbin/powertop --auto-tune
 
