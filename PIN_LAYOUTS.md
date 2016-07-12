@@ -12,8 +12,6 @@ project box, all of the wires are soldered onto a
 The wind / rain sensors came with two separate RJ11 terminated cables. I combined
 the two cables into a single piece of CAT5e to allow using the RJ45 cable glands.
 
-![argent wind / rain cable](images/wind-rain-cable.jpg)
-
 Pin | Description
 ----|-------------
   1 | +5V
@@ -24,6 +22,8 @@ Pin | Description
   6 | Unused
   7 | Unused
   8 | Unused
+
+![argent wind / rain cable](images/wind-rain-cable.jpg)
 
 ## Temperature / Humidity / Barometric Pressure Cable
 
