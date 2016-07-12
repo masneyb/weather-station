@@ -14,16 +14,14 @@ the two cables into a single piece of CAT5e to allow using the RJ45 cable glands
 
 Pin | Description
 ----|-------------
-  1 | +5V
-  2 | Ground
-  3 | Wind speed signal - to BCM GPIO pin #18
-  4 | Rain gauge signal - to BCM GPIO pin #27
-  5 | Wind direction - to analog channel 0 on ADC
+  1 | Ground
+  2 | Wind speed signal - to BCM GPIO pin #18
+  3 | +5V
+  4 | Wind direction - to analog channel 0 on ADC
+  5 | Unused
   6 | Unused
-  7 | Unused
-  8 | Unused
-
-![argent wind / rain cable](images/wind-rain-cable.jpg)
+  7 | Rain gauge signal - to BCM GPIO pin #27
+  8 | +5V
 
 ## Temperature / Humidity / Barometric Pressure Cable
 
