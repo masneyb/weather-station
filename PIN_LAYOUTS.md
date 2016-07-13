@@ -7,10 +7,13 @@ are used on the project box to get the connections inside the box. Inside the
 project box, all of the wires are soldered onto a
 [solderable breadboard](https://www.sparkfun.com/products/12070).
 
+![Inside](images/weather-station-outside-rj45-cable-glands.jpg?raw=1)
+
 ## Wind / Rain Sensors Cable
 
 The wind / rain sensors came with two separate RJ11 terminated cables. I combined
-the two cables into a single piece of CAT5e to allow using the RJ45 cable glands.
+the two cables into a single RJ45 connector to allow using the RJ45 waterproof
+cable glands.
 
 Pin | Description
 ----|-------------

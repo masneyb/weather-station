@@ -40,3 +40,7 @@ converted to 5V using a [PowerBoost 1000](https://www.adafruit.com/products/2465
 More information about the solar setup can be found on
 [Adafruit's Website](https://learn.adafruit.com/usb-dc-and-solar-lipoly-charger/overview).
 
+![Complete Setup](images/weather-station-complete.jpg?raw=1)
+
+![Inside](images/weather-station-inside-box.jpg?raw=1)
+
