@@ -32,10 +32,10 @@ Pin | Description
 ----|-------------
   1 | DHT Temperature / Humidity Signal
   2 | Unused
-  3 | DHT Temperature / Humidity +5V
+  3 | DHT Temperature / Humidity +3.3V
   4 | DHT Temperature / Humidity Ground
   5 | BMP180 I2C SCL
   6 | BMP180 I2C SDA
-  7 | BMP180 +5V
+  7 | BMP180 +3.3V
   8 | Unused
 

@@ -40,7 +40,8 @@ powered by a
 that is [charged](https://www.adafruit.com/products/390) using a
 [6V 9W solar panel](https://www.adafruit.com/products/2747). The 3.7V is
 converted to 5V using a [PowerBoost 1000](https://www.adafruit.com/products/2465).
-More information about the solar setup can be found on
+The solar panel is attached to the top of the project box using several large
+pieces of velcrow. More information about the solar setup can be found on
 [Adafruit's Website](https://learn.adafruit.com/usb-dc-and-solar-lipoly-charger/overview).
 
 ![Complete Setup](images/weather-station-complete.jpg?raw=1)
