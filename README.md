@@ -45,9 +45,9 @@ More information about the solar setup can be found on
 
 ![Complete Setup](images/weather-station-complete.jpg?raw=1)
 
-The Stevenson screen (left side of the above picture) contains the DHT11
-temperature and BMP180 barometric pressure sensors. A 3D model of the screen
-was downloaded from
+The Stevenson screen (left side of the above picture) contains the DHT22
+temperature/humidity sensor and the BMP180 barometric pressure sensor. A 3D
+model of the screen was downloaded from
 [https://www.thingiverse.com/thing:158039](https://www.thingiverse.com/thing:158039)
 and printed using HIPS plastic and spray painted using flat white paint.
 
