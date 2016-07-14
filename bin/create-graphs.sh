@@ -15,6 +15,12 @@ WEB_BASE_DIR=/home/masneyb/data/weather-station/web
 
 "${CREATE_MIN_MAX_GRAPHS}" \
 	"${WEB_BASE_DIR}"/argent_80422.rrd \
+	wind_speed_gust_2m \
+	"${WEB_BASE_DIR}"/wind_speed_gust_2m \
+	"Wind Speed Gust - 2 mins (mph)"
+
+"${CREATE_MIN_MAX_GRAPHS}" \
+	"${WEB_BASE_DIR}"/argent_80422.rrd \
 	wind_dir_cur \
 	"${WEB_BASE_DIR}"/wind_direction \
 	"Wind Direction (degrees)"
