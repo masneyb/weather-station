@@ -647,7 +647,7 @@ static yadl_result *_bmp180_read_data(yadl_config *config)
         bmp180_set_oss(bmp, BMP180_PRE_OSS3);
 
 	float temperature = bmp180_temperature(bmp);
-	float pressure = bmp180_pressure(bmp) / 100;
+	float pressure = bmp180_pressure(bmp) / 100.0;
 	float altitude = bmp180_altitude(bmp);
 
 	bmp180_close(bmp);
