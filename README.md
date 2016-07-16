@@ -15,6 +15,7 @@ My [pi-yadl](https://github.com/masneyb/pi-yadl) project is used to gather and
 graph the data from these sensors. This weather-station project only contains the
 systemd services, systemd timers, and web page for the various sensors.
 
+
 ## Screenshot
 
 ![Screenshot](images/weather-station-screenshot.png?raw=1)
@@ -33,6 +34,7 @@ systemd services, systemd timers, and web page for the various sensors.
   a dashboard showing the current weather readings.
 - The Apache webserver runs on the server and it only needs to serve out static
   files.
+
 
 ## Hardware Information
 
@@ -105,4 +107,15 @@ The [PIN_LAYOUTS.md](PIN_LAYOUTS.md) file contains the pin layouts of the cables
 that leave the box.
 
 ![Inside](images/weather-station-outside-rj45-cable-glands.jpg?raw=1)
+
+
+## Installation
+
+- Clone this repository and the [pi-yadl](https://github.com/masneyb/pi-yadl)
+  repository.
+- Follow the installation instructions to compile the pi-yadl project.
+- Update the paths in this repository's [systemd service files)[systemd/].
+- Run `bin/create-rrds.sh <path to web/ directory>` to create the initial
+  empty RRD databases.
+- `sudo make install`
 
