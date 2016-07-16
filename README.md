@@ -52,6 +52,11 @@ although I am a little concerned about the quality of the seal of the box. I
 put a piece of tape around the whole box where the lip and box body meet to
 help keep the wind-driven rain out.
 
+All of the external sensors are terminated with a RJ45 connector to make it easy
+to remove the project box without having to bring all of the associated sensors
+inside. [RJ45 waterproof cable glands](https://www.adafruit.com/products/827)
+are used on the project box to get the connections inside the box.
+
 A [MCP3008 analog to digital converter](https://www.adafruit.com/products/856)
 was soldered onto a [solderable breadboard](https://www.sparkfun.com/products/12070).
 The ADC is used for the wind vane and obtaining the voltage levels from the
