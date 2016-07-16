@@ -36,8 +36,8 @@ systemd services, systemd timers, and web page for the various sensors.
 
 ![Complete Setup](images/weather-station-complete.jpg?raw=1)
 
-This weather station runs on a Raspberry Pi Zero. All of the hardware is
-powered by a
+This weather station runs on a Raspberry Pi Zero running Rasbian Jessie Lite.
+All of the hardware is powered by a
 [4400mAH 3.7V lithium ion battery](https://www.adafruit.com/products/354)
 that is [charged](https://www.adafruit.com/products/390) using a
 [6V 9W solar panel](https://www.adafruit.com/products/2747). The 3.7V is
@@ -45,6 +45,16 @@ converted to 5V using a [PowerBoost 1000](https://www.adafruit.com/products/2465
 The solar panel is attached to the top of the project box using several large
 pieces of velcrow. More information about the solar setup can be found on
 [Adafruit's Website](https://learn.adafruit.com/usb-dc-and-solar-lipoly-charger/overview).
+
+The power usage per hour over a single night was consistently 44mA as measured
+by the ADC (analog to digital converter). This is with a USB wireless dongle
+and having wireless enabled the entire time. The LED and display on the Pi
+was disabled, and `powertop --auto-tune` was used to enable other power saving
+features. See the files
+[systemd/power-savings.service](systemd/power-savings.service) and
+[bin/power-savings](bin/power-savings) for the details. The power requirements
+could be reduced even further by desoldering the various LEDs on the solar
+charger and PowerBoost 1000.
 
 I used
 [this project box on Amazon](https://www.amazon.com/uxcell%C2%AE-Waterproof-Connect-Junction-200x120x75mm/dp/B00O9YY1G2),
