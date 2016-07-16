@@ -31,6 +31,8 @@ systemd services, systemd timers, and web page for the various sensors.
   recreated at the beginning of each hour.
 - The index.html uses Javascript to download the various JSON files to provide
   a dashboard showing the current weather readings.
+- The Apache webserver runs on the server and it only needs to serve out static
+  files.
 
 ## Hardware Information
 
@@ -58,9 +60,9 @@ charger and PowerBoost 1000.
 
 I used
 [this project box on Amazon](https://www.amazon.com/uxcell%C2%AE-Waterproof-Connect-Junction-200x120x75mm/dp/B00O9YY1G2),
-although I am a little concerned about the quality of the seal of the box. I
-put a piece of tape around the whole box where the lip and box body meet to
-help keep the wind-driven rain out.
+although I am a little concerned about the quality of the seal on the box. I
+put a piece of tape around the box where the lid and body meet to help keep the
+wind-driven rain out.
 
 All of the external sensors are terminated with a RJ45 connector to make it easy
 to remove the project box without having to bring all of the associated sensors
@@ -74,15 +76,16 @@ battery and PowerBoost 1000. This ADC communicates with the Raspberry Pi
 using the SPI bus.
 
 The anemometer is hooked up to a GPIO pin on the Pi. According to the
-[datasheet](https://www.argentdata.com/files/80422_datasheet.pdf), each click
-of the reed switch corresponds to a wind speed of 1.492 mph. A pull down
-resistor is used and the switch is debounced in software.
+[datasheet](https://www.argentdata.com/files/80422_datasheet.pdf), one click
+of the reed switch over a second corresponds to a wind speed of 1.492 mph. A
+pull down resistor is used and the switch is debounced in software.
 
 The rain gauge is very similiar to the anemometer. Each click of the switch
-corresponds to 0.011 inches of rain according to the
+over a second corresponds to 0.011 inches of rain according to the
 [datasheet](https://www.argentdata.com/files/80422_datasheet.pdf).
 The rain gauge is very sensitive to movement and the high winds sometimes
-causes the switch to close.
+causes the switch to close. This also uses a pull down resistor and the
+switch is debounced in software.
 
 The Stevenson screen (left side of the above picture) contains the temperature,
 humidity and barometric pressure sensors. A 3D model of the screen was
@@ -90,7 +93,7 @@ downloaded from
 [https://www.thingiverse.com/thing:158039](https://www.thingiverse.com/thing:158039).
 It was 3D printed using HIPS plastic and spray painted using flat white paint.
 
-The temperature / humidity is obtained using a the DHT22 sensor. The dew point is
+The temperature / humidity is obtained using a DHT22 sensor. The dew point is
 calculated based on these two values. The DHT sensor communicates with the
 Pi over one of the GPIO pins.
 
