@@ -43,6 +43,17 @@ converted to 5V using a [PowerBoost 1000](https://www.adafruit.com/products/2465
 The solar panel is attached to the top of the project box using several large
 pieces of velcrow. More information about the solar setup can be found on
 [Adafruit's Website](https://learn.adafruit.com/usb-dc-and-solar-lipoly-charger/overview).
+I used
+[this project box on Amazon](https://www.amazon.com/uxcell%C2%AE-Waterproof-Connect-Junction-200x120x75mm/dp/B00O9YY1G2),
+although I am a little concerned about the quality of the seal of the box. I
+put a piece of tape around the whole box where the lip and box body meet to
+help keep the wind-driven rain out.
+
+A [MCP3008 analog to digital converter](https://www.adafruit.com/products/856)
+was soldered onto the [solderable breadboard](https://www.sparkfun.com/products/12070).
+The ADC is used for the wind direction, obtaining the voltage levels of the
+battery and the PowerBoost 1000. This ADC communicates with the Raspberry Pi
+using the SPI bus.
 
 ![Complete Setup](images/weather-station-complete.jpg?raw=1)
 
@@ -53,6 +64,8 @@ model of the screen was downloaded from
 and printed using HIPS plastic and spray painted using flat white paint.
 
 ![Inside](images/weather-station-inside-box.jpg?raw=1)
+
+![Inside](images/weather-station-breadboard.jpg?raw=1)
 
 The [PIN_LAYOUTS.md](PIN_LAYOUTS.md) file contains the pin layouts of the cables
 that leave the box.
