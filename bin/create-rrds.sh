@@ -1,6 +1,10 @@
 #!/bin/bash
 
-BASE_DIR=/home/masneyb/data/weather-station/web
+BASE_DIR="${1:-}"
+if [ "${BASE_DIR}" = "" ] ; then
+	echo "usage: $0 <path to web/ directory>" >&2
+	exit 1
+fi
 
 ARGENT_RRD="${BASE_DIR}"/argent_80422.rrd
 TEMPERATURE_HUMIDTY_RRD="${BASE_DIR}"/temperature_humidity.rrd

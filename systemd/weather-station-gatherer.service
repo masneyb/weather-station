@@ -1,7 +1,7 @@
 [Unit]
-Description=Garden sensors data gatherer
+Description=Weather station gatherer
 
 [Service]
 User=root
 Type=simple
-ExecStart=/home/masneyb/data/weather-station/bin/gather-data.sh
+ExecStart=/home/masneyb/data/weather-station/bin/gather-data.sh /home/masneyb/data/pi-yadl/bin/yadl /home/masneyb/data/weather-station/web

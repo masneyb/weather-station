@@ -1,9 +1,15 @@
 #!/bin/bash
 
-YADL_BIN_DIR=/home/masneyb/data/pi-yadl/bin
+YADL_BIN_DIR="${1:-}"
+WEB_BASE_DIR="${2:-}"
+
+if [ "${YADL_BIN_DIR}" = "" ] || [ "${WEB_BASE_DIR}" = "" ] ; then
+	echo "usage: $0 <path to pi-yadl/bin/ directory> <path to web/ directory" >&2
+	exit 1
+fi
+
 CREATE_MIN_MAX_GRAPHS="${YADL_BIN_DIR}"/create-min-max-graphs.sh
 CREATE_MAX_GRAPHS="${YADL_BIN_DIR}"/create-max-graphs.sh
-WEB_BASE_DIR=/home/masneyb/data/weather-station/web
 
 "${CREATE_MIN_MAX_GRAPHS}" \
 	"${WEB_BASE_DIR}"/temperature_humidity \
