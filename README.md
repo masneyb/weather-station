@@ -48,11 +48,8 @@ The solar panel is attached to the top of the project box using several large
 pieces of velcrow. More information about the solar setup can be found on
 [Adafruit's Website](https://learn.adafruit.com/usb-dc-and-solar-lipoly-charger/overview).
 
-The power usage per hour over a single night was consistently 44mA as measured
-by the ADC (analog to digital converter). This is with a USB wireless dongle
-and having wireless enabled the entire time. The LED and display on the Pi
-was disabled, and `powertop --auto-tune` was used to enable other power saving
-features. See the files
+The LED and display on the Pi was disabled, and `powertop --auto-tune` was used
+to enable other power saving features. See the files
 [systemd/power-savings.service](systemd/power-savings.service) and
 [bin/power-savings](bin/power-savings) for the details. The power requirements
 could be reduced even further by desoldering the various LEDs on the solar
