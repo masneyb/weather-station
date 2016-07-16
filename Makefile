@@ -24,3 +24,4 @@ shellcheck:
 	shellcheck bin/create-graphs.sh
 	shellcheck bin/create-rrds.sh
 	shellcheck bin/gather-data.sh
+	shellcheck bin/power-savings
