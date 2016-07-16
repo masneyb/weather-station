@@ -3,11 +3,11 @@
 A weather station for the Raspberry Pi that supports the following sensors:
 
 - [Argent Data Systems Weather Sensor Assembly](https://www.sparkfun.com/products/8942)
-  contains sensors for the wind vane, wind speed, and rain gauge. This
-  project supports logging the wind speed average and gusts over 2 minute, 10 minute
-  and 60 minute periods; rain over the last 1 hour, 6 hour and 24 hours.
-- Supports various types of temperature and humidity sensors (DHT11, DHT22, DS18B20,
-  TMP36 analog).
+  contains a wind vane, anemometer, and rain gauge. This project supports logging the
+  wind speed average and gusts over 2 minute, 10 minute and 60 minute periods. The
+  rain over the last 1 hour, 6 hours and 24 hours are logged.
+- Supports various types of temperature and humidity sensors: DHT11, DHT22, DS18B20,
+  TMP36 (analog).
 - Supports the BMP180 pressure, altitude and temperature sensor.
 - Battery charge level.
 
@@ -60,14 +60,14 @@ using the SPI bus.
 
 The anemometer is hooked up to a GPIO pin on the Pi. According to the
 [datasheet](https://www.argentdata.com/files/80422_datasheet.pdf), each click
-of the reed switch corresponds to a wind speed of 1.492 MPH. A pull down
+of the reed switch corresponds to a wind speed of 1.492 mph. A pull down
 resistor is used and the switch is debounced in software.
 
 The rain gauge is very similiar to the anemometer. Each click of the switch
 corresponds to 0.011 inches of rain according to the
 [datasheet](https://www.argentdata.com/files/80422_datasheet.pdf).
 The rain gauge is very sensitive to movement and the high winds sometimes
-causes the switch to activate.
+causes the switch to close.
 
 The Stevenson screen (left side of the above picture) contains the temperature,
 humidity and barometric pressure sensors. A 3D model of the screen was
@@ -76,10 +76,11 @@ downloaded from
 It was 3D printed using HIPS plastic and spray painted using flat white paint.
 
 The temperature / humidity is obtained using a the DHT22 sensor. The dew point is
-calculated based on these two values.
+calculated based on these two values. The DHT sensor communicates with the
+Pi over one of the GPIO pins.
 
-A BMP180 sensor is used to obtain the barometric pressure. It also collects the
-temperature and altitude, although I am not using these values.
+A BMP180 sensor is used to obtain the barometric pressure and communicates with
+the Pi over the i2c bus.
 
 ![Inside](images/weather-station-inside-box.jpg?raw=1)
 
