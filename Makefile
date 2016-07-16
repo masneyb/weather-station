@@ -37,5 +37,5 @@ install:
 	systemctl enable pi-yadl-create-graphs.timer
 
 shellcheck:
-	shellcheck bin/create-graphs.sh
+	shellcheck bin/create-min-max-graphs.sh
 	shellcheck bin/log-remote-sensor.sh

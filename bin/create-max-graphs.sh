@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# create-min-max-graphs.sh
+# create-max-graphs.sh
 #
 # Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
 #
@@ -50,23 +50,17 @@ create_graph()
 		rrdtool graph "${OUTFILE}" \
 			--start "-${SCALE}" \
 			--title "${GRAPH_TITLE}" \
-			DEF:"${RRD_FIELD1}"min="${RRD_FILE1}":"${RRD_FIELD1}":MIN \
 			DEF:"${RRD_FIELD1}"max="${RRD_FILE1}":"${RRD_FIELD1}":MAX \
-			AREA:"${RRD_FIELD1}"min#FF0000:"Min ${RRD_FIELD1_LABEL}" \
-			AREA:"${RRD_FIELD1}"max#FFFF00:"Max ${RRD_FIELD1_LABEL}" \
+			AREA:"${RRD_FIELD1}"max#FFFF00:"${RRD_FIELD1_LABEL}" \
 			GPRINT:"${RRD_FIELD1}"max:LAST:"Last Reading %2.1lf"
 	else
 		rrdtool graph "${OUTFILE}" \
 			--start "-${SCALE}" \
 			--title "${GRAPH_TITLE}" \
 			DEF:"${RRD_FIELD1}"1max="${RRD_FILE1}":"${RRD_FIELD1}":MAX \
-			DEF:"${RRD_FIELD1}"1min="${RRD_FILE1}":"${RRD_FIELD1}":MIN \
 			DEF:"${RRD_FIELD2}"2max="${RRD_FILE2}":"${RRD_FIELD2}":MAX \
-			DEF:"${RRD_FIELD2}"2min="${RRD_FILE2}":"${RRD_FIELD2}":MIN \
-			AREA:"${RRD_FIELD1}"1min#FF0000:"Min ${RRD_FIELD1_LABEL}" \
-			AREA:"${RRD_FIELD1}"1max#FFFF00:"Max ${RRD_FIELD1_LABEL}\j" \
-			LINE1:"${RRD_FIELD2}"2min#0000FF:"Min ${RRD_FIELD2_LABEL}" \
-			LINE1:"${RRD_FIELD2}"2max#FF00FF:"Max ${RRD_FIELD2_LABEL}\j" \
+			AREA:"${RRD_FIELD1}"1max#FFFF00:"${RRD_FIELD1_LABEL}" \
+			LINE1:"${RRD_FIELD2}"2max#FF00FF:"${RRD_FIELD2_LABEL}\j" \
 			GPRINT:"${RRD_FIELD1}"1max:LAST:"Last ${RRD_FIELD1_LABEL} %2.1lf" \
 			GPRINT:"${RRD_FIELD2}"2max:LAST:"Last ${RRD_FIELD2_LABEL} %2.1lf\j"
 	fi
