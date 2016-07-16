@@ -13,6 +13,8 @@
     .stat, #wind { font-size: 120%; font-weight: bold; }
     .clear_float { clear: both; }
     .graphs_interval_div { text-align: right; padding: 5px; }
+    .about { margin-top: 5px; }
+    .last_updated { color: gray; display: none; }
   </style>
   <script src="scripts/jquery.min.js"></script>
   <script>
@@ -29,6 +31,7 @@
 
     function update_stats() {
       $.getJSON("argent_80422.json", function(data) {
+        $('#argent_80422_last_updated').text("Wind / rain last updated " + (((new Date().getTime() / 1000) - data.result[0].timestamp)).toFixed(0) + " seconds ago");
         var wind_profile = $('#wind_profile').val();
         if (wind_profile == 'cur') {
 		$('#wind').text(data.result[0].wind_speed_cur.toFixed(1));
@@ -69,21 +72,25 @@
       });
 
       $.getJSON("temperature_humidity.json", function(data) {
+        $('#temperature_humidity_last_updated').text("Temperature / humidity last updated " + ((new Date().getTime() / 1000) - data.result[0].timestamp).toFixed(0) + " seconds ago");
         $('#temperature_number').text(data.result[0].temperature.toFixed(1));
         $('#humidity_number').text(data.result[0].humidity.toFixed(1));
         $('#dew_point_number').text(data.result[0].dew_point.toFixed(1));
       });
 
       $.getJSON("bmp180.json", function(data) {
+        $('#bmp180_last_updated').text("Barometric pressure last updated " + ((new Date().getTime() / 1000) - data.result[0].timestamp).toFixed(0) + " seconds ago");
         $('#pressure_in_number').text(data.result[0].pressure_in.toFixed(2));
         $('#pressure_mb_number').text(data.result[0].pressure_millibars.toFixed(1));
       });
 
       $.getJSON("battery.json", function(data) {
+        $('#battery_last_updated').text("Battery last updated " + ((new Date().getTime() / 1000) - data.result[0].timestamp).toFixed(0) + " seconds ago");
         $('#battery_number').text(data.result[0].millivolts.toFixed(0));
       });
 
       $.getJSON("booster.json", function(data) {
+        $('#booster_last_updated').text("Booster last updated " + ((new Date().getTime() / 1000) - data.result[0].timestamp).toFixed(0) + " seconds ago");
         $('#booster_number').text(data.result[0].millivolts.toFixed(0));
       });
     }
@@ -182,6 +189,14 @@
   </div>
 
   <div class="clear_float"></div>
+
+  <div>
+    <div id="argent_80422_last_updated" class="last_updated"></div>
+    <div id="temperature_humidity_last_updated" class="last_updated"></div>
+    <div id="bmp180_last_updated" class="last_updated"></div>
+    <div id="battery_last_updated" class="last_updated"></div>
+    <div id="booster_last_updated" class="last_updated"></div>
+  </div>
 
   <div class="about">More information about this weather station project can be found at <a href="https://github.com/masneyb/weather-station">https://github.com/masneyb/weather-station</a>.</div>
   </form>
