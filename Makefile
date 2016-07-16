@@ -38,4 +38,5 @@ install:
 
 shellcheck:
 	shellcheck bin/create-min-max-graphs.sh
+	shellcheck bin/create-max-graphs.sh
 	shellcheck bin/log-remote-sensor.sh

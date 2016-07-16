@@ -50,19 +50,19 @@ create_graph()
 		rrdtool graph "${OUTFILE}" \
 			--start "-${SCALE}" \
 			--title "${GRAPH_TITLE}" \
-			DEF:"${RRD_FIELD1}"max="${RRD_FILE1}":"${RRD_FIELD1}":MAX \
-			AREA:"${RRD_FIELD1}"max#FFFF00:"${RRD_FIELD1_LABEL}" \
-			GPRINT:"${RRD_FIELD1}"max:LAST:"Last Reading %2.1lf"
+			"DEF:${RRD_FIELD1}max=${RRD_FILE1}:${RRD_FIELD1}:MAX" \
+			"AREA:${RRD_FIELD1}max#FFFF00:${RRD_FIELD1_LABEL}" \
+			"GPRINT:${RRD_FIELD1}max:LAST:Last Reading %2.1lf"
 	else
 		rrdtool graph "${OUTFILE}" \
 			--start "-${SCALE}" \
 			--title "${GRAPH_TITLE}" \
-			DEF:"${RRD_FIELD1}"1max="${RRD_FILE1}":"${RRD_FIELD1}":MAX \
-			DEF:"${RRD_FIELD2}"2max="${RRD_FILE2}":"${RRD_FIELD2}":MAX \
-			AREA:"${RRD_FIELD1}"1max#FFFF00:"${RRD_FIELD1_LABEL}" \
-			LINE1:"${RRD_FIELD2}"2max#FF00FF:"${RRD_FIELD2_LABEL}\j" \
-			GPRINT:"${RRD_FIELD1}"1max:LAST:"Last ${RRD_FIELD1_LABEL} %2.1lf" \
-			GPRINT:"${RRD_FIELD2}"2max:LAST:"Last ${RRD_FIELD2_LABEL} %2.1lf\j"
+			"DEF:${RRD_FIELD1}1max=${RRD_FILE1}:${RRD_FIELD1}:MAX" \
+			"DEF:${RRD_FIELD2}2max=${RRD_FILE2}:${RRD_FIELD2}:MAX" \
+			"AREA:${RRD_FIELD1}1max#FFFF00:${RRD_FIELD1_LABEL}" \
+			"LINE1:${RRD_FIELD2}2max#FF00FF:${RRD_FIELD2_LABEL}\j" \
+			"GPRINT:${RRD_FIELD1}1max:LAST:Last ${RRD_FIELD1_LABEL} %2.1lf" \
+			"GPRINT:${RRD_FIELD2}2max:LAST:Last ${RRD_FIELD2_LABEL} %2.1lf\j"
 	fi
 
 	# Add the graph to the HTML file
