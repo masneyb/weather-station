@@ -22,11 +22,9 @@
         var graphs_interval = $('#graphs_interval').val();
         $('#temperature_graph').css("background-image", "url(\"temperature_humidity_" + graphs_interval + ".png\")");
         $('#wind_speed_graph').css("background-image", "url(\"wind_speed_" + graphs_interval + ".png\")");
-        $('#wind_speed_gust_graph').css("background-image", "url(\"wind_speed_gust_2m_" + graphs_interval + ".png\")");
         $('#rain_gauge_graph').css("background-image", "url(\"rain_gauge_" + graphs_interval + ".png\")");
         $('#pressure_in_graph').css("background-image", "url(\"pressure_in_" + graphs_interval + ".png\")");
         $('#battery_graph').css("background-image", "url(\"battery_" + graphs_interval + ".png\")");
-        $('#booster_graph').css("background-image", "url(\"booster_" + graphs_interval + ".png\")");
     }
 
     function update_stats() {
@@ -181,7 +179,6 @@
   <div>
     <div id="temperature_graph" class="graph"></div>
     <div id="wind_speed_graph" class="graph"></div>
-    <div id="wind_speed_gust_graph" class="graph"></div>
     <div id="rain_gauge_graph" class="graph"></div>
     <div id="pressure_in_graph" class="graph"></div>
     <div id="battery_graph" class="graph"></div>
