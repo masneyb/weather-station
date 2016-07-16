@@ -4,4 +4,4 @@ Description=pi-yadl graph creator
 [Service]
 User=masneyb
 Type=simple
-ExecStart=/home/masneyb/data/pi-yadl/bin/create-temperature-humidity-graphs.sh /home/masneyb/data/pi-yadl/web/humiture "Basement Temperature and Humidity" "Temperature" /home/masneyb/data/pi-yadl/web/humiture.rrd temperature "Relative Humidity" /home/masneyb/data/pi-yadl/web/humiture.rrd humidity
+ExecStart=/home/masneyb/data/pi-yadl/bin/create-min-max-graphs.sh /home/masneyb/data/pi-yadl/web/humiture "Basement Temperature and Humidity" "Temperature" /home/masneyb/data/pi-yadl/web/humiture.rrd temperature "Relative Humidity" /home/masneyb/data/pi-yadl/web/humiture.rrd humidity
