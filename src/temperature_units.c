@@ -63,7 +63,9 @@ void populate_temperature_converter(yadl_config *config, char *name)
 		config->temperature_converter = &_celsius_to_rankine;
 		config->temperature_unit = "R";
 	}
-	else
+	else {
 		fprintf(stderr, "Unknown temperature unit '%s'\n", name);
+		usage();
+	}
 }
 

@@ -619,8 +619,6 @@ int main(int argc, char **argv)
 		usage();
 
 	populate_temperature_converter(&config, temperature_unit);
-	if (config.temperature_converter == NULL)
-		usage();
 
 	config.adc = get_adc(adc_name);
 
