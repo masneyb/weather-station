@@ -359,7 +359,9 @@ static yadl_result *_argent_80422_read_data(yadl_config *config)
 			rain_num_seen, rain_gauge, result->value[15], result->value[16],
 			result->value[17]);
 
-	result->unit = NULL;
+	result->unit = malloc(sizeof(char *) * 2);
+	result->unit[0] = "mph";
+	result->unit[1] = "in";
 
 	return result;
 }
@@ -380,8 +382,16 @@ static char ** _argent_80422_get_value_header_names(__attribute__((__unused__)) 
 	return _argent_80422_value_header_names;
 }
 
+static char * _argent_80422_unit_header_names[] = { "wind_speed_unit", "rain_gauge_unit", NULL };
+
+static char ** _argent_80422_get_unit_header_names(__attribute__((__unused__)) yadl_config *config)
+{
+        return _argent_80422_unit_header_names;
+}
+
 sensor argent_80422_sensor_funcs = {
 	.init = &_argent_80422_init,
 	.get_value_header_names = &_argent_80422_get_value_header_names,
+	.get_unit_header_names = &_argent_80422_get_unit_header_names,
 	.read = _argent_80422_read_data
 };
