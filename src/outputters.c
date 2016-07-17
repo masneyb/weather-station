@@ -139,6 +139,13 @@ static void _write_multi_json(output_metadata *meta, int reading_number, yadl_re
 		fprintf(meta->fd, " \"%s\": %.2f,", header_names[i], result->value[i]);
 	}
 
+	if (config->sens->get_unit_header_names != NULL) {
+		char **unit_names = config->sens->get_unit_header_names(config);
+		for (int i = 0; unit_names[i] != NULL; i++) {
+			fprintf(meta->fd, " \"%s\": \"%s\",", unit_names[i], result->unit[i]);
+		}
+	}
+
 	fprintf(meta->fd, " \"timestamp\": %ld }", _get_current_timestamp());
 
 	if (reading_number + 1 < config->num_results)
@@ -175,6 +182,13 @@ static void _write_single_json(output_metadata *meta, __attribute__((__unused__)
 	char **header_names = config->sens->get_value_header_names(config);
 	for (int i = 0; header_names[i] != NULL; i++) {
 		fprintf(meta->fd, " \"%s\": %.2f,", header_names[i], result->value[i]);
+	}
+
+	if (config->sens->get_unit_header_names != NULL) {
+		char **unit_names = config->sens->get_unit_header_names(config);
+		for (int i = 0; unit_names[i] != NULL; i++) {
+			fprintf(meta->fd, " \"%s\": \"%s\",", unit_names[i], result->unit[i]);
+		}
 	}
 
 	fprintf(meta->fd, " \"timestamp\": %ld } ] }", _get_current_timestamp());

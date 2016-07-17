@@ -43,20 +43,27 @@ static float _celsius_to_rankine(float input)
 	return (input + 273.15) * (9.0 / 5.0);
 }
 
-temperature_unit_converter get_temperature_converter(char *name)
+void populate_temperature_converter(yadl_config *config, char *name)
 {
 	if (name == NULL)
-		return NULL;
-	else if (strcmp(name, "celsius") == 0)
-		return &_celsius_to_celsius;
-	else if (strcmp(name, "fahrenheit") == 0)
-		return &_celsius_to_fahrenheit;
-	else if (strcmp(name, "kelvin") == 0)
-		return &_celsius_to_kelvin;
-	else if (strcmp(name, "rankine") == 0)
-		return &_celsius_to_rankine;
-
-	fprintf(stderr, "Unknown tempearture unit '%s'\n", name);
-	return NULL;
+		return;
+	else if (strcmp(name, "celsius") == 0) {
+		config->temperature_converter = &_celsius_to_celsius;
+		config->temperature_unit = "C";
+	}
+	else if (strcmp(name, "fahrenheit") == 0) {
+		config->temperature_converter = &_celsius_to_fahrenheit;
+		config->temperature_unit = "F";
+	}
+	else if (strcmp(name, "kelvin") == 0) {
+		config->temperature_converter = &_celsius_to_kelvin;
+		config->temperature_unit = "K";
+	}
+	else if (strcmp(name, "rankine") == 0) {
+		config->temperature_converter = &_celsius_to_rankine;
+		config->temperature_unit = "R";
+	}
+	else
+		fprintf(stderr, "Unknown temperature unit '%s'\n", name);
 }
 

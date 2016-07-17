@@ -636,8 +636,6 @@ static void _bmp180_init(yadl_config *config)
 
 static yadl_result *_bmp180_read_data(yadl_config *config)
 {
-	yadl_result *result;
-
         void *bmp = bmp180_init(config->i2c_address, config->i2c_device);
         if (bmp == NULL) {
 		fprintf(stderr, "Error initializing bmp180 sensor\n");
@@ -652,12 +650,17 @@ static yadl_result *_bmp180_read_data(yadl_config *config)
 
 	bmp180_close(bmp);
 
-	result = malloc(sizeof(*result));
+	yadl_result *result = malloc(sizeof(*result));
+
 	result->value = malloc(sizeof(float) * 4);
 	result->value[0] = config->temperature_converter(temperature);
 	result->value[1] = pressure;
 	result->value[2] = pressure * 0.0295301;
 	result->value[3] = altitude;
+
+	result->unit = malloc(sizeof(char *) * 1);
+	result->unit[0] = config->temperature_unit;
+
 	return result;
 }
 
@@ -668,9 +671,17 @@ static char ** _bmp180_get_value_header_names(__attribute__((__unused__)) yadl_c
 	return _bmp180_value_header_names;
 }
 
+static char * _bmp180_unit_header_names[] = { "temperature_unit", NULL };
+
+static char ** _bmp180_get_unit_header_names(__attribute__((__unused__)) yadl_config *config)
+{
+	return _bmp180_unit_header_names;
+}
+
 sensor bmp180_sensor_funcs = {
 	.init = &_bmp180_init,
 	.get_value_header_names = &_bmp180_get_value_header_names,
+	.get_unit_header_names = &_bmp180_get_unit_header_names,
 	.read = _bmp180_read_data
 
 

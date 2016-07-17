@@ -116,7 +116,7 @@ void usage(void)
 	printf("\n");
 	printf("* Poll a DHT22 temperature sensor on BCM pin 17 (wiringPi pin 0) as JSON.\n");
 	printf("  $ sudo yadl --gpio_pin 0 --sensor dht22 --temperature_unit fahrenheit --output json\n");
-	printf("  { \"result\": [  { \"temperature\": 68.18, \"humidity\": 55.30, \"dew_point\": 51.55, \"timestamp\": 1467648942 } ] }\n");
+	printf("  { \"result\": [  { \"temperature\": 68.18, \"humidity\": 55.30, \"dew_point\": 51.55, \"temperature_unit\": \"F\", \"timestamp\": 1467648942 } ] }\n");
 	printf("\n");
 	printf("* Poll a single sample from BCM digital pin 17 (wiringPi pin 0) as JSON\n");
 	printf("  $ yadl --sensor digital --gpio_pin 0 --output json\n");
@@ -182,6 +182,9 @@ int get_num_values(yadl_config *config)
 static void _free_result(yadl_result *result)
 {
 	free(result->value);
+	if (result->unit != NULL) {
+		free(result->unit);
+	}
 	free(result);
 }
 
@@ -296,11 +299,19 @@ static yadl_result *_perform_all_readings(yadl_config *config)
 	int num_values = get_num_values(config);
 	value_list = calloc(num_values, sizeof(float *));
 
+	char **unit_values = NULL;
+
 	for (int i = 0; i < config->num_samples_per_result; i++) {
 		if (i > 0 && config->sleep_millis_between_samples > 0)
 			delay(config->sleep_millis_between_samples);
 
 		yadl_result *sample = _perform_reading(config);
+
+		/* Save the units for the returned result */
+		if (i == 0 && sample->unit != NULL) {
+			unit_values = sample->unit;
+			sample->unit = NULL;
+		}
 
 		config->logger("Sample #%d", i);
 		for (int num = 0; num < num_values; num++) {
@@ -319,6 +330,7 @@ static yadl_result *_perform_all_readings(yadl_config *config)
 	}
 
 	yadl_result *result = malloc(sizeof(*result));
+	result->unit = unit_values;
 	result->value = malloc(sizeof(float) * num_values);
 	for (int num = 0; num < num_values; num++) {
 		result->value[num] = config->filter_func(value_list[num]);
@@ -408,6 +420,7 @@ int main(int argc, char **argv)
 
 	char *sensor_name = NULL, *adc_name = NULL;
 	char *filter_name = NULL, *logfile = NULL;
+	char *temperature_unit = NULL;
 	yadl_config config;
 
 	char **output_types = NULL;
@@ -529,7 +542,7 @@ int main(int argc, char **argv)
 			config.adc_millivolts = strtol(optarg, NULL, 10);
 			break;
 		case 25:
-			config.temperature_unit = optarg;
+			temperature_unit = optarg;
 			break;
 		case 26:
 			config.w1_slave = optarg;
@@ -605,7 +618,9 @@ int main(int argc, char **argv)
 	if (config.filter_func == NULL)
 		usage();
 
-	config.temperature_converter = get_temperature_converter(config.temperature_unit);
+	populate_temperature_converter(&config, temperature_unit);
+	if (config.temperature_converter == NULL)
+		usage();
 
 	config.adc = get_adc(adc_name);
 

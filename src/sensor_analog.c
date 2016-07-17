@@ -43,11 +43,14 @@ static yadl_result *_analog_read_data(yadl_config *config)
 	int read_millivolts = (float) reading * ((float) config->adc_millivolts / (float) config->adc->adc_resolution);
 	config->logger("Got analog reading %d; %d millivolts.\n", reading, read_millivolts);
 
-	yadl_result *result;
-	result = malloc(sizeof(*result));
+	yadl_result *result = malloc(sizeof(*result));
+
 	result->value = malloc(sizeof(float) * 2);
 	result->value[0] = reading;
 	result->value[1] = read_millivolts;
+
+	result->unit = NULL;
+
 	return result;
 }
 

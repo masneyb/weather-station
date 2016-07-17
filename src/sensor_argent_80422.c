@@ -306,8 +306,8 @@ static yadl_result *_argent_80422_read_data(yadl_config *config)
 	_argent_80422_rain_gauge_total(&config->rain_gauge_24h, &config->num_rain_gauge_24h_samples,
 					86400000, rain_gauge, config);
 
-	yadl_result *result;
-	result = malloc(sizeof(*result));
+	yadl_result *result = malloc(sizeof(*result));
+
 	result->value = malloc(sizeof(float) * 18);
 
 	result->value[0] = wind_direction;
@@ -358,6 +358,8 @@ static yadl_result *_argent_80422_read_data(yadl_config *config)
 	config->logger("rain_num_seen=%d, rain_gauge (in): cur=%.1f, 1h=%.1f, 6h=%.1f, 24h=%.1f\n",
 			rain_num_seen, rain_gauge, result->value[15], result->value[16],
 			result->value[17]);
+
+	result->unit = NULL;
 
 	return result;
 }

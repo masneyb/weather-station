@@ -102,7 +102,7 @@ following features:
     
     * Poll a DHT22 temperature sensor on BCM pin 17 (wiringPi pin 0) as JSON.
       $ sudo yadl --gpio_pin 0 --sensor dht22 --temperature_unit fahrenheit --output json
-      { "result": [  { "temperature": 68.18, "humidity": 55.30, "dew_point": 51.55, "timestamp": 1467648942 } ] }
+      { "result": [  { "temperature": 68.18, "humidity": 55.30, "dew_point": 51.55, "temperature_unit": "F", "timestamp": 1467648942 } ] }
     
     * Poll a single sample from BCM digital pin 17 (wiringPi pin 0) as JSON
       $ yadl --sensor digital --gpio_pin 0 --output json

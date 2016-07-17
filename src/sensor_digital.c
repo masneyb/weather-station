@@ -42,10 +42,13 @@ static yadl_result *_digital_read_data(yadl_config *config)
 	config->logger("Got digital reading %d from GPIO pin %d.\n",
 			reading, config->gpio_pin);
 
-	yadl_result *result;
-	result = malloc(sizeof(*result));
+	yadl_result *result = malloc(sizeof(*result));
+
 	result->value = malloc(sizeof(float) * 1);
 	result->value[0] = reading;
+
+	result->unit = NULL;
+
 	return result;
 }
 

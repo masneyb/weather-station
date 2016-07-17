@@ -93,13 +93,15 @@ static yadl_result *_digital_counter_read_data(yadl_config *config)
 	config->logger("num_seen=%d, elapsed_secs=%.2f, counts_per_sec=%.2f, counter_multiplier=%.2f\n",
 			num_seen, elapsed_secs, counts_per_sec, config->counter_multiplier);
 
-	yadl_result *result;
-	result = malloc(sizeof(*result));
+	yadl_result *result = malloc(sizeof(*result));
+
 	result->value = malloc(sizeof(float) * 4);
 	result->value[0] = num_seen;
 	result->value[1] = num_seen * config->counter_multiplier;
 	result->value[2] = counts_per_sec;
 	result->value[3] = counts_per_sec * config->counter_multiplier;
+
+	result->unit = NULL;
 
 	return result;
 }

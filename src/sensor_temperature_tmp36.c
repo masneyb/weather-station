@@ -41,8 +41,6 @@ static void _tmp36_init(yadl_config *config)
 
 static yadl_result *_tmp36_read_data(yadl_config *config)
 {
-	yadl_result *result;
-
 	config->logger("tmp36: Beginning to perform analog read. adc_millivolts=%d, adc_resolution=%d, analog_scaling_factor=%d\n",
 			config->adc_millivolts, config->adc->adc_resolution, config->analog_scaling_factor);
 
@@ -55,9 +53,14 @@ static yadl_result *_tmp36_read_data(yadl_config *config)
 
 	config->logger("tmp36: temperature=%.2fC, humidity=unsupported\n", temperature);
 
-	result = malloc(sizeof(*result));
+	yadl_result *result = malloc(sizeof(*result));
+
 	result->value = malloc(sizeof(float) * 1);
 	result->value[0] = config->temperature_converter(temperature);
+
+	result->unit = malloc(sizeof(char *) * 1);
+	result->unit[0] = config->temperature_unit;
+
 	return result;
 }
 
@@ -68,8 +71,16 @@ static char ** _tmp36_get_value_header_names(__attribute__((__unused__)) yadl_co
 	return _tmp36_value_header_names;
 }
 
+static char * _tmp36_unit_header_names[] = { "temperature_unit", NULL };
+
+static char ** _tmp36_get_unit_header_names(__attribute__((__unused__)) yadl_config *config)
+{
+	return _tmp36_unit_header_names;
+}
+
 sensor tmp36_sensor_funcs = {
 	.init = &_tmp36_init,
 	.get_value_header_names = &_tmp36_get_value_header_names,
+	.get_unit_header_names = &_tmp36_get_unit_header_names,
 	.read = _tmp36_read_data
 };

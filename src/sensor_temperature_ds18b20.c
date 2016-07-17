@@ -50,7 +50,6 @@ static char *_read_line(char *buf, int size, FILE *stream)
 
 static yadl_result *_ds18b20_read_data(yadl_config *config)
 {
-	yadl_result *result;
 	float temperature;
 	char buf[255];
 	char *pos;
@@ -99,9 +98,13 @@ static yadl_result *_ds18b20_read_data(yadl_config *config)
 	temperature = strtol(pos, NULL, 10) / 1000.0;
 	config->logger("ds18b20: temperature=%.2fC, humidity=unsupported\n", temperature);
 
-	result = malloc(sizeof(*result));
+	yadl_result *result = malloc(sizeof(*result));
 	result->value = malloc(sizeof(float) * 1);
 	result->value[0] = config->temperature_converter(temperature);
+
+	result->unit = malloc(sizeof(char *) * 1);
+	result->unit[0] = config->temperature_unit;
+
 	return result;
 }
 
@@ -125,9 +128,17 @@ static char ** _ds18b20_get_value_header_names(__attribute__((__unused__)) yadl_
         return _ds18b20_value_header_names;
 }
 
+static char * _ds18b20_unit_header_names[] = { "temperature_unit", NULL };
+
+static char ** _ds18b20_get_unit_header_names(__attribute__((__unused__)) yadl_config *config)
+{
+	return _ds18b20_unit_header_names;
+}
+
 sensor ds18b20_sensor_funcs = {
-        .init = &_ds18b20_init,
+	.init = &_ds18b20_init,
 	.get_value_header_names = &_ds18b20_get_value_header_names,
-        .read = &_ds18b20_read_data
+	.get_unit_header_names = &_ds18b20_get_unit_header_names,
+	.read = &_ds18b20_read_data
 };
 

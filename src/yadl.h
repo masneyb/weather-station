@@ -25,6 +25,7 @@
 
 typedef struct yadl_result_tag {
 	float *value;
+	char **unit;
 } yadl_result;
 
 typedef struct yadl_config_tag yadl_config;
@@ -52,6 +53,7 @@ typedef struct sensor_tag {
 	void (*init)(yadl_config *config);
 	yadl_result * (*read)(yadl_config *config);
 	char ** (*get_value_header_names)(yadl_config *config);
+	char ** (*get_unit_header_names)(yadl_config *config);
 } sensor;
 
 typedef float (*filter)(float_node *list);
@@ -152,4 +154,5 @@ void usage(void);
 
 int get_num_values(yadl_config *config);
 
-temperature_unit_converter get_temperature_converter(char *name);
+void populate_temperature_converter(yadl_config *config, char *name);
+

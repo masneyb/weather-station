@@ -163,6 +163,7 @@ static yadl_result *_dht_read_data(char *sensor_descr,
 			sensor_descr, checksum, data[4]);
 
 	yadl_result *result = malloc(sizeof(*result));
+
 	result->value = malloc(sizeof(float) * 3);
 	dht_parser(data, result);
 	result->value[2] = _calculate_dew_point(result->value[0], result->value[1]);
@@ -170,6 +171,10 @@ static yadl_result *_dht_read_data(char *sensor_descr,
 			sensor_descr, result->value[0], result->value[1], result->value[2]);
 	result->value[0] = config->temperature_converter(result->value[0]);
 	result->value[2] = config->temperature_converter(result->value[2]);
+
+	result->unit = malloc(sizeof(char *) * 1);
+	result->unit[0] = config->temperature_unit;
+
 	return result;
 }
 
@@ -203,15 +208,24 @@ static char ** _dht_get_value_header_names(__attribute__((__unused__)) yadl_conf
         return _dht_value_header_names;
 }
 
+static char * _dht_unit_header_names[] = { "temperature_unit", NULL };
+
+static char ** _dht_get_unit_header_names(__attribute__((__unused__)) yadl_config *config)
+{
+        return _dht_unit_header_names;
+}
+
 sensor dht11_sensor_funcs = {
 	.init = &_dht_init,
 	.get_value_header_names = &_dht_get_value_header_names,
+	.get_unit_header_names = &_dht_get_unit_header_names,
 	.read = &_dht11_read_data
 };
 
 sensor dht22_sensor_funcs = {
 	.init = &_dht_init,
 	.get_value_header_names = &_dht_get_value_header_names,
+	.get_unit_header_names = &_dht_get_unit_header_names,
 	.read = &_dht22_read_data
 };
 
