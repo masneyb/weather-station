@@ -49,6 +49,12 @@ converted to 5V using a [PowerBoost 1000](https://www.adafruit.com/products/2465
 The solar panel is attached to the top of the project box using several large
 pieces of velcrow. More information about the solar setup can be found on
 [Adafruit's Website](https://learn.adafruit.com/usb-dc-and-solar-lipoly-charger/overview).
+Be sure to connect the PowerBoost 1000 to the battery charge output pins instead
+of to the load terminal. This is because the solar panel can put out 6V however the
+PowerBoost can only accept a maximum input voltage of 5.5V. See
+[this post](https://forums.adafruit.com/viewtopic.php?f=19&t=59523) on the Adafruit
+forums for more details. There should not be anything hooked up to the load
+terminal.
 
 The LED and display on the Pi was disabled, and `powertop --auto-tune` was used
 to enable other power saving features. See the files
