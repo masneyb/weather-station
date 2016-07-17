@@ -65,15 +65,20 @@
         }
 
         $('#rain_1h').text(data.result[0].rain_gauge_1h);
+        $('#rain_1h_unit').text(data.result[0].rain_gauge_unit);
         $('#rain_6h').text(data.result[0].rain_gauge_6h);
+        $('#rain_6h_unit').text(data.result[0].rain_gauge_unit);
         $('#rain_24h').text(data.result[0].rain_gauge_24h);
+        $('#rain_24h_unit').text(data.result[0].rain_gauge_unit);
       });
 
       $.getJSON("temperature_humidity.json", function(data) {
         $('#temperature_humidity_last_updated').text("Temperature / humidity last updated " + ((new Date().getTime() / 1000) - data.result[0].timestamp).toFixed(0) + " seconds ago");
         $('#temperature_number').text(data.result[0].temperature.toFixed(1));
+        $('#temperature_unit').text(data.result[0].temperature_unit);
         $('#humidity_number').text(data.result[0].humidity.toFixed(1));
         $('#dew_point_number').text(data.result[0].dew_point.toFixed(1));
+        $('#dew_point_unit').text(data.result[0].temperature_unit);
       });
 
       $.getJSON("bmp180.json", function(data) {
@@ -129,7 +134,7 @@
     </tr>
     <tr>
       <td>
-        <div class="stat"><span id="temperature_number"></span> F</div>
+        <div class="stat"><span id="temperature_number"></span> <span id="temperature_unit"></span></div>
       </td>
       <td>
         <div class="stat"><span id="humidity_number"></span> %</div>
@@ -138,16 +143,16 @@
         <div id="wind"></div>
       </td>
       <td>
-        <div>Last 1 hour: <span id="rain_1h"></span> in</div>
-        <div>Last 6 hours: <span id="rain_6h"></span> in</div>
-        <div>Last 24 hours: <span id="rain_24h"></span> in</div>
+        <div>Last 1 hour: <span id="rain_1h"></span> <span id="rain_1h_unit"></span></div>
+        <div>Last 6 hours: <span id="rain_6h"></span> <span id="rain_6h_unit"></span></div>
+        <div>Last 24 hours: <span id="rain_24h"></span> <span id="rain_24h_unit"></span></div>
       </td>
       <td>
         <div class="stat"><span id="pressure_in_number"></span> in</div>
         <div class="stat"><span id="pressure_mb_number"></span> millibars</div>
       </td>
       <td>
-        <div class="stat"><span id="dew_point_number"></span> F</div>
+        <div class="stat"><span id="dew_point_number"></span> <span id="dew_point_unit"></span></div>
       </td>
       <td>
         <div class="stat"><span id="battery_number"></span> mV</div>
