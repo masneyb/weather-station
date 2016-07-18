@@ -415,6 +415,8 @@ int main(int argc, char **argv)
 		{"wind_speed_pin", required_argument, 0, 0 },
 		{"rain_gauge_pin", required_argument, 0, 0 },
 		{"i2c_device", required_argument, 0, 0 },
+		{"wind_speed_unit", required_argument, 0, 0 },
+		{"rain_gauge_unit", required_argument, 0, 0 },
 		{0, 0, 0, 0 }
 	};
 
@@ -558,6 +560,12 @@ int main(int argc, char **argv)
 			break;
 		case 30:
 			config.i2c_device = optarg;
+			break;
+		case 31:
+			config.wind_speed_unit = optarg;
+			break;
+		case 32:
+			config.rain_gauge_unit = optarg;
 			break;
 		default:
 			usage();

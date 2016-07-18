@@ -31,9 +31,6 @@
 #include <sys/time.h>
 #include "yadl.h"
 
-#define RAIN_GAUGE_MULTIPLIER 0.011
-#define WIND_SPEED_MULTIPLIER 1.492
-
 static volatile unsigned int _wind_last_millis = 0;
 static volatile int _wind_current_counter = 0;
 static int _wind_last_counter = 0;
@@ -129,7 +126,7 @@ static void *_argent_80422_wind_thread(void *arg)
 
 		int stop_counter = _wind_current_counter;
 		int wind_num_seen = _get_num_seen(start_counter, stop_counter);
-		float wind_speed = wind_num_seen * WIND_SPEED_MULTIPLIER;
+		float wind_speed = wind_num_seen * config->wind_speed_multiplier;
 
 		float wind_direction = _get_wind_direction(config);
 
@@ -190,6 +187,32 @@ static void _argent_80422_init(yadl_config *config)
 	}
 	else if (config->rain_gauge_pin == -1) {
 		fprintf(stderr, "You must specify the --rain_gauge_pin argument\n");
+		usage();
+	}
+
+	if (config->wind_speed_unit == NULL) {
+		fprintf(stderr, "You must specify the --wind_speed_unit argument\n");
+		usage();
+	}
+	else if (strcmp(config->wind_speed_unit, "mph") == 0)
+		config->wind_speed_multiplier = 1.492;
+	else if (strcmp(config->wind_speed_unit, "kmh") == 0)
+		config->wind_speed_multiplier = 2.4;
+	else {
+		fprintf(stderr, "Invalid --wind_speed_unit %s. Must be either mph or kmh.\n", config->wind_speed_unit);
+		usage();
+	}
+
+	if (config->rain_gauge_unit == NULL) {
+		fprintf(stderr, "You must specify the --rain_gauge_unit argument\n");
+		usage();
+	}
+	else if (strcmp(config->rain_gauge_unit, "in") == 0)
+		config->rain_gauge_multiplier = 0.011;
+	else if (strcmp(config->rain_gauge_unit, "mm") == 0)
+		config->rain_gauge_multiplier = 0.2794;
+	else {
+		fprintf(stderr, "Invalid --rain_gauge_unit %s. Must be either in or mm.\n", config->rain_gauge_unit);
 		usage();
 	}
 
@@ -294,10 +317,10 @@ static yadl_result *_argent_80422_read_data(yadl_config *config)
 
 	int wind_num_seen = _get_num_seen(start_wind_counter, stop_wind_counter);
 	float avg_wind_cps = wind_num_seen / elapsed_secs;
-	float wind_speed = avg_wind_cps * WIND_SPEED_MULTIPLIER;
+	float wind_speed = avg_wind_cps * config->wind_speed_multiplier;
 
 	int rain_num_seen = _get_num_seen(start_rain_counter, stop_rain_counter);
-	float rain_gauge = rain_num_seen * RAIN_GAUGE_MULTIPLIER;
+	float rain_gauge = rain_num_seen * config->rain_gauge_multiplier;
 
 	_argent_80422_rain_gauge_total(&config->rain_gauge_1h, &config->num_rain_gauge_1h_samples,
 					3600000, rain_gauge, config);
@@ -360,8 +383,8 @@ static yadl_result *_argent_80422_read_data(yadl_config *config)
 			result->value[17]);
 
 	result->unit = malloc(sizeof(char *) * 2);
-	result->unit[0] = "mph";
-	result->unit[1] = "in";
+	result->unit[0] = config->wind_speed_unit;
+	result->unit[1] = config->rain_gauge_unit;
 
 	return result;
 }

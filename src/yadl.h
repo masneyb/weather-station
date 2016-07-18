@@ -95,6 +95,12 @@ struct yadl_config_tag {
 	int wind_speed_pin;
 	int rain_gauge_pin;
 
+	char *wind_speed_unit;
+	float wind_speed_multiplier;
+
+	char *rain_gauge_unit;
+	float rain_gauge_multiplier;
+
 	float_node *rain_gauge_1h;
 	int num_rain_gauge_1h_samples;
 
