@@ -30,6 +30,7 @@
     function update_stats() {
       $.getJSON("argent_80422.json", function(data) {
         $('#argent_80422_last_updated').text("Wind / rain last updated " + (((new Date().getTime() / 1000) - data.result[0].timestamp)).toFixed(0) + " seconds ago");
+        $('#wind_current_label').text("Current Speed (" + data.result[0].wind_speed_unit + ")");
         var wind_profile = $('#wind_profile').val();
         if (wind_profile == 'cur') {
 		$('#wind').text(data.result[0].wind_speed_cur.toFixed(1));
@@ -166,7 +167,7 @@
       <td></td>
       <td>
         <select name="wind_profile" id="wind_profile" onchange="update_stats();">
-          <option value="cur" checked="1">Current Speed</input>
+          <option id="wind_current_label" value="cur" checked="1">Current Speed</input>
           <option value="avg_2m">2 minute average</input>
           <option value="gust_2m">2 minute gust</input>
           <option value="avg_10m">10 minute average</input>
