@@ -120,7 +120,7 @@ that leave the box.
 - Clone this repository and the [pi-yadl](https://github.com/masneyb/pi-yadl)
   repository.
 - Follow the installation instructions to compile the pi-yadl project.
-- Update the paths in this repository's [systemd service files)[systemd/].
+- Update the paths in this repository's (systemd service files)[systemd/].
 - Run `bin/create-rrds.sh <path to web/ directory>` to create the initial
   empty RRD databases.
 - `sudo make install`
