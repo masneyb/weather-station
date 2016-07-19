@@ -1,6 +1,10 @@
 # weather-station
 
-A weather station for the Raspberry Pi that supports the following sensors:
+A lightweight solar powered weather station for the Raspberry Pi.
+
+![Screenshot](images/weather-station-screenshot.png?raw=1)
+
+## Supported Sensors
 
 - [Argent Data Systems Weather Sensor Assembly](https://www.sparkfun.com/products/8942)
   contains a wind vane, anemometer, and rain gauge. This project supports logging the
@@ -11,17 +15,11 @@ A weather station for the Raspberry Pi that supports the following sensors:
 - Supports the BMP180 pressure, altitude and temperature sensor.
 - Battery charge level is read via an analog to digital converter (ADC).
 
-My [pi-yadl](https://github.com/masneyb/pi-yadl) project is used to gather and
-graph the data from these sensors. This weather-station project only contains the
-systemd services, systemd timers, and web page for the various sensors.
-
-
-## Screenshot
-
-![Screenshot](images/weather-station-screenshot.png?raw=1)
-
 ## High level overview
 
+- My [pi-yadl](https://github.com/masneyb/pi-yadl) project is used to gather and
+  graph the data from these sensors. This weather-station project only contains
+  the systemd services, systemd timers, and web page for the various sensors.
 - For the wind vane, wind speed and rain gauge, the pi-yadl program is ran
   as a daemon in the background so that it can monitor the rain gauge and
   anemometer. The values from these three sensors are written out to a RRD
