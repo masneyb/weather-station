@@ -1,6 +1,4 @@
-# weather-station
-
-A lightweight solar powered weather station for the Raspberry Pi.
+# Solar Powered Weather Station
 
 ![Screenshot](images/weather-station-screenshot.png?raw=1)
 
