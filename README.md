@@ -16,8 +16,7 @@
 ## High level overview
 
 - My [pi-yadl](https://github.com/masneyb/pi-yadl) project is used to gather and
-  graph the data from these sensors. This weather-station project only contains
-  the systemd services, systemd timers, and web page for the various sensors.
+  graph the data from these sensors.
 - For the wind vane, wind speed and rain gauge, the pi-yadl program is ran
   as a daemon in the background so that it can monitor the rain gauge and
   anemometer. The values from these three sensors are written out to a RRD
@@ -27,7 +26,7 @@
 - The RRD databases are used to show the historical readings and are
   recreated at the beginning of each hour.
 - The web page uses Javascript to download the various JSON files to provide
-  a dashboard showing the current weather readings. The web page checks for
+  a dashboard showing the current sensor readings. The web page checks for
   updated JSON files on the server every 10 seconds.
 - The Apache webserver runs on the server and it only needs to serve out static
   files.
@@ -46,12 +45,13 @@ converted to 5V using a [PowerBoost 1000](https://www.adafruit.com/products/2465
 The solar panel is attached to the top of the project box using several large
 pieces of velcrow. More information about the solar setup can be found on
 [Adafruit's Website](https://learn.adafruit.com/usb-dc-and-solar-lipoly-charger/overview).
-Be sure to connect the PowerBoost 1000 to the battery charge output pins instead
-of to the load terminal. This is because the solar panel can put out 6V however the
+Be sure to connect the PowerBoost 1000 to the battery charge output pins; not
+the load terminal. This is because the solar panel can put out 6V however the
 PowerBoost can only accept a maximum input voltage of 5.5V. See
 [this post](https://forums.adafruit.com/viewtopic.php?f=19&t=59523) on the Adafruit
 forums for more details. There should not be anything hooked up to the load
-terminal on the charger.
+terminal on the charger. I fried a Pi Zero and a PowerBoost 1000 on a bright,
+sunny afternoon with the PowerBoost hooked up to the load terminal.
 
 To reduce the power usage of the Raspberry Pi, the LED and display on the Pi was
 disabled. `powertop --auto-tune` was used to enable other power saving features.
@@ -78,6 +78,16 @@ The ADC is used for the wind vane and obtaining the voltage levels from the
 battery and PowerBoost 1000. This ADC communicates with the Raspberry Pi
 using the SPI bus.
 
+The wind vane supports reporting 16 different positions by using a series of
+different size resistors and reed switches to indicate the position of the wind
+vane. The wind vane is connected to the ADC and the voltage indicates the
+direction. For example, according to the 
+[datasheet](https://www.argentdata.com/files/80422_datasheet.pdf), 0 degrees (N)
+is 3.84V; 45 degrees (NE) is 2.25V; and 90 degrees (E) is 0.45V. I had an issue
+with getting accurate readings between 270 degrees and 337.5 degrees. The issue
+was my reference ADC voltage was set to 5V instead of 5.1V. Adding the argument
+`--adc_millivolts 5100` to the yadl binary fixed the issue.
+
 The anemometer is hooked up to a GPIO pin on the Pi. According to the
 [datasheet](https://www.argentdata.com/files/80422_datasheet.pdf), one click
 of the reed switch over a second corresponds to a wind speed of 1.492 mph
@@ -94,10 +104,10 @@ is debounced in software.
 The Stevenson screen (left side of the above picture) contains the temperature,
 humidity and barometric pressure sensors. A 3D model of the screen was
 downloaded from
-[https://www.thingiverse.com/thing:158039](https://www.thingiverse.com/thing:158039).
-It was 3D printed using HIPS plastic and spray painted using flat white paint.
+[https://www.thingiverse.com/thing:158039](https://www.thingiverse.com/thing:158039),
+3D printed using HIPS plastic and spray painted using flat white paint.
 
-The temperature / humidity is obtained using a DHT22 sensor. The dew point is
+The temperature and humidity is obtained using a DHT22 sensor. The dew point is
 calculated using the
 [August-Roche-Magnus approximation](http://andrew.rsmas.miami.edu/bmcnoldy/Humidity.html).
 The DHT sensor communicates with the Pi over one of the GPIO pins.
