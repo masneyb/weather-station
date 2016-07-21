@@ -78,15 +78,16 @@ The ADC is used for the wind vane and obtaining the voltage levels from the
 battery and PowerBoost 1000. This ADC communicates with the Raspberry Pi
 using the SPI bus.
 
-The wind vane supports reporting 16 different positions by using a series of
-different size resistors and reed switches to indicate the position of the wind
-vane. The wind vane is connected to the ADC and the voltage indicates the
-direction. For example, according to the 
+The wind vane supports reporting 16 different positions of the wind vane by
+using a series of different size resistors and reed switches. The wind vane
+is connected to the ADC and the voltage indicates the direction. For example,
+according to the 
 [datasheet](https://www.argentdata.com/files/80422_datasheet.pdf), 0 degrees (N)
 is 3.84V; 45 degrees (NE) is 2.25V; and 90 degrees (E) is 0.45V. I had an issue
-with getting accurate readings between 270 degrees and 337.5 degrees. The issue
-was my reference ADC voltage was set to 5V instead of 5.1V. Adding the argument
-`--adc_millivolts 5100` to the yadl binary fixed the issue.
+with getting accurate readings from the wind vane between 270 and 337.5 degrees
+that was caused by having my reference ADC voltage in software set to 5V instead
+of 5.1V. Adding the argument `--adc_millivolts 5100` to the yadl binary fixed
+the issue.
 
 The anemometer is hooked up to a GPIO pin on the Pi. According to the
 [datasheet](https://www.argentdata.com/files/80422_datasheet.pdf), one click
