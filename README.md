@@ -140,4 +140,3 @@ that leave the box.
 ## Contact
 
 Brian Masney <masneyb@onstation.org>
-Morgantown, WV USA
