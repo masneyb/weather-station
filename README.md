@@ -1,6 +1,8 @@
-# weather-station
+# Solar Powered Weather Station
 
-A weather station for the Raspberry Pi that supports the following sensors:
+![Screenshot](images/weather-station-screenshot.png?raw=1)
+
+## Supported Sensors
 
 - [Argent Data Systems Weather Sensor Assembly](https://www.sparkfun.com/products/8942)
   contains a wind vane, anemometer, and rain gauge. This project supports logging the
@@ -9,31 +11,28 @@ A weather station for the Raspberry Pi that supports the following sensors:
 - Supports various types of temperature and humidity sensors: DHT11, DHT22, DS18B20,
   TMP36 (analog).
 - Supports the BMP180 pressure, altitude and temperature sensor.
-- Battery charge level.
-
-My [pi-yadl](https://github.com/masneyb/pi-yadl) project is used to gather and
-graph the data from these sensors. This weather-station project only contains the
-systemd services, systemd timers, and web page for the various sensors.
-
-
-## Screenshot
-
-![Screenshot](images/weather-station-screenshot.png?raw=1)
+- Battery charge level is read via an analog to digital converter (ADC).
 
 ## High level overview
 
+- My [pi-yadl](https://github.com/masneyb/pi-yadl) project is used to gather and
+  graph the data from these sensors.
 - For the wind vane, wind speed and rain gauge, the pi-yadl program is ran
-  as a daemon continuously in the background so that it can monitor the rain
-  gauge and anemometer. The values from these three sensors are
-  written out to a RRD database and JSON file every 30 seconds.
+  as a daemon in the background so that it can monitor the rain gauge and
+  anemometer. The values from these three sensors are written out to a RRD
+  database and JSON file every 30 seconds.
 - The data from the other sensors are polled every 5 minutes via a systemd
-  timer. The readings are also written out to a RRD database and JSON file.
+  timer and written to various RRD databases and JSON files.
 - The RRD databases are used to show the historical readings and are
   recreated at the beginning of each hour.
-- The index.html uses Javascript to download the various JSON files to provide
-  a dashboard showing the current weather readings.
+- The web page uses Javascript to download the various JSON files to provide
+  a dashboard showing the current sensor readings. The web page checks for
+  updated JSON files on the server every 10 seconds.
 - The Apache webserver runs on the server and it only needs to serve out static
   files.
+- Everything runs on the Pi; no third-party services are used.
+- *Coming Soon* - The ability to also optionally publish the sensor readings to
+  WeatherUnderground.
 
 
 ## Hardware Information
@@ -49,17 +48,19 @@ converted to 5V using a [PowerBoost 1000](https://www.adafruit.com/products/2465
 The solar panel is attached to the top of the project box using several large
 pieces of velcrow. More information about the solar setup can be found on
 [Adafruit's Website](https://learn.adafruit.com/usb-dc-and-solar-lipoly-charger/overview).
-Be sure to connect the PowerBoost 1000 to the battery charge output pins instead
-of to the load terminal. This is because the solar panel can put out 6V however the
+Be sure to connect the PowerBoost 1000 to the battery charge output pins; not
+the load terminal. This is because the solar panel can put out 6V however the
 PowerBoost can only accept a maximum input voltage of 5.5V. See
 [this post](https://forums.adafruit.com/viewtopic.php?f=19&t=59523) on the Adafruit
 forums for more details. There should not be anything hooked up to the load
-terminal.
+terminal on the charger. I fried a Pi Zero and a PowerBoost 1000 on a bright,
+sunny afternoon with the PowerBoost hooked up to the load terminal.
 
-The LED and display on the Pi was disabled, and `powertop --auto-tune` was used
-to enable other power saving features. See the files
+To reduce the power usage of the Raspberry Pi, the LED and display on the Pi was
+disabled. `powertop --auto-tune` was used to enable other power saving features.
+See the files
 [systemd/power-savings.service](systemd/power-savings.service) and
-[bin/power-savings](bin/power-savings) for the details. The power requirements
+[bin/power-savings](bin/power-savings) for details. The power requirements
 could be reduced even further by desoldering the various LEDs on the solar
 charger and PowerBoost 1000.
 
@@ -70,9 +71,11 @@ put a piece of tape around the box where the lid and body meet to help keep the
 wind-driven rain out.
 
 All of the external sensors are terminated with a RJ45 connector to make it easy
-to remove the project box without having to bring all of the associated sensors
+to remove the project box without having to bring the entire weather station
 inside. [RJ45 waterproof cable glands](https://www.adafruit.com/products/827)
-are used on the project box to get the connections inside the box.
+are used on the project box to get the connections inside the box. The wire for
+the solar panel enters the project box using a
+[PG-9](https://www.adafruit.com/products/761) cable gland.
 
 A [MCP3008 analog to digital converter](https://www.adafruit.com/products/856)
 was soldered onto a [solderable breadboard](https://www.sparkfun.com/products/12070).
@@ -80,27 +83,40 @@ The ADC is used for the wind vane and obtaining the voltage levels from the
 battery and PowerBoost 1000. This ADC communicates with the Raspberry Pi
 using the SPI bus.
 
+The wind vane supports reporting 16 different positions of the wind vane by
+using a series of different size resistors and reed switches. The wind vane
+is connected to the ADC and the voltage indicates the direction. For example,
+according to the 
+[datasheet](https://www.argentdata.com/files/80422_datasheet.pdf), 0 degrees (N)
+is 3.84V; 45 degrees (NE) is 2.25V; and 90 degrees (E) is 0.45V. I had an issue
+with getting accurate readings from the wind vane between 270 and 337.5 degrees
+that was caused by having my reference ADC voltage in software set to 5V instead
+of 5.1V. Adding the argument `--adc_millivolts 5100` to the yadl binary fixed
+the issue.
+
 The anemometer is hooked up to a GPIO pin on the Pi. According to the
 [datasheet](https://www.argentdata.com/files/80422_datasheet.pdf), one click
-of the reed switch over a second corresponds to a wind speed of 1.492 mph. A
-pull down resistor is used and the switch is debounced in software.
+of the reed switch over a second corresponds to a wind speed of 1.492 mph
+(2.4 km/h). A pull down resistor is used and the switch is debounced in
+software.
 
 The rain gauge is very similiar to the anemometer. Each click of the switch
-over a second corresponds to 0.011 inches of rain according to the
-[datasheet](https://www.argentdata.com/files/80422_datasheet.pdf).
-The rain gauge is very sensitive to movement and the high winds sometimes
-causes the switch to close. This also uses a pull down resistor and the
-switch is debounced in software.
+over a second corresponds to 0.011 inches (0.2794 mm) of rain according to
+the [datasheet](https://www.argentdata.com/files/80422_datasheet.pdf).
+The rain gauge is sensitive to movement and high winds sometimes cause the
+switch to change state. This also uses a pull down resistor and the switch
+is debounced in software.
 
 The Stevenson screen (left side of the above picture) contains the temperature,
 humidity and barometric pressure sensors. A 3D model of the screen was
 downloaded from
-[https://www.thingiverse.com/thing:158039](https://www.thingiverse.com/thing:158039).
-It was 3D printed using HIPS plastic and spray painted using flat white paint.
+[https://www.thingiverse.com/thing:158039](https://www.thingiverse.com/thing:158039),
+3D printed using HIPS plastic and spray painted using flat white paint.
 
-The temperature / humidity is obtained using a DHT22 sensor. The dew point is
-calculated based on these two values. The DHT sensor communicates with the
-Pi over one of the GPIO pins.
+The temperature and humidity is obtained using a DHT22 sensor. The dew point is
+calculated using the
+[August-Roche-Magnus approximation](http://andrew.rsmas.miami.edu/bmcnoldy/Humidity.html).
+The DHT sensor communicates with the Pi over one of the GPIO pins.
 
 A BMP180 sensor is used to obtain the barometric pressure and communicates with
 the Pi over the i2c bus.
@@ -120,8 +136,12 @@ that leave the box.
 - Clone this repository and the [pi-yadl](https://github.com/masneyb/pi-yadl)
   repository.
 - Follow the installation instructions to compile the pi-yadl project.
-- Update the paths in this repository's [systemd service files)[systemd/].
+- Update the paths in this repository's [systemd service files](systemd/).
 - Run `bin/create-rrds.sh <path to web/ directory>` to create the initial
   empty RRD databases.
 - `sudo make install`
+- Symlink the [web/](web/) directory somewhere into your web root.
 
+## Contact
+
+Brian Masney <masneyb@onstation.org>
