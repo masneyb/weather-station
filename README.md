@@ -30,6 +30,9 @@
   updated JSON files on the server every 10 seconds.
 - The Apache webserver runs on the server and it only needs to serve out static
   files.
+- Everything runs on the Pi; no third-party services are used.
+- *Coming Soon* - The ability to also optionally publish the sensor readings to
+  WeatherUnderground.
 
 
 ## Hardware Information
