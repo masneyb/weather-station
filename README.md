@@ -137,3 +137,7 @@ that leave the box.
 - `sudo make install`
 - Symlink the [web/](web/) directory somewhere into your web root.
 
+## Contact
+
+Brian Masney <masneyb@onstation.org>
+Morgantown, WV USA
