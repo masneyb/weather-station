@@ -25,3 +25,4 @@ shellcheck:
 	shellcheck bin/create-rrds.sh
 	shellcheck bin/gather-data.sh
 	shellcheck bin/power-savings
+	shellcheck bin/weather-underground-publish.sh
