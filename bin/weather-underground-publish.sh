@@ -36,7 +36,7 @@ generate_url()
 	validate_timestamp "${TS}"
 
 
-	jq -r '.result[]|[.rain_gauge_1h, .wind_dir_cur, .wind_speed_cur, .wind_speed_avg_2m, .wind_dir_avg_2m, .wind_speed_gust_10m, .wind_dir_gust_10m, .timestamp]|@csv' < "${WEB_BASE_DIR}"/argent_80422.json > "${TMP}"
+	jq -r '.result[]|[.rain_gauge_1h, .wind_dir_cur, .wind_speed_cur, .wind_speed_avg_2m, .wind_dir_avg_2m, .wind_speed_gust_10m, .wind_dir_gust_10m, .wind_speed_gust_2m, .wind_dir_gust_2m, .timestamp]|@csv' < "${WEB_BASE_DIR}"/argent_80422.json > "${TMP}"
 	
 	RAININ=$(awk -F, '{print $1}' < "${TMP}")
 	WINDDIR=$(awk -F, '{print $2}' < "${TMP}")
@@ -45,14 +45,16 @@ generate_url()
 	WINDDIR_AVG2M=$(awk -F, '{print $5}' < "${TMP}")
 	WINDGUSTMPH_10M=$(awk -F, '{print $6}' < "${TMP}")
 	WINDGUSTDIR_10M=$(awk -F, '{print $7}' < "${TMP}")
-	TS=$(awk -F, '{print $8}' < "${TMP}")
+	WINDGUSTMPH_2M=$(awk -F, '{print $8}' < "${TMP}")
+	WINDGUSTDIR_2M=$(awk -F, '{print $9}' < "${TMP}")
+	TS=$(awk -F, '{print $10}' < "${TMP}")
 
 	validate_timestamp "${TS}"
 
 	# See http://wiki.wunderground.com/index.php/PWS_-_Upload_Protocol
 	# for the supported URL parameters.
 
-	echo -n "${BASE_URL}?softwaretype=https%3A%2F%2Fgithub.com%2Fmasneyb%2Fweather-station&dateutc=now&action=updateraw&ID=${ID}&PASSWORD=${PASSWORD}"
+	echo -n "${BASE_URL}?softwaretype=tinyurl.com%2Fhyft8kp&dateutc=now&action=updateraw&ID=${ID}&PASSWORD=${PASSWORD}"
 	display_number_in_url_field tempf "${TEMPF}"
 	display_number_in_url_field humidity "${HUMIDITY}"
 	display_number_in_url_field dewptf "${DEWPTF}"
@@ -60,11 +62,15 @@ generate_url()
 	display_number_in_url_field rainin "${RAININ}"
 	display_number_in_url_field winddir "${WINDDIR}"
 	display_number_in_url_field windspeedmph "${WINDSPEEDMPH}"
+	display_number_in_url_field windgustdir "${WINDGUSTDIR_2M}"
+	display_number_in_url_field windgustmph "${WINDGUSTMPH_2M}"
 	display_number_in_url_field windspdmph_avg2m "${WINDSPDMPH_AVG2M}"
 	display_number_in_url_field winddir_avg2m "${WINDDIR_AVG2M}"
 	display_number_in_url_field windgustmph_10m "${WINDGUSTMPH_10M}"
 	display_number_in_url_field windgustdir_10m "${WINDGUSTDIR_10M}"
 	echo ""
+
+	rm -f "${TMP}"
 }
 
 WEB_BASE_DIR="${1:-}"
