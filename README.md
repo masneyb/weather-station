@@ -2,25 +2,23 @@
 
 ![Screenshot](images/weather-station-screenshot.png?raw=1)
 
-## Supported Sensors
-
-- [Argent Data Systems Weather Sensor Assembly](https://www.sparkfun.com/products/8942)
-  contains a wind vane, anemometer, and rain gauge. This project supports logging the
-  wind speed average and gusts over 2 minute, 10 minute and 60 minute periods. The
-  rain over the last 1 hour, 6 hours and 24 hours are logged.
-- Supports various types of temperature and humidity sensors: DHT11, DHT22, DS18B20,
-  TMP36 (analog).
-- Supports the BMP180 pressure, altitude and temperature sensor.
-- Battery charge level is read via an analog to digital converter (ADC).
-
 ## High level overview
 
 - My [pi-yadl](https://github.com/masneyb/pi-yadl) project is used to gather and
-  graph the data from these sensors.
+  graph the data from the following types of sensors:
+  - [Argent Data Systems Weather Sensor Assembly](https://www.sparkfun.com/products/8942)
+    contains a wind vane, anemometer, and rain gauge. This project supports
+    logging the wind speed average and gusts over 2 minute, 10 minute and 60
+    minute periods. The rain over the last 1 hour, 6 hours and 24 hours are
+    logged.
+  - Supports various types of temperature and humidity sensors: DHT11, DHT22,
+    DS18B20, TMP36 (analog).
+  - Supports the BMP180 pressure, altitude and temperature sensor.
+  - Battery charge level is read via an analog to digital converter (ADC).
 - For the wind vane, wind speed and rain gauge, the pi-yadl program is ran
-  as a daemon in the background so that it can monitor the rain gauge and
-  anemometer. The values from these three sensors are written out to a RRD
-  database and JSON file every 30 seconds.
+  as a daemon in the background so that it can continuously monitor the rain
+  gauge and anemometer. The values from these three sensors are written out to
+  a RRD database and JSON file every 30 seconds.
 - The data from the other sensors are polled every 5 minutes via a systemd
   timer and written to various RRD databases and JSON files.
 - The RRD databases are used to show the historical readings and are
@@ -29,10 +27,10 @@
   a dashboard showing the current sensor readings. The web page checks for
   updated JSON files on the server every 10 seconds.
 - The Apache webserver runs on the server and it only needs to serve out static
-  files.
-- Everything runs on the Pi; no third-party services are used.
-- *Coming Soon* - The ability to also optionally publish the sensor readings to
-  WeatherUnderground.
+  files. Everything runs on the Pi; no third-party services are required.
+- Optional ability to publish the sensor readings to Weather Underground.
+  You can
+  [view my weather station on Weather Underground](https://www.wunderground.com/personal-weather-station/dashboard?ID=KWVMORGA45).
 
 
 ## Hardware Information
@@ -42,7 +40,7 @@
 
 ### Solar and Power Setup
 
-This weather station runs on a Raspberry Pi Zero running Rasbian Jessie Lite.
+This weather station runs on a Raspberry Pi Zero running Raspbian Jessie Lite.
 All of the hardware is powered by a
 [4400mAH 3.7V lithium ion battery](https://www.adafruit.com/products/354)
 that is [charged](https://www.adafruit.com/products/390) using a
@@ -119,7 +117,7 @@ of the reed switch over a second corresponds to a wind speed of 1.492 mph
 (2.4 km/h). A pull down resistor is used and the switch is debounced in
 software.
 
-The rain gauge is very similiar to the anemometer. Each click of the switch
+The rain gauge is very similar to the anemometer. Each click of the switch
 over a second corresponds to 0.011 inches (0.2794 mm) of rain according to
 the [datasheet](https://www.argentdata.com/files/80422_datasheet.pdf).
 The rain gauge is sensitive to movement and high winds sometimes cause the
