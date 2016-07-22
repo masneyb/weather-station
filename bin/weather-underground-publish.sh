@@ -49,6 +49,9 @@ generate_url()
 
 	validate_timestamp "${TS}"
 
+	# See http://wiki.wunderground.com/index.php/PWS_-_Upload_Protocol
+	# for the supported URL parameters.
+
 	echo -n "${BASE_URL}?softwaretype=https%3A%2F%2Fgithub.com%2Fmasneyb%2Fweather-station&dateutc=now&action=updateraw&ID=${ID}&PASSWORD=${PASSWORD}"
 	display_number_in_url_field tempf "${TEMPF}"
 	display_number_in_url_field humidity "${HUMIDITY}"
