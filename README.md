@@ -39,6 +39,9 @@
 
 ![Complete Setup](images/weather-station-complete.jpg?raw=1)
 
+
+### Solar and Power Setup
+
 This weather station runs on a Raspberry Pi Zero running Rasbian Jessie Lite.
 All of the hardware is powered by a
 [4400mAH 3.7V lithium ion battery](https://www.adafruit.com/products/354)
@@ -67,9 +70,15 @@ charger and PowerBoost 1000.
 I used a [USB Charger Doctor](https://www.adafruit.com/products/1852) to roughly
 measure the power utilization of the entire weather station at 140 mAH with just
 the wind / rain collector running in the background and 200 mAH when the main
-collection processes runs every 5 minutes for just a few seconds. I would
-expect to get around a day on a fully charged battery without any kind of backup
-from the solar panel.
+collection processes runs every 5 minutes for just a few seconds. This is with a
+USB WiFi dongle running the entire time. I would expect to get around a day of
+usage on a fully charged battery without any kind of backup from the solar
+panel. I've had no problems with the battery charging itself each day during
+the Summer. We'll see how this does in the Winter, although I hope that the
+larger solar panel will be able to replenish the battery each day.
+
+
+### Project Box
 
 I used
 [this project box on Amazon](https://www.amazon.com/uxcell%C2%AE-Waterproof-Connect-Junction-200x120x75mm/dp/B00O9YY1G2),
@@ -83,6 +92,9 @@ inside. [RJ45 waterproof cable glands](https://www.adafruit.com/products/827)
 are used on the project box to get the connections inside the box. The wire for
 the solar panel enters the project box using a
 [PG-9](https://www.adafruit.com/products/761) cable gland.
+
+
+### Sensors
 
 A [MCP3008 analog to digital converter](https://www.adafruit.com/products/856)
 was soldered onto a [solderable breadboard](https://www.sparkfun.com/products/12070).
