@@ -64,6 +64,13 @@ See the files
 could be reduced even further by desoldering the various LEDs on the solar
 charger and PowerBoost 1000.
 
+I used a [USB Charger Doctor](https://www.adafruit.com/products/1852) to roughly
+measure the power utilization of the entire weather station at 140 mAH with just
+the wind / rain collector running in the background and 200 mAH when the main
+collection processes runs every 5 minutes for just a few seconds. I would
+expect to get around a day on a fully charged battery without any kind of backup
+from the solar panel.
+
 I used
 [this project box on Amazon](https://www.amazon.com/uxcell%C2%AE-Waterproof-Connect-Junction-200x120x75mm/dp/B00O9YY1G2),
 although I am a little concerned about the quality of the seal on the box. I
