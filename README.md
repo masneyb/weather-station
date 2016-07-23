@@ -147,6 +147,8 @@ that leave the box.
 
 ![Inside](images/weather-station-outside-rj45-cable-glands.jpg?raw=1)
 
+[![Weather Underground PWS KWVMORGA45](http://banners.wunderground.com/cgi-bin/banner/ban/wxBanner?bannertype=pws250&weatherstationcount=KWVMORGA45)](http://www.wunderground.com/weatherstation/WXDailyHistory.asp?ID=KWVMORGA45)
+
 
 ## Installation
 
