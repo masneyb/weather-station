@@ -1,16 +1,48 @@
 #!/bin/bash -e
 
+# weather-underground-publish.sh
+#
+# Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+# 02110-1301, USA.
+
 validate_timestamp()
 {
 	TS="${1}"
-	# FIXME - validate
+	NOW=$(date +%s)
+	DIFF=$((NOW - TS))
+	if [ "${DIFF}" -gt 300 ] ; then
+		echo "Timestamp ${TS} is ${DIFF} seconds from now and is too old to publish." >&2
+		exit 1
+	elif [ "${DIFF}" -lt 0 ] ; then
+		echo "Timestamp ${TS} is ${DIFF} seconds in the future and cannot be published." >&2
+		exit 1
+	fi
 }
 
 display_number_in_url_field()
 {
 	FIELD="${1}"
 	NUM="${2}"
-	# FIXME - validate that this is a number
+
+	if [[ ! "${NUM}" =~ ^[0-9]+(\.[0-9]+){0,1}$ ]] ; then
+		echo "${NUM} is not a valid number for field ${FIELD}" >&2
+		exit 1
+	fi
+
 	echo -n "&${FIELD}=${NUM}"
 }
 
@@ -79,7 +111,7 @@ PASSWORD="${3:-}"
 BASE_URL="${4:-}"
 
 if [ "${WEB_BASE_DIR}" = "" ] || [ "${ID}" = "" ] || [ "${PASSWORD}" = "" ] ; then
-        echo "usage: $0 <path to web/ directory" >&2
+        echo "usage: $0 <path to web/ directory <wunderground ID> <wunderground password> [ <wunderground base URL> ]" >&2
         exit 1
 fi
 
