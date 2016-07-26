@@ -80,9 +80,7 @@ larger solar panel will be able to replenish the battery each day.
 
 I used
 [this project box on Amazon](https://www.amazon.com/uxcell%C2%AE-Waterproof-Connect-Junction-200x120x75mm/dp/B00O9YY1G2),
-although I am a little concerned about the quality of the seal on the box. I
-put a piece of tape around the box where the lid and body meet to help keep the
-wind-driven rain out.
+although I am a little concerned about the quality of the seal on the box.
 
 All of the external sensors are terminated with a RJ45 connector to make it easy
 to remove the project box without having to bring the entire weather station
