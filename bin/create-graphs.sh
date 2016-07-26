@@ -58,6 +58,13 @@ CREATE_MAX_GRAPHS="${YADL_BIN_DIR}"/create-max-graphs.sh
 	rain_gauge_1h
 
 "${CREATE_MIN_MAX_GRAPHS}" \
+	"${WEB_BASE_DIR}"/wind_dir \
+	"Wind Direction" \
+	"Wind Direction" \
+	"${WEB_BASE_DIR}"/argent_80422.rrd \
+	wind_dir_avg_2m
+
+"${CREATE_MIN_MAX_GRAPHS}" \
 	"${WEB_BASE_DIR}"/pressure_in \
 	"Pressure (in)" \
 	"Pressure (in)" \
