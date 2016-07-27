@@ -32,13 +32,13 @@ CREATE_MAX_GRAPHS="${YADL_BIN_DIR}"/create-max-graphs.sh
 
 "${CREATE_MIN_MAX_GRAPHS}" \
 	"${WEB_BASE_DIR}"/temperature_humidity \
-	"Temperature and Humidity" \
+	"Temperature and Dew Point" \
 	"Temperature" \
 	"${WEB_BASE_DIR}"/temperature_humidity.rrd \
 	temperature \
-	"Relative Humidity" \
+	"Dew Point" \
 	"${WEB_BASE_DIR}"/temperature_humidity.rrd \
-	humidity
+	dew_point
 
 "${CREATE_MAX_GRAPHS}" \
 	"${WEB_BASE_DIR}"/wind_speed \
