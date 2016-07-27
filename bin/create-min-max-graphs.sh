@@ -27,6 +27,7 @@ RRD_FIELD1="${5:-}"
 RRD_FIELD2_LABEL="${6:-}"
 RRD_FILE2="${7:-}"
 RRD_FIELD2="${8:-}"
+OTHER_RRDGRAPH_ARGS="${9:-}"
 if [ "${BASE_OUTPUT_NAME}" = "" ] || [ "${DESCRIPTION}" = "" ] ||
 	[ "${RRD_FILE1}" = "" ] || [ "${RRD_FIELD1}" = "" ] ||
 	[ "${RRD_FIELD1_LABEL}" = "" ] ; then
@@ -46,10 +47,15 @@ create_graph()
 	GRAPH_TITLE=$3
 
 	# Create the graph
+
+	# Intentionally don't put ${OTHER_RRDGRAPH_ARGS} in quotes so
+	# that multiple arguments can be passed to the function.
+
 	if [ "${RRD_FIELD2}" = "" ] ; then
 		rrdtool graph "${OUTFILE}" \
 			--start "-${SCALE}" \
 			--title "${GRAPH_TITLE}" \
+			${OTHER_RRDGRAPH_ARGS} \
 			"DEF:${RRD_FIELD1}max=${RRD_FILE1}:${RRD_FIELD1}:MAX" \
 			"DEF:${RRD_FIELD1}min=${RRD_FILE1}:${RRD_FIELD1}:MIN" \
 			"AREA:${RRD_FIELD1}max#FF0000:Max ${RRD_FIELD1_LABEL}" \
@@ -59,6 +65,7 @@ create_graph()
 		rrdtool graph "${OUTFILE}" \
 			--start "-${SCALE}" \
 			--title "${GRAPH_TITLE}" \
+			${OTHER_RRDGRAPH_ARGS} \
 			"DEF:${RRD_FIELD1}1max=${RRD_FILE1}:${RRD_FIELD1}:MAX" \
 			"DEF:${RRD_FIELD1}1min=${RRD_FILE1}:${RRD_FIELD1}:MIN" \
 			"DEF:${RRD_FIELD2}2max=${RRD_FILE2}:${RRD_FIELD2}:MAX" \
