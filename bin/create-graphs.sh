@@ -62,14 +62,22 @@ CREATE_MAX_GRAPHS="${YADL_BIN_DIR}"/create-max-graphs.sh
 	"Wind Direction" \
 	"Wind Direction" \
 	"${WEB_BASE_DIR}"/argent_80422.rrd \
-	wind_dir_avg_2m
+	wind_dir_avg_2m \
+	"" \
+	"" \
+	"" \
+	"--lower-limit 0 --upper-limit 360 --rigid"
 
 "${CREATE_MIN_MAX_GRAPHS}" \
 	"${WEB_BASE_DIR}"/pressure_in \
 	"Pressure (in)" \
 	"Pressure (in)" \
 	"${WEB_BASE_DIR}"/bmp180.rrd \
-	pressure_in
+	pressure_in \
+	"" \
+	"" \
+	"" \
+	"--alt-autoscale"
 
 "${CREATE_MIN_MAX_GRAPHS}" \
 	"${WEB_BASE_DIR}"/battery \
