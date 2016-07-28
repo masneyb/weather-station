@@ -45,8 +45,6 @@ following features:
     		[ --remove_n_samples_from_ends <# samples (default 0)> ]
     		[ --max_retries <# retries (default 10)> ]
     		[ --sleep_millis_between_retries <milliseconds (default 500)> ]
-    		[ --min_valid_value <minimum allowable value> ]
-    		[ --max_valid_value <maximum allowable value> ]
     		[ --debug ]
     		[ --logfile <path to debug logs. Uses stderr if not specified.> ]
     		[ --daemon ]

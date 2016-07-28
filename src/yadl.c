@@ -59,8 +59,6 @@ void usage(void)
 	printf("\t\t[ --remove_n_samples_from_ends <# samples (default %d)> ]\n", DEFAULT_REMOVE_N_SAMPLES_FROM_ENDS);
 	printf("\t\t[ --max_retries <# retries (default %d)> ]\n", DEFAULT_MAX_RETRIES);
 	printf("\t\t[ --sleep_millis_between_retries <milliseconds (default %d)> ]\n", DEFAULT_SLEEP_MILLIS_BETWEEN_RETRIES);
-	printf("\t\t[ --min_valid_value <minimum allowable value> ]\n");
-	printf("\t\t[ --max_valid_value <maximum allowable value> ]\n");
 	printf("\t\t[ --debug ]\n");
 	printf("\t\t[ --logfile <path to debug logs. Uses stderr if not specified.> ]\n");
 	printf("\t\t[ --daemon ]\n");
@@ -204,13 +202,6 @@ static yadl_result *_perform_reading(yadl_config *config)
 			continue;
 		}
 
-		if (result->value[0] < config->min_valid_reading ||
-				result->value[0] > config->max_valid_reading) {
-			config->logger("Received reading outside of allowable ranges. value=%.2f. Retrying.\n",
-					result->value[0]);
-			_free_result(result);
-			continue;
-		}
 		success = 1;
 		break;
 	}
@@ -385,8 +376,6 @@ int main(int argc, char **argv)
 {
 	static struct option long_options[] = {
 		{"gpio_pin", required_argument, 0, 0 },
-		{"min_valid_value", required_argument, 0, 0 },
-		{"max_valid_value", required_argument, 0, 0 },
 		{"output", required_argument, 0, 0 },
 		{"sensor", required_argument, 0, 0 },
 		{"debug", no_argument, 0, 0 },
@@ -440,8 +429,6 @@ int main(int argc, char **argv)
 	config.gpio_pin = -1;
 	config.spi_channel = -1;
 	config.i2c_address = -1;
-	config.min_valid_reading = INT_MIN;
-	config.max_valid_reading = INT_MAX;
 	config.max_retries = DEFAULT_MAX_RETRIES;
 	config.sleep_millis_between_retries = DEFAULT_SLEEP_MILLIS_BETWEEN_RETRIES;
 	config.sleep_millis_between_samples = DEFAULT_SLEEP_MILLIS_BETWEEN_SAMPLES;
@@ -468,103 +455,97 @@ int main(int argc, char **argv)
 			config.gpio_pin = strtol(optarg, NULL, 10);
 			break;
 		case 1:
-			config.min_valid_reading = strtol(optarg, NULL, 10);
-			break;
-		case 2:
-			config.max_valid_reading = strtol(optarg, NULL, 10);
-			break;
-		case 3:
 			num_output_types++;
 			output_types = realloc(output_types, sizeof(char *) * num_output_types);
 			output_types[num_output_types - 1] = optarg;
 			break;
-		case 4:
+		case 2:
 			sensor_name = optarg;
 			break;
-		case 5:
+		case 3:
 			debug = 1;
 			break;
-		case 6:
+		case 4:
 			num_output_filenames++;
 			output_filenames = realloc(output_filenames, sizeof(char *) * num_output_filenames);
 			output_filenames[num_output_filenames - 1] = optarg;
 			break;
-		case 7:
+		case 5:
 			config.spi_channel = strtol(optarg, NULL, 10);
 			break;
-		case 8:
+		case 6:
 			adc_name = optarg;
 			break;
-		case 9:
+		case 7:
 			config.max_retries = strtol(optarg, NULL, 10);
 			break;
-		case 10:
+		case 8:
 			config.sleep_millis_between_retries = strtol(optarg, NULL, 10);
 			break;
-		case 11:
+		case 9:
 			config.num_samples_per_result = strtol(optarg, NULL, 10);
 			break;
-		case 12:
+		case 10:
 			config.analog_channel = strtol(optarg, NULL, 10);
 			break;
-		case 13:
+		case 11:
 			config.sleep_millis_between_samples = strtol(optarg, NULL, 10);
 			break;
-		case 14:
+		case 12:
 			filter_name = optarg;
 			break;
-		case 15:
+		case 13:
 			config.remove_n_samples_from_ends = strtol(optarg, NULL, 10);
 			break;
-		case 16:
+		case 14:
 			config.num_results = strtol(optarg, NULL, 10);
 			break;
-		case 17:
+		case 15:
 			config.sleep_millis_between_results = strtol(optarg, NULL, 10);
 			break;
-		case 18:
+		case 16:
 			config.i2c_address = strtol(optarg, NULL, 16);
 			break;
-		case 19:
+		case 17:
 			config.only_log_value_changes = 1;
 			break;
-		case 20:
+		case 18:
 			config.counter_multiplier = strtof(optarg, NULL);
 			break;
-		case 21:
+		case 19:
 			logfile = optarg;
 			break;
-		case 22:
+		case 20:
 			daemon = 1;
 			break;
-		case 23:
+		case 21:
 			config.interrupt_edge = optarg;
 			break;
-		case 24:
+		case 22:
 			config.adc_millivolts = strtol(optarg, NULL, 10);
 			break;
-		case 25:
+		case 23:
 			temperature_unit = optarg;
 			break;
-		case 26:
+		case 24:
 			config.w1_slave = optarg;
 			break;
-		case 27:
+		case 25:
 			config.analog_scaling_factor = strtol(optarg, NULL, 10);
 			break;
-		case 28:
+		case 26:
 			config.wind_speed_pin = strtol(optarg, NULL, 10);
 			break;
-		case 29:
+		case 27:
 			config.rain_gauge_pin = strtol(optarg, NULL, 10);
 			break;
-		case 30:
+		case 28:
 			config.i2c_device = optarg;
 			break;
-		case 31:
+		case 29:
 			config.wind_speed_unit = optarg;
 			break;
-		case 32:
+		case 30:
 			config.rain_gauge_unit = optarg;
 			break;
 		default:
@@ -630,8 +611,6 @@ int main(int argc, char **argv)
 
 	config.adc = get_adc(adc_name);
 
-	config.logger("min_valid_value=%d; max_valid_value=%d\n",
-			config.min_valid_reading, config.max_valid_reading);
 	config.logger("num_results=%d; sleep_millis_between_samples=%d; num_samples_per_result=%d; sleep_millis_between_samples=%d\n",
 			config.num_results, config.sleep_millis_between_samples, config.num_samples_per_result, config.sleep_millis_between_samples);
 	config.logger("max_retries=%d; sleep_millis_between_retries=%d\n",

@@ -67,8 +67,6 @@ typedef float (*temperature_unit_converter)(float input);
 struct yadl_config_tag {
 	sensor *sens;
 	int gpio_pin;
-	int min_valid_reading;
-	int max_valid_reading;
 	logger logger;
 	int spi_channel;
 	char *i2c_device;

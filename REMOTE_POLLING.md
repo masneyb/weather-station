@@ -23,7 +23,7 @@ root.
       [Service]
       User=root
       Type=simple
-      ExecStart=/home/masneyb/data/pi-yadl/bin/yadl --gpio_pin 0 --sensor dht22 --temperature_unit fahrenheit --min_valid_temperature 30 --max_valid_temperature 95 --output json --outfile /var/www/html/humiture.json
+      ExecStart=/home/masneyb/data/pi-yadl/bin/yadl --gpio_pin 0 --sensor dht22 --temperature_unit fahrenheit --output json --outfile /var/www/html/humiture.json
 
   /etc/systemd/system/yadl-json-output.timer
 
