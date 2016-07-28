@@ -37,6 +37,17 @@ fi
 
 "${YADL_BIN}" --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 2 --adc_millivolts 5000 --output rrd --outfile "${WEB_BASE_DIR}"/booster.rrd --output single_json --outfile "${WEB_BASE_DIR}"/booster.json
 
+
+# Write system uptime JSON file
+UPTIME_SECS=$(awk '{print $1}' < /proc/uptime)
+NOW=$(date +%s)
+
+cat > "${WEB_BASE_DIR}"/uptime.json << __EOF__
+{ "result": [ { "uptime_secs": ${UPTIME_SECS}, "timestamp": ${NOW} } ] }
+__EOF__
+
+
+# Publish to weather underground
 if [ "${ID}" != "" ] && [ "${PASSWORD}" != "" ] ; then
 	/home/masneyb/data/weather-station/bin/weather-underground-publish.sh "${WEB_BASE_DIR}" "${ID}" "${PASSWORD}"
 fi

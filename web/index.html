@@ -95,9 +95,9 @@
         $('#battery_number').text(data.result[0].millivolts.toFixed(0));
       });
 
-      $.getJSON("booster.json", function(data) {
-        $('#booster_last_updated').text("Booster last updated " + ((new Date().getTime() / 1000) - data.result[0].timestamp).toFixed(0) + " seconds ago");
-        $('#booster_number').text(data.result[0].millivolts.toFixed(0));
+      $.getJSON("uptime.json", function(data) {
+        $('#uptime_last_updated').text("Uptime last updated " + ((new Date().getTime() / 1000) - data.result[0].timestamp).toFixed(0) + " seconds ago");
+        $('#uptime_number').text((data.result[0].uptime_secs / 86400).toFixed(2));
       });
     }
 
@@ -133,7 +133,7 @@
       <th>Pressure</th>
       <th>Dew Point</th>
       <th>Battery</th>
-      <th>Booster</th>
+      <th>System Uptime</th>
     </tr>
     <tr>
       <td>
@@ -161,7 +161,7 @@
         <div class="stat"><span id="battery_number"></span> mV</div>
       </td>
       <td>
-        <div class="stat"><span id="booster_number"></span> mV</div>
+        <div class="stat"><span id="uptime_number"></span> days</div>
       </td>
     </tr>
     <tr>
@@ -191,7 +191,6 @@
     <div id="rain_gauge_graph" class="graph"></div>
     <div id="pressure_in_graph" class="graph"></div>
     <div id="battery_graph" class="graph"></div>
-    <div id="booster_graph" class="graph"></div>
   </div>
 
   <div class="clear_float"></div>
@@ -201,7 +200,7 @@
     <div id="temperature_humidity_last_updated" class="last_updated"></div>
     <div id="bmp180_last_updated" class="last_updated"></div>
     <div id="battery_last_updated" class="last_updated"></div>
-    <div id="booster_last_updated" class="last_updated"></div>
+    <div id="uptime_last_updated" class="last_updated"></div>
   </div>
 
   <div class="about">More information about this weather station project can be found at <a href="https://github.com/masneyb/weather-station">https://github.com/masneyb/weather-station</a>.</div>
