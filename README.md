@@ -31,70 +31,76 @@ following features:
 
 ## Usage
 
-    usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|argent_80422|bmp180>
-    		[ --gpio_pin <wiringPi pin #. Required for digital sensors.> ]
-    		  See http://wiringpi.com/pins/ to lookup the pin number.
-    		--output <json|yaml|csv|xml|rrd|single_json> [ --output <...> ]
-    		[ --outfile <optional output filename. Defaults to stdout> [ --outfile <...> ] ]
-    		[ --only_log_value_changes ]
-    		[ --num_results <# results returned (default 1). Set to -1 to poll indefinitely.> ]
-    		[ --sleep_millis_between_results <milliseconds (default 0)> ]
-    		[ --num_samples_per_result <# samples (default 1). See --filter for aggregation.> ]
-    		[ --sleep_millis_between_samples <milliseconds (default 0)> ]
-    		[ --filter <median|mean|mode|sum|min|max|range (default median)> ]
-    		[ --remove_n_samples_from_ends <# samples (default 0)> ]
-    		[ --max_retries <# retries (default 10)> ]
-    		[ --sleep_millis_between_retries <milliseconds (default 500)> ]
-    		[ --debug ]
-    		[ --logfile <path to debug logs. Uses stderr if not specified.> ]
-    		[ --daemon ]
+    usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|bmp180|argent_80422>
+    	--output <json|yaml|csv|xml|rrd|single_json> [ --output <...> ]
+    	[ --outfile <optional output filename. Defaults to stdout> [ --outfile <...> ] ]
+    	[ --only_log_value_changes ]
+    	[ --num_results <# results returned (default 1). Set to -1 to poll indefinitely.> ]
+    	[ --sleep_millis_between_results <milliseconds (default 0)> ]
+    	[ --num_samples_per_result <# samples (default 1). See --filter for aggregation.> ]
+    	[ --sleep_millis_between_samples <milliseconds (default 0)> ]
+    	[ --filter <median|mean|mode|sum|min|max|range (default median)> ]
+    	[ --remove_n_samples_from_ends <# samples (default 0)> ]
+    	[ --max_retries <# retries (default 20)> ]
+    	[ --sleep_millis_between_retries <milliseconds (default 500)> ]
+    	[ --debug ]
+    	[ --logfile <path to debug logs. Uses stderr if not specified.> ]
+    	[ --daemon ]
     
-    Counter specific options
+    Sensor Specific Options
     
-    		[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default 1.0)> ]
-    		[ --interrupt_edge <rising|falling|both (default rising)> ]
+    * digital - Reads from a digital pin
+    	--gpio_pin <wiringPi pin #. See http://wiringpi.com/pins/>
     
-    Analog specific options
+    * counter - Counts the number of times the digital pin state changes.
+    	--gpio_pin <wiringPi pin #. See http://wiringpi.com/pins/>
+    	[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default 1.0)> ]
+    	[ --interrupt_edge <rising|falling|both (default rising)> ]
     
-    		--adc <see ADC list below. Required for analog>
-    		[ --adc_millivolts <value (default 3300)> ]
+    * analog
+    	--adc <see ADC options below>
     
-    Argent 80422 specific options
+    * dht11 / dht22 - Temperature and Humidity sensors
+    	--gpio_pin <wiringPi pin #. See http://wiringpi.com/pins/>
+    	--temperature_unit <celsius|fahrenheit|kelvin|rankine>
     
-    		--wind_speed_pin <wiringPi pin #.>
-    		--rain_gauage_pin <wiringPi pin #.>
-    		Analog specific options from above must also be specified for the wind direction.
+    * ds18b20 - Temperature sensor that uses the Dallas 1-Wire protocol.
+    	--w1_slave <w1 slave device. See /sys/bus/w1/devices/28-*/w1_slave>
+    	--temperature_unit <celsius|fahrenheit|kelvin|rankine>
     
-    Temperature sensors specific options
-    		--temperature_unit <celsius|fahrenheit|kelvin|rankine>
-    
-    * ds18b20 - This temperature sensor uses the Dallas 1-Wire protocol.
-      --w1_slave <w1 slave device>
-      	The w1 slave device will be one of the
-      	/sys/bus/w1/devices/28-*/w1_slave files.
-    
-      	You need to have the w1-gpio and w1-therm kernel modules loaded.
-      	You'll also need to have 'dtoverlay=w1-gpio' in your /boot/config.txt
-      	and reboot if it was not already present.
+    	You need to have the w1-gpio and w1-therm kernel modules loaded.
+    	You'll also need to have 'dtoverlay=w1-gpio' in your /boot/config.txt
+    	and reboot if it was not already present.
     
     * tmp36 - Analog temperature sensor.
-      [ --analog_scaling_factor <value> (default 500) ]
+    	--adc <see ADC options below>
+    	--temperature_unit <celsius|fahrenheit|kelvin|rankine>
+    	[ --analog_scaling_factor <value> (default 500) ]
     
-    Supported Analog to Digital Converters (ADCs)
+    * bmp180 - Temperature, pressure and altitude sensor.
+    	--i2c_device <I2C device.>
+    	--i2c_address <I2C hex address. Use i2cdetect command to look up.>
+    	--temperature_unit <celsius|fahrenheit|kelvin|rankine>
+    
+    * argent_80422 - Wind vane, anemometer, and rain gauge.
+    	--wind_speed_pin <wiringPi pin #.>
+    	--wind_speed_unit <mph|kmh>
+    	--rain_gauage_pin <wiringPi pin #.>
+    	--rain_gauage_unit <in|mm>
+    	--adc <see ADC options below. This is for the wind vane.>
+    
+    ADC Options and Supported Types
+    	[ --adc_millivolts <value (default 3300)> ]
     
     * mcp3002 / mcp3004 / mcp3008 - 10-bit ADCs with a SPI interface.
-      --spi_channel <spi channel>
-      	The SPI channel is either 0 or 1 for the Raspberry Pi.
+    	--spi_channel <spi channel. Either 0 or 1 for the Pi.>
+    	--analog_channel <analog channel>
     
-      --analog_channel <analog channel>
-    
-      You need to have the proper spi_bcmXXXX kernel module loaded on the Pi.
+    	You need to have the proper spi_bcmXXXX kernel module loaded on the Pi.
     
     * pcf8591 - 8-bit ADC with an I2C interface.
-      --i2c_address <I2C hex address>
-      	Use i2cdetect to scan your bus. 48 is the default if you have a single board.
-    
-      --analog_channel <analog channel>
+    	--i2c_address <I2C hex address. Use i2cdetect command to look up.>
+    	--analog_channel <analog channel>
     
     Examples
     
@@ -102,26 +108,10 @@ following features:
       $ sudo yadl --gpio_pin 0 --sensor dht22 --temperature_unit fahrenheit --output json
       { "result": [  { "temperature": 68.18, "humidity": 55.30, "dew_point": 51.55, "temperature_unit": "F", "timestamp": 1467648942 } ] }
     
-    * Poll a single sample from BCM digital pin 17 (wiringPi pin 0) as JSON
-      $ yadl --sensor digital --gpio_pin 0 --output json
-      { "result": [ { "pin_state": 0.0, "timestamp": 1464465651 } ] }
-    
-    * Poll 7 results from an analog sensor hooked up to channel 0 of a MCP3008.
-      Wait 50 milliseconds between each result shown.
-      $ yadl --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 0 \
-    	--output csv --num_results 7 --sleep_millis_between_results 50
-      reading_number,timestamp,reading,millivolts
-      0,1465685742,96.0,309.0
-      1,1465685742,96.0,309.0
-      2,1465685742,96.0,309.0
-      3,1465685742,96.0,309.0
-      4,1465685742,92.0,296.0
-      5,1465685742,96.0,309.0
-      6,1465685742,96.0,309.0
-    
     * Show 5 averaged results from an ADC. 1000 samples are taken for each result
       shown. 200 samples from each end are removed and the mean is taken of the middle
-      600 samples. This is useful for removing noise from analog sensors.
+      600 samples. This is useful for removing noise from analog sensors. Wait 2 seconds
+      between each result shown.
       $ yadl --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 0 \
     	--output csv --num_results 5 --sleep_millis_between_results 2000 \
     	--num_samples_per_result 1000 --remove_n_samples_from_ends 200 --filter mean
@@ -132,25 +122,18 @@ following features:
       3,1465685846,96.0,309.0
       4,1465685848,96.0,309.0
     
-    * Hook a button up to a digital pin and check for bounce when the button
-      is pressed. This polls the digital pin indefinitely until Crtl-C is
-      pressed. Note: Newlines were added for clarity between the two button
-      presses for illustration purposes.
-      $ yadl --sensor digital --gpio_pin 0 --output csv --num_results -1 \
-    	--only_log_value_changes
-      reading_number,timestamp,pin_state
-      0,1464480347,0.0
-    
-      636673,1464480348,1.0
-      687383,1464480348,0.0
-    
-      1678984,1464480351,1.0
-      1731987,1464480351,0.0
-      1731988,1464480351,1.0
-      1732148,1464480351,0.0
+    * See the files in the examples/ directory for more examples.
     
     * See systemd/pi-yadl-gatherer.service for an example writing the data to
       a RRD database.
+
+
+## Examples
+
+* See my [weather station project](https://github.com/masneyb/weather-station/) for
+  an example polling the different types of sensors supported by this project.
+* The [examples directory](examples/) shows several more examples of how to poll
+  various types of sensors.
 
 
 ## Graphing
