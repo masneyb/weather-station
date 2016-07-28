@@ -1,5 +1,6 @@
 This shows how to take readings from the Argent Data Systems Wind / Rain Sensor
-Assembly
+Assembly:
+
 https://www.argentdata.com/catalog/product_info.php?products_id=145
 https://www.argentdata.com/files/80422_datasheet.pdf
 
@@ -7,6 +8,7 @@ https://www.argentdata.com/files/80422_datasheet.pdf
 
     $ yadl --sensor argent_80422 --wind_speed_pin 1 --rain_gauge_pin 2 \
 	--adc mcp3008 --spi_channel 0 --analog_channel 0 \
+	--wind_speed_unit mph --rain_gauge_unit in \
 	--sleep_millis_between_results 5000 --num_results 5 --output csv 
     reading_number,timestamp,wind_direction,wind_speed,rain_gauge
     0,1466985448,135.0,2.4,0.0
