@@ -7,27 +7,28 @@
 - My [pi-yadl](https://github.com/masneyb/pi-yadl) project is used to gather and
   graph the data from the following types of sensors:
   - [Argent Data Systems Weather Sensor Assembly](https://www.sparkfun.com/products/8942)
-    contains a wind vane, anemometer, and rain gauge. This project supports
-    logging the wind speed average and gusts over 2 minute, 10 minute and 60
-    minute periods. The rain over the last 1 hour, 6 hours and 24 hours are
-    logged.
+    contains a wind vane, anemometer, and rain gauge. The wind speed average and gusts
+    over the last 2 minute, 10 minute and 60 minute periods are logged. The rain over the
+    last 1 hour, 6 hours and 24 hours are logged.
   - Supports various types of temperature and humidity sensors: DHT11, DHT22,
     DS18B20, TMP36 (analog).
   - Supports the BMP180 pressure, altitude and temperature sensor.
   - Battery charge level is read via an analog to digital converter (ADC).
 - For the wind vane, wind speed and rain gauge, the pi-yadl program is ran
   as a daemon in the background so that it can continuously monitor the rain
-  gauge and anemometer. The values from these three sensors are written out to
-  a RRD database and JSON file every 30 seconds.
-- The data from the other sensors are polled every 5 minutes via a systemd
-  timer and written to various RRD databases and JSON files.
+  gauge and anemometer via interrupts. The values from these three sensors are
+  written out to a RRD database and JSON file every 30 seconds. The wind speed
+  values are updated internally every second so that it can obtain the correct
+  wind gusts.
+- The other sensors are polled every 5 minutes via a systemd timer and written
+  to various RRD databases and JSON files.
 - The RRD databases are used to show the historical readings and are
   recreated at the beginning of each hour.
-- The web page uses Javascript to download the various JSON files to provide
-  a dashboard showing the current sensor readings. The web page checks for
-  updated JSON files on the server every 10 seconds.
-- The Apache webserver runs on the server and it only needs to serve out static
-  files. Everything runs on the Pi; no third-party services are required.
+- The web page uses Javascript and JQuery to download the various JSON files to
+  provide a dashboard showing the current sensor readings. The web page checks
+  for updated JSON files on the server every 10 seconds.
+- The Apache webserver runs on the Pi and apache only needs to serve out static
+  content. Everything runs on the Pi; no third-party services are required.
 - Optional ability to publish the sensor readings to Weather Underground.
   You can
   [view my weather station on Weather Underground](https://www.wunderground.com/personal-weather-station/dashboard?ID=KWVMORGA45).
@@ -71,16 +72,16 @@ the wind / rain collector running in the background and 200 mAH when the main
 collection processes runs every 5 minutes for just a few seconds. This is with a
 USB WiFi dongle running the entire time. I would expect to get around a day of
 usage on a fully charged battery without any kind of backup from the solar
-panel. I've had no problems with the battery charging itself each day during
-the Summer. We'll see how this does in the Winter, although I hope that the
-larger solar panel will be able to replenish the battery each day.
+panel.
 
 
 ### Project Box
 
 I used
 [this project box on Amazon](https://www.amazon.com/uxcell%C2%AE-Waterproof-Connect-Junction-200x120x75mm/dp/B00O9YY1G2),
-although I am a little concerned about the quality of the seal on the box.
+although I am a little concerned about the quality of the seal on the box. The
+solar panel is mounted to the lid of the project box and the panel is wider
+than the box so it should also help to keep the water away from the seal.
 
 All of the external sensors are terminated with a RJ45 connector to make it easy
 to remove the project box without having to bring the entire weather station
@@ -88,6 +89,8 @@ inside. [RJ45 waterproof cable glands](https://www.adafruit.com/products/827)
 are used on the project box to get the connections inside the box. The wire for
 the solar panel enters the project box using a
 [PG-9](https://www.adafruit.com/products/761) cable gland.
+
+The box is mounted to the top of my fence using hose clamps with some rubber
 
 
 ### Sensors
@@ -98,22 +101,22 @@ The ADC is used for the wind vane and obtaining the voltage levels from the
 battery and PowerBoost 1000. This ADC communicates with the Raspberry Pi
 using the SPI bus.
 
-The wind vane supports reporting 16 different positions of the wind vane by
-using a series of different size resistors and reed switches. The wind vane
-is connected to the ADC and the voltage indicates the direction. For example,
-according to the 
+The wind vane supports reporting 16 different positions by using a series of
+reed switches and different size resistors. The wind vane is connected to the
+ADC and the voltage indicates the direction. For example, according to the 
 [datasheet](https://www.argentdata.com/files/80422_datasheet.pdf), 0 degrees (N)
 is 3.84V; 45 degrees (NE) is 2.25V; and 90 degrees (E) is 0.45V. I had an issue
 with getting accurate readings from the wind vane between 270 and 337.5 degrees
-that was caused by having my reference ADC voltage in software set to 5V instead
-of 5.1V. Adding the argument `--adc_millivolts 5100` to the yadl binary fixed
-the issue.
+that was caused by having the reference ADC voltage in software set to 5V
+instead of 5.1V when converting the value read from the ADC to millivolts.
+Adding the argument `--adc_millivolts 5100` to the yadl binary fixed the issue.
 
 The anemometer is hooked up to a GPIO pin on the Pi. According to the
 [datasheet](https://www.argentdata.com/files/80422_datasheet.pdf), one click
 of the reed switch over a second corresponds to a wind speed of 1.492 mph
 (2.4 km/h). A pull down resistor is used and the switch is debounced in
-software.
+software. One complete revolution of the anemometer will cause the pin to go
+high twice.
 
 The rain gauge is very similar to the anemometer. Each click of the switch
 over a second corresponds to 0.011 inches (0.2794 mm) of rain according to
