@@ -24,7 +24,10 @@ validate_timestamp()
 	TS="${1}"
 	NOW=$(date +%s)
 	DIFF=$((NOW - TS))
-	if [ "${DIFF}" -gt 300 ] ; then
+	if [ "${TS}" = "" ] ; then
+		echo "Timestamp field is blank." >&2
+		return 1
+	elif [ "${DIFF}" -gt 300 ] ; then
 		echo "Timestamp ${TS} is ${DIFF} seconds from now and is too old to publish." >&2
 		return 1
 	elif [ "${DIFF}" -lt 0 ] ; then
@@ -48,6 +51,19 @@ display_number_in_url_field()
 	echo -n "&${FIELD}=${NUM}"
 }
 
+process_json()
+{
+	JQ_ARGS="${1}"
+	JSON_FILE="${2}"
+	OUTFILE="${TMP}"
+
+	if [ ! -f "${JSON_FILE}" ] ; then
+		> "${OUTFILE}"
+	else
+		jq -r "${JQ_ARGS}" < "${JSON_FILE}" > "${OUTFILE}"
+	fi
+}
+
 generate_url()
 {
 	TMP=$(mktemp)
@@ -58,7 +74,7 @@ generate_url()
 	echo -n "${BASE_URL}?softwaretype=tinyurl.com%2Fhyft8kp&dateutc=now&action=updateraw&ID=${ID}&PASSWORD=${PASSWORD}"
 
 	NUM_OK=0
-	jq -r '.result[]|[.temperature, .humidity, .dew_point, .timestamp]|@csv' < "${WEB_BASE_DIR}"/temperature_humidity.json > "${TMP}"
+	process_json '.result[]|[.temperature, .humidity, .dew_point, .timestamp]|@csv' "${WEB_BASE_DIR}"/temperature_humidity.json "${TMP}"
 	TEMPF=$(awk -F, '{print $1}' < "${TMP}")
 	HUMIDITY=$(awk -F, '{print $2}' < "${TMP}")
 	DEWPTF=$(awk -F, '{print $3}' < "${TMP}")
@@ -73,7 +89,7 @@ generate_url()
 		echo "Warning: Temperature / humidity readings are not current. Not sending these values." >&2
 	fi
 
-	jq -r '.result[]|[.pressure_in, .timestamp]|@csv' < "${WEB_BASE_DIR}"/bmp180.json > "${TMP}"
+	process_json '.result[]|[.pressure_in, .timestamp]|@csv' "${WEB_BASE_DIR}"/bmp180.json "${TMP}"
 	BAROMIN=$(awk -F, '{print $1}' < "${TMP}")
 	TS=$(awk -F, '{print $2}' < "${TMP}")
 	validate_timestamp "${TS}"
@@ -84,7 +100,7 @@ generate_url()
 		echo "Warning: Barometer reading is not current. Not sending this value." >&2
 	fi
 
-	jq -r '.result[]|[.rain_gauge_1h, .wind_dir_cur, .wind_speed_cur, .wind_speed_avg_2m, .wind_dir_avg_2m, .wind_speed_gust_10m, .wind_dir_gust_10m, .wind_speed_gust_2m, .wind_dir_gust_2m, .timestamp]|@csv' < "${WEB_BASE_DIR}"/argent_80422.json > "${TMP}"
+	process_json '.result[]|[.rain_gauge_1h, .wind_dir_cur, .wind_speed_cur, .wind_speed_avg_2m, .wind_dir_avg_2m, .wind_speed_gust_10m, .wind_dir_gust_10m, .wind_speed_gust_2m, .wind_dir_gust_2m, .timestamp]|@csv' "${WEB_BASE_DIR}"/argent_80422.json "${TMP}"
 	RAININ=$(awk -F, '{print $1}' < "${TMP}")
 	WINDDIR=$(awk -F, '{print $2}' < "${TMP}")
 	WINDSPEEDMPH=$(awk -F, '{print $3}' < "${TMP}")
@@ -138,7 +154,7 @@ fi
 URL=$(generate_url)
 if [ $? = 0 ] ; then
 	echo "Generated URL ${URL}"
-	curl "${URL}"
+	curl --silent "${URL}"
 else
 	echo "Error: No readings are current; not publishing to Weather Underground" >&2
 fi
