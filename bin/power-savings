@@ -9,10 +9,10 @@ echo none | sudo tee /sys/class/leds/led0/trigger
 echo 1 | sudo tee /sys/class/leds/led0/brightness
 
 # Remove some unneeded kernel modules
-rmmod w1_gpio
-rmmod bluetooth
-rmmod wire
-rmmod snd_bcm2835 snd_pcm snd_timer snd
+rmmod w1_gpio || true
+rmmod bluetooth || true
+rmmod wire || true
+rmmod snd_bcm2835 snd_pcm snd_timer snd || true
 
 # ... and services
 systemctl stop avahi-daemon.service
