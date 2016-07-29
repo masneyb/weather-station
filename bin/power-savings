@@ -23,3 +23,6 @@ systemctl disable triggerhappy.service
 
 # Enable powertop auto tuner
 /usr/sbin/powertop --auto-tune
+
+# Ensure system time is current
+/usr/sbin/ntpdate-debian
