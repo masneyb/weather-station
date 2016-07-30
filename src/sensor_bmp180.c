@@ -62,6 +62,8 @@
 #include <math.h>
 #include <unistd.h>
 #include <errno.h>
+#include <limits.h>
+#include <float.h>
 #include "yadl.h"
 
 /*
@@ -226,6 +228,9 @@ typedef struct {
 	int32_t mb;
 	int32_t mc;
 	int32_t md;
+
+	/* Last errno */
+	int error;
 } bmp180_t;
 
 
@@ -355,7 +360,13 @@ void bmp180_read_eprom(void *_bmp) {
  */
 int32_t bmp180_read_raw_temperature(void *_bmp) {
 	bmp180_t* bmp = TO_BMP(_bmp);
-	i2c_smbus_write_byte_data(bmp->file, BMP180_CTRL, BMP180_TMP_READ_CMD);
+
+	bmp->error = i2c_smbus_write_byte_data(bmp->file, BMP180_CTRL, BMP180_TMP_READ_CMD);
+	if (bmp->error < 0) {
+		DEBUG("error: i2c_smbus_write_byte_data failed with error %d\n", bmp->error);
+		bmp->error *= -1;
+		return -1;
+	}
 
 	usleep(BMP180_TMP_READ_WAIT_US);
 	int32_t data = i2c_smbus_read_word_data(bmp->file, BMP180_REG_TMP) & 0xFFFF;
@@ -395,7 +406,12 @@ int32_t bmp180_read_raw_pressure(void *_bmp, uint8_t oss) {
 			break;
 	}
 	
-	i2c_smbus_write_byte_data(bmp->file, BMP180_CTRL, cmd);
+	bmp->error = i2c_smbus_write_byte_data(bmp->file, BMP180_CTRL, cmd);
+	if (bmp->error < 0) {
+		DEBUG("error: i2c_smbus_write_byte_data failed with error %d\n", bmp->error);
+		bmp->error *= -1;
+		return -1;
+	}
 
 	usleep(wait);
 	
@@ -487,6 +503,7 @@ void *bmp180_init(int address, const char* i2c_device_filepath) {
 	
 	DEBUG("device: open ok\n");
 
+	bmp->error = 0;
 	return _bmp;
 }
 
@@ -516,6 +533,22 @@ void bmp180_close(void *_bmp) {
 
 
 /**
+ * Determine if the last BMP180 operation was successful.
+ *
+ * @param bmp180 sensor
+ *
+ * @ret 0 if the last operation was successful; otherwise the errno from the
+ *        last failed operation
+ */
+
+int bmp180_get_last_errno(void *_bmp)
+{
+	bmp180_t* bmp = TO_BMP(_bmp);
+	return bmp->error;
+}
+
+
+/**
  * Returns the measured temperature in celsius.
  * 
  * @param bmp180 sensor
@@ -527,6 +560,9 @@ float bmp180_temperature(void *_bmp) {
 	float T;
 	
 	UT = bmp180_read_raw_temperature(_bmp);
+	if (bmp->error != 0) {
+		return -FLT_MAX; // error
+	}
 	
 	DEBUG("UT=%lu\n",UT);
 	
@@ -551,7 +587,14 @@ long bmp180_pressure(void *_bmp) {
 	unsigned long B4, B7;
 	
 	UT = bmp180_read_raw_temperature(_bmp);
+	if (bmp->error != 0) {
+		return LONG_MIN; // error
+	}
+
 	UP = bmp180_read_raw_pressure(_bmp, bmp->oss);
+	if (bmp->error != 0) {
+		return LONG_MIN; // error
+	}
 	
 	X1 = ((UT - bmp->ac6) * bmp->ac5) >> 15;
 	X2 = (bmp->mc << 11) / (X1 + bmp->md);
@@ -596,8 +639,14 @@ long bmp180_pressure(void *_bmp) {
  * @return altitude
  */
 float bmp180_altitude(void *_bmp) {
+	bmp180_t* bmp = TO_BMP(_bmp);
 	float p, alt;
+
 	p = bmp180_pressure(_bmp);
+	if (bmp->error != 0) {
+		return -FLT_MAX; // error
+	}
+
 	alt = 44330 * (1 - pow(( (p/100) / BMP180_SEA_LEVEL),1/5.255));
 	
 	return alt;
@@ -645,8 +694,22 @@ static yadl_result *_bmp180_read_data(yadl_config *config)
         bmp180_set_oss(bmp, BMP180_PRE_OSS3);
 
 	float temperature = bmp180_temperature(bmp);
+	if (bmp180_get_last_errno(bmp) != 0) {
+		bmp180_close(bmp);
+		return NULL;
+	}
+
 	float pressure = bmp180_pressure(bmp) / 100.0;
+	if (bmp180_get_last_errno(bmp) != 0) {
+		bmp180_close(bmp);
+		return NULL;
+	}
+
 	float altitude = bmp180_altitude(bmp);
+	if (bmp180_get_last_errno(bmp) != 0) {
+		bmp180_close(bmp);
+		return NULL;
+	}
 
 	bmp180_close(bmp);
 
