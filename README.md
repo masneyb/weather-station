@@ -8,8 +8,8 @@
   graph the data from the following types of sensors:
   - [Argent Data Systems Weather Sensor Assembly](https://www.sparkfun.com/products/8942)
     contains a wind vane, anemometer, and rain gauge. The wind speed average and gusts
-    over the last 2 minute, 10 minute and 60 minute periods are logged. The rain over the
-    last 1 hour, 6 hours and 24 hours are logged.
+    over the last 2 minute, 10 minute and 60 minute periods are logged. The amount of
+    rain over the last 1 hour, 6 hours, 24 hours, and since midnight are logged.
   - Supports various types of temperature and humidity sensors: DHT11, DHT22,
     DS18B20, TMP36 (analog).
   - Supports the BMP180 pressure, altitude and temperature sensor.
