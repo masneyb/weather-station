@@ -14,7 +14,8 @@ following features:
   * Supports anemometer, wind direction, and rain gauage for the
     Argent Data Systems 80422 Wind / Rain sensors. Other types of similar
     sensors should be easily supported.
-  * Supports BMP180 pressure, altitude and temperature sensor.
+  * Supports BMP180 pressure, altitude and temperature sensor. The BMP180
+    driver came from [this project](https://github.com/lexruee/bmp180).
 * Supports returning the data in JSON, YAML, CSV, XML, and RRD. RRDtool can
   be used to graph the data over time. It also supports writing multiple
   files from a single sensor reading. For example, you may want to write the
