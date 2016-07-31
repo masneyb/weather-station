@@ -137,7 +137,8 @@ calculated using the
 The DHT sensor communicates with the Pi over one of the GPIO pins.
 
 A BMP180 sensor is used to obtain the barometric pressure and communicates with
-the Pi over the i2c bus.
+the Pi over the i2c bus. The BMP180 driver came from
+[this project](https://github.com/lexruee/bmp180).
 
 ![Inside](images/weather-station-inside-box.jpg?raw=1)
 
