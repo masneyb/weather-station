@@ -28,6 +28,7 @@
 #include <limits.h>
 #include <pthread.h>
 #include <unistd.h>
+#include <time.h>
 #include <sys/time.h>
 #include "yadl.h"
 
@@ -114,26 +115,43 @@ static float _get_wind_direction(yadl_config *config)
 	return direction;
 }
 
-static pthread_mutex_t _wind_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t _wind_rain_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static void *_argent_80422_wind_thread(void *arg)
+static int _get_current_hour_of_day()
+{
+	time_t t;
+	struct tm tm;
+
+	time(&t);
+	localtime_r(&t, &tm);
+
+	return tm.tm_hour;
+}
+
+static void *_argent_80422_wind_rain_thread(void *arg)
 {
 	yadl_config *config = (yadl_config *) arg;
 
-	int start_counter = _wind_current_counter;
+	int wind_start_counter = _wind_current_counter;
+	int rain_start_counter = _rain_current_counter;
 	while(1) {
 		sleep(1);
 
-		int stop_counter = _wind_current_counter;
-		int wind_num_seen = _get_num_seen(start_counter, stop_counter);
+		int wind_stop_counter = _wind_current_counter;
+		int wind_num_seen = _get_num_seen(wind_start_counter, wind_stop_counter);
 		float wind_speed = wind_num_seen * config->wind_speed_multiplier;
 
 		float wind_direction = _get_wind_direction(config);
 
-		config->logger("Wind thread: wind_direction=%.1f, wind_speed=%.1f mph\n",
-				wind_direction, wind_speed);
+		int rain_stop_counter = _rain_current_counter;
+		int rain_num_seen = _get_num_seen(rain_start_counter, rain_stop_counter);
 
-		pthread_mutex_lock(&_wind_mutex);
+		int current_hour = _get_current_hour_of_day();
+
+		config->logger("Wind/Rain Thread: wind_direction=%.1f, wind_speed=%.1f, rain_num_seen=%d\n",
+				wind_direction, wind_speed, rain_num_seen);
+
+		pthread_mutex_lock(&_wind_rain_mutex);
 
 		config->wind_directions_2m[config->wind_2m_idx] = wind_direction;
 		config->wind_speeds_2m[config->wind_2m_idx] = wind_speed;
@@ -147,9 +165,22 @@ static void *_argent_80422_wind_thread(void *arg)
 		config->wind_speeds_60m[config->wind_60m_idx] = wind_speed;
 		config->wind_60m_idx = (config->wind_60m_idx + 1) % NUM_WIND_60_MIN_SAMPLES;
 
-		pthread_mutex_unlock(&_wind_mutex);
+		if (config->current_hour == current_hour)
+			config->num_rain_clicks_today += rain_num_seen;
+		else {
+			/* Check to see if this is a new day */
+			if (config->current_hour > current_hour)
+				config->num_rain_clicks_today = rain_num_seen;
+			else
+				config->num_rain_clicks_today += rain_num_seen;
 
-		start_counter = stop_counter;
+			config->current_hour = current_hour;
+		}
+
+		pthread_mutex_unlock(&_wind_rain_mutex);
+
+		wind_start_counter = wind_stop_counter;
+		rain_start_counter = rain_stop_counter;
 	}
 
 	return NULL;
@@ -172,7 +203,7 @@ static void _create_wind_thread(yadl_config *config)
 		config->wind_speeds_60m[i] = -1;
 	}
 
-	int ret = pthread_create(&tid, NULL, _argent_80422_wind_thread, config);
+	int ret = pthread_create(&tid, NULL, _argent_80422_wind_rain_thread, config);
 	if (ret < 0) {
 		printf("Error creating wind thread: %s\n", strerror(errno));
 		exit(1);
@@ -336,7 +367,7 @@ static yadl_result *_argent_80422_read_data(yadl_config *config)
 	result->value[0] = wind_direction;
 	result->value[1] = wind_speed;
 
-	pthread_mutex_lock(&_wind_mutex);
+	pthread_mutex_lock(&_wind_rain_mutex);
 
 	result->value[2] = _get_average_values(config->wind_directions_2m, NUM_WIND_2_MIN_SAMPLES);
 	result->value[3] = _get_average_values(config->wind_speeds_2m, NUM_WIND_2_MIN_SAMPLES);
@@ -359,28 +390,31 @@ static yadl_result *_argent_80422_read_data(yadl_config *config)
 	result->value[12] = config->wind_directions_60m[wind_gust_60m_idx];
 	result->value[13] = config->wind_speeds_60m[wind_gust_60m_idx];
 
-	pthread_mutex_unlock(&_wind_mutex);
+	int num_rain_clicks_today = config->num_rain_clicks_today;
+
+	pthread_mutex_unlock(&_wind_rain_mutex);
 
 	result->value[14] = rain_gauge;
 	result->value[15] = list_sum(config->rain_gauge_1h);
 	result->value[16] = list_sum(config->rain_gauge_6h);
 	result->value[17] = list_sum(config->rain_gauge_24h);
+	result->value[18] = num_rain_clicks_today * config->rain_gauge_multiplier;;
 
-	config->logger("current wind stats: wind_num_seen=%d, avg_wind_cps=%.1f, wind_speed=%.1f mph\n",
-			wind_num_seen, avg_wind_cps, wind_speed);
+	config->logger("current wind stats: wind_num_seen=%d, avg_wind_cps=%.1f, wind_speed=%.1f %s\n",
+			wind_num_seen, avg_wind_cps, wind_speed, config->wind_speed_unit);
 
-	config->logger("2 minute wind stats: average direction=%.1f, average speed=%.1f mph, gust direction=%.1f, gust speed=%.1f\n",
+	config->logger("2 minute wind stats: average direction=%.1f, average speed=%.1f, gust direction=%.1f, gust speed=%.1f\n",
 			result->value[2], result->value[3], result->value[4], result->value[5]);
 
-	config->logger("10 minute wind stats: average direction=%.1f, average speed=%.1f mph, gust direction=%.1f, gust speed=%.1f\n",
+	config->logger("10 minute wind stats: average direction=%.1f, average speed=%.1f, gust direction=%.1f, gust speed=%.1f\n",
 			result->value[6], result->value[7], result->value[8], result->value[9]);
 
-	config->logger("60 minute wind stats: average direction=%.1f, average speed=%.1f mph, gust direction=%.1f, gust speed=%.1f\n",
+	config->logger("60 minute wind stats: average direction=%.1f, average speed=%.1f, gust direction=%.1f, gust speed=%.1f\n",
 			result->value[10], result->value[11], result->value[12], result->value[13]);
 
-	config->logger("rain_num_seen=%d, rain_gauge (in): cur=%.1f, 1h=%.1f, 6h=%.1f, 24h=%.1f\n",
+	config->logger("rain_num_seen=%d, rain_gauge: cur=%.1f, 1h=%.1f, 6h=%.1f, 24h=%.1f, since midnight=%1.f\n",
 			rain_num_seen, rain_gauge, result->value[15], result->value[16],
-			result->value[17]);
+			result->value[17], result->value[18]);
 
 	result->unit = malloc(sizeof(char *) * 2);
 	result->unit[0] = config->wind_speed_unit;
@@ -398,6 +432,7 @@ static char * _argent_80422_value_header_names[] = { "wind_dir_cur", "wind_speed
 							"wind_dir_gust_60m", "wind_speed_gust_60m", 
 							"rain_gauge_cur", "rain_gauge_1h",
 							"rain_gauge_6h", "rain_gauge_24h",
+							"rain_gauge_today",
 							NULL };
 
 static char ** _argent_80422_get_value_header_names(__attribute__((__unused__)) yadl_config *config)

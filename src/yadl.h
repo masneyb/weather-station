@@ -108,6 +108,10 @@ struct yadl_config_tag {
 	float_node *rain_gauge_24h;
 	int num_rain_gauge_24h_samples;
 
+	/* Keep track of the amount of rain that was seen since midnight local time */
+	int current_hour;
+	int num_rain_clicks_today;
+
 	/* Ring buffers for the historical wind data */
 	float wind_directions_2m[NUM_WIND_2_MIN_SAMPLES];
 	float wind_speeds_2m[NUM_WIND_2_MIN_SAMPLES];
