@@ -100,21 +100,23 @@ generate_url()
 		echo "Warning: Barometer reading is not current. Not sending this value." >&2
 	fi
 
-	process_json '.result[]|[.rain_gauge_1h, .wind_dir_cur, .wind_speed_cur, .wind_speed_avg_2m, .wind_dir_avg_2m, .wind_speed_gust_10m, .wind_dir_gust_10m, .wind_speed_gust_2m, .wind_dir_gust_2m, .timestamp]|@csv' "${WEB_BASE_DIR}"/argent_80422.json "${TMP}"
-	RAININ=$(awk -F, '{print $1}' < "${TMP}")
-	WINDDIR=$(awk -F, '{print $2}' < "${TMP}")
-	WINDSPEEDMPH=$(awk -F, '{print $3}' < "${TMP}")
-	WINDSPDMPH_AVG2M=$(awk -F, '{print $4}' < "${TMP}")
-	WINDDIR_AVG2M=$(awk -F, '{print $5}' < "${TMP}")
-	WINDGUSTMPH_10M=$(awk -F, '{print $6}' < "${TMP}")
-	WINDGUSTDIR_10M=$(awk -F, '{print $7}' < "${TMP}")
-	WINDGUSTMPH_2M=$(awk -F, '{print $8}' < "${TMP}")
-	WINDGUSTDIR_2M=$(awk -F, '{print $9}' < "${TMP}")
-	TS=$(awk -F, '{print $10}' < "${TMP}")
+	process_json '.result[]|[.rain_gauge_1h, .rain_gauge_today, .wind_dir_cur, .wind_speed_cur, .wind_speed_avg_2m, .wind_dir_avg_2m, .wind_speed_gust_10m, .wind_dir_gust_10m, .wind_speed_gust_2m, .wind_dir_gust_2m, .timestamp]|@csv' "${WEB_BASE_DIR}"/argent_80422.json "${TMP}"
+	RAIN_1H=$(awk -F, '{print $1}' < "${TMP}")
+	RAIN_TODAY=$(awk -F, '{print $2}' < "${TMP}")
+	WINDDIR=$(awk -F, '{print $3}' < "${TMP}")
+	WINDSPEEDMPH=$(awk -F, '{print $4}' < "${TMP}")
+	WINDSPDMPH_AVG2M=$(awk -F, '{print $5}' < "${TMP}")
+	WINDDIR_AVG2M=$(awk -F, '{print $6}' < "${TMP}")
+	WINDGUSTMPH_10M=$(awk -F, '{print $7}' < "${TMP}")
+	WINDGUSTDIR_10M=$(awk -F, '{print $8}' < "${TMP}")
+	WINDGUSTMPH_2M=$(awk -F, '{print $9}' < "${TMP}")
+	WINDGUSTDIR_2M=$(awk -F, '{print $10}' < "${TMP}")
+	TS=$(awk -F, '{print $11}' < "${TMP}")
 	validate_timestamp "${TS}"
 	if [ $? = 0 ] ; then
 		NUM_OK=$((NUM_OK + 1))
-		display_number_in_url_field rainin "${RAININ}"
+		display_number_in_url_field rainin "${RAIN_1H}"
+		display_number_in_url_field dailyrainin "${RAIN_TODAY}"
 		display_number_in_url_field winddir "${WINDDIR}"
 		display_number_in_url_field windspeedmph "${WINDSPEEDMPH}"
 		display_number_in_url_field windgustdir "${WINDGUSTDIR_2M}"

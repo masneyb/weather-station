@@ -73,6 +73,8 @@
         $('#rain_6h_unit').text(data.result[0].rain_gauge_unit);
         $('#rain_24h').text(data.result[0].rain_gauge_24h);
         $('#rain_24h_unit').text(data.result[0].rain_gauge_unit);
+        $('#rain_today').text(data.result[0].rain_gauge_today);
+        $('#rain_today_unit').text(data.result[0].rain_gauge_unit);
       });
 
       $.getJSON("temperature_humidity.json", function(data) {
@@ -149,6 +151,7 @@
         <div>Last 1 hour: <span id="rain_1h">-</span> <span id="rain_1h_unit"></span></div>
         <div>Last 6 hours: <span id="rain_6h">-</span> <span id="rain_6h_unit"></span></div>
         <div>Last 24 hours: <span id="rain_24h">-</span> <span id="rain_24h_unit"></span></div>
+        <div>Today: <span id="rain_today">-</span> <span id="rain_today_unit"></span></div>
       </td>
       <td>
         <div class="stat"><span id="pressure_in_number">-</span> in</div>

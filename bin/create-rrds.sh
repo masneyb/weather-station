@@ -53,6 +53,7 @@ if [ ! -f "${ARGENT_RRD}" ] ; then
 		DS:rain_gauge_1h:GAUGE:600:U:U \
 		DS:rain_gauge_6h:GAUGE:600:U:U \
 		DS:rain_gauge_24h:GAUGE:600:U:U \
+		DS:rain_gauge_today:GAUGE:600:U:U \
 		RRA:MIN:0.5:1:120 \
 		RRA:MIN:0.5:2:120 \
 		RRA:MIN:0.5:4:120 \
