@@ -121,9 +121,8 @@ high twice.
 The rain gauge is very similar to the anemometer. Each click of the switch
 over a second corresponds to 0.011 inches (0.2794 mm) of rain according to
 the [datasheet](https://www.argentdata.com/files/80422_datasheet.pdf).
-The rain gauge is sensitive to movement and high winds sometimes cause the
-switch to change state. This also uses a pull down resistor and the switch
-is debounced in software.
+This also uses a pull down resistor and the switch is debounced in
+software.
 
 The Stevenson screen (left side of the above picture) contains the temperature,
 humidity and barometric pressure sensors. A 3D model of the screen was
