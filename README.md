@@ -27,7 +27,7 @@
 - The web page uses Javascript and JQuery to download the various JSON files to
   provide a dashboard showing the current sensor readings. The web page checks
   for updated JSON files on the server every 10 seconds.
-- The Apache webserver runs on the Pi and apache only needs to serve out static
+- The nginx webserver runs on the Pi and only needs to serve out static
   content. Everything runs on the Pi; no third-party services are required.
 - Optional ability to publish the sensor readings to Weather Underground.
   You can
@@ -160,7 +160,8 @@ that leave the box.
 - Run `bin/create-rrds.sh <path to web/ directory>` to create the initial
   empty RRD databases.
 - `sudo make install`
-- Symlink the [web/](web/) directory somewhere into your web root.
+- Symlink the [web/](web/) directory somewhere into your web root in
+  /var/www/html.
 
 ## Contact
 
