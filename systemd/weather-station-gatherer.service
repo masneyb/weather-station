@@ -9,4 +9,4 @@ Type=simple
 # to the end of the call to gather-data.sh.
 # gather-data.sh <path to yadl binary> <path to web/ directory [ <weather underground ID> <weather underground password> ]
 
-ExecStart=/home/masneyb/data/weather-station/bin/gather-data.sh /home/masneyb/data/pi-yadl/bin/yadl /home/masneyb/data/weather-station/web
+ExecStart=/home/masneyb/data/weather-station/bin/gather-data.sh /home/masneyb/data/pi-yadl/bin/yadl /home/masneyb/data/weather-station-data

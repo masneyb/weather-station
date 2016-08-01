@@ -4,4 +4,4 @@ Description=Create graphs for the weather station
 [Service]
 User=masneyb
 Type=simple
-ExecStart=/home/masneyb/data/weather-station/bin/create-graphs.sh /home/masneyb/data/pi-yadl/bin /home/masneyb/data/weather-station/web
+ExecStart=/home/masneyb/data/weather-station/bin/create-graphs.sh /home/masneyb/data/pi-yadl/bin /home/masneyb/data/weather-station-data
