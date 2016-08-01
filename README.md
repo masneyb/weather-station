@@ -160,8 +160,9 @@ that leave the box.
 - Run `bin/create-rrds.sh <path to web/ directory>` to create the initial
   empty RRD databases.
 - `sudo make install`
-- Symlink the [web/](web/) directory somewhere into your web root in
-  /var/www/html.
+- `sudo apt-get install nginx`
+- `sudo ln -s /path/to/web/directory /var/www/html/weather-station`
+
 
 ## Contact
 
