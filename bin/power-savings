@@ -1,5 +1,10 @@
 #!/bin/bash -ve
 
+# For additional power savings, you can reduce the number of interrupts (with
+# slower network speeds) by adding dwc_otg.speed=1 to your /boot/config.txt
+# file. You can also add dwc_otg.fiq_fix_enable=1 to reduce the number of
+# interrupts.
+
 # Disable display
 tvservice -o
 
