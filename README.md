@@ -39,18 +39,36 @@
 ![Complete Setup](images/weather-station-complete.jpg?raw=1)
 
 
+### Project Box
+
+I used
+[this project box on Amazon](https://www.amazon.com/uxcell%C2%AE-Waterproof-Connect-Junction-200x120x75mm/dp/B00O9YY1G2),
+although I am a little concerned about the quality of the seal on the box. The
+solar panel is mounted to the lid of the project box and the panel is wider
+than the box so it should also help to keep the water away from the seal.
+
+All of the external sensors are terminated with a RJ45 connector to make it easy
+to remove the project box without having to bring the entire weather station
+inside. [RJ45 waterproof cable glands](https://www.adafruit.com/products/827)
+are used on the project box to get the connections inside the box. The wire for
+the solar panel enters the project box using a
+[PG-9](https://www.adafruit.com/products/761) cable gland.
+
+The box is mounted to the top of my fence using hose clamps with some rubber
+
+
 ### Solar and Power Setup
 
 This weather station runs on a Raspberry Pi Zero running Raspbian Jessie Lite.
 All of the hardware is powered by a
-[4400mAH 3.7V lithium ion battery](https://www.adafruit.com/products/354)
+[6600mAH 3.7V lithium ion battery](https://www.adafruit.com/products/353)
 that is [charged](https://www.adafruit.com/products/390) using a
 [6V 9W solar panel](https://www.adafruit.com/products/2747). The 3.7V is
 converted to 5V using a [PowerBoost 1000](https://www.adafruit.com/products/2465).
 The solar panel is attached to the top of the project box using several large
 pieces of velcrow. More information about the solar setup can be found on
 [Adafruit's Website](https://learn.adafruit.com/usb-dc-and-solar-lipoly-charger/overview).
-Be sure to connect the PowerBoost 1000 to the battery charge output pins; not
+Be sure to connect the PowerBoost 1000 to the battery charge output pins; not to
 the load terminal. This is because the solar panel can put out 6V however the
 PowerBoost can only accept a maximum input voltage of 5.5V. See
 [this post](https://forums.adafruit.com/viewtopic.php?f=19&t=59523) on the Adafruit
@@ -70,27 +88,20 @@ I used a [USB Charger Doctor](https://www.adafruit.com/products/1852) to roughly
 measure the power utilization of the entire weather station at 140 mAH with just
 the wind / rain collector running in the background and 200 mAH when the main
 collection processes runs every 5 minutes for just a few seconds. This is with a
-USB WiFi dongle running the entire time. I would expect to get around a day of
-usage on a fully charged battery without any kind of backup from the solar
+USB WiFi dongle running the entire time. I would expect to get around 35 hours
+of usage on a fully charged battery without any kind of backup from the solar
 panel.
 
+The end of the solar panel is terminated with one of
+[these waterproof cables](https://www.adafruit.com/products/744) to make it
+easy to detach the solar panel from the box. This would also make it easy to
+run an extension cord outside and plug the unit in to charge without removing
+or disassembling the project box if there were several days in a row of very
+cloudy weather.
 
-### Project Box
-
-I used
-[this project box on Amazon](https://www.amazon.com/uxcell%C2%AE-Waterproof-Connect-Junction-200x120x75mm/dp/B00O9YY1G2),
-although I am a little concerned about the quality of the seal on the box. The
-solar panel is mounted to the lid of the project box and the panel is wider
-than the box so it should also help to keep the water away from the seal.
-
-All of the external sensors are terminated with a RJ45 connector to make it easy
-to remove the project box without having to bring the entire weather station
-inside. [RJ45 waterproof cable glands](https://www.adafruit.com/products/827)
-are used on the project box to get the connections inside the box. The wire for
-the solar panel enters the project box using a
-[PG-9](https://www.adafruit.com/products/761) cable gland.
-
-The box is mounted to the top of my fence using hose clamps with some rubber
+I mounted this [waterproof on / off switch](https://www.adafruit.com/products/917)
+on the project box. Two wires from the switch go to the run pins on the
+Raspberry Pi Zero.
 
 
 ### Sensors
