@@ -55,6 +55,7 @@ the solar panel enters the project box using a
 [PG-9](https://www.adafruit.com/products/761) cable gland.
 
 The box is mounted to the top of my fence using hose clamps with some rubber
+stops that were purchased at a local hardware store.
 
 
 ### Solar and Power Setup
