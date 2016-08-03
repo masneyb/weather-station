@@ -67,7 +67,7 @@ that is [charged](https://www.adafruit.com/products/390) using a
 [6V 9W solar panel](https://www.adafruit.com/products/2747). The 3.7V is
 converted to 5V using a [PowerBoost 1000](https://www.adafruit.com/products/2465).
 The solar panel is attached to the top of the project box using several large
-pieces of velcrow. More information about the solar setup can be found on
+pieces of Velcro. More information about the solar setup can be found on
 [Adafruit's Website](https://learn.adafruit.com/usb-dc-and-solar-lipoly-charger/overview).
 Be sure to connect the PowerBoost 1000 to the battery charge output pins; not to
 the load terminal. This is because the solar panel can put out 6V however the
@@ -116,7 +116,7 @@ using the SPI bus.
 The wind vane supports reporting 16 different positions by using a series of
 reed switches and different size resistors. The wind vane is connected to the
 ADC and the voltage indicates the direction. For example, according to the 
-[datasheet](https://www.argentdata.com/files/80422_datasheet.pdf), 0 degrees (N)
+[data sheet](https://www.argentdata.com/files/80422_data sheet.pdf), 0 degrees (N)
 is 3.84V; 45 degrees (NE) is 2.25V; and 90 degrees (E) is 0.45V. I had an issue
 with getting accurate readings from the wind vane between 270 and 337.5 degrees
 that was caused by having the reference ADC voltage in software set to 5V
@@ -124,7 +124,7 @@ instead of 5.1V when converting the value read from the ADC to millivolts.
 Adding the argument `--adc_millivolts 5100` to the yadl binary fixed the issue.
 
 The anemometer is hooked up to a GPIO pin on the Pi. According to the
-[datasheet](https://www.argentdata.com/files/80422_datasheet.pdf), one click
+[data sheet](https://www.argentdata.com/files/80422_data sheet.pdf), one click
 of the reed switch over a second corresponds to a wind speed of 1.492 mph
 (2.4 km/h). A pull down resistor is used and the switch is debounced in
 software. One complete revolution of the anemometer will cause the pin to go
@@ -132,7 +132,7 @@ high twice.
 
 The rain gauge is very similar to the anemometer. Each click of the switch
 over a second corresponds to 0.011 inches (0.2794 mm) of rain according to
-the [datasheet](https://www.argentdata.com/files/80422_datasheet.pdf).
+the [data sheet](https://www.argentdata.com/files/80422_data sheet.pdf).
 This also uses a pull down resistor and the switch is debounced in
 software.
 
