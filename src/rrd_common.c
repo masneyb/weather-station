@@ -114,7 +114,7 @@ void write_to_rrd_database(logger log, char *rrd_database, char **names, float *
 	for (int i = 0; names[i] != NULL; i++) {
 		char str_value[20];
 
-		snprintf(str_value, sizeof(str_value), ":%.1f", values[i]);
+		snprintf(str_value, sizeof(str_value), ":%.2f", values[i]);
 		strncat(update_buf, str_value, sizeof(update_buf));
 	}
 
