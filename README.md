@@ -60,8 +60,8 @@ stops that were purchased at a local hardware store.
 
 ### Solar and Power Setup
 
-This weather station runs on a Raspberry Pi Zero running Raspbian Jessie Lite.
-All of the hardware is powered by a
+This weather station runs on a Raspberry Pi Zero running the latest Raspbian
+Testing Lite. All of the hardware is powered by a
 [6600mAH 3.7V lithium ion battery](https://www.adafruit.com/products/353)
 that is [charged](https://www.adafruit.com/products/390) using a
 [6V 9W solar panel](https://www.adafruit.com/products/2747). The 3.7V is
@@ -165,6 +165,9 @@ that leave the box.
 
 ## Installation
 
+- Note: This project iniitally started out using Raspian based on Debian
+  Jessie, but the latest version of Raspbian Testing is required for the
+  newer version of rrdtool that supports the `--left-axis-format` argument.
 - Clone this repository and the [pi-yadl](https://github.com/masneyb/pi-yadl)
   repository.
 - Follow the installation instructions to compile the pi-yadl project.

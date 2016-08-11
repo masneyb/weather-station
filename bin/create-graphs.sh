@@ -77,7 +77,7 @@ CREATE_MAX_GRAPHS="${YADL_BIN_DIR}"/create-max-graphs.sh
 	"" \
 	"" \
 	"" \
-	"--alt-autoscale"
+	"--alt-autoscale --left-axis-format %2.2lf"
 
 "${CREATE_MIN_MAX_GRAPHS}" \
 	"${WEB_BASE_DIR}"/battery \
