@@ -52,10 +52,13 @@ CREATE_MAX_GRAPHS="${YADL_BIN_DIR}"/create-max-graphs.sh
 
 "${CREATE_MIN_MAX_GRAPHS}" \
 	"${WEB_BASE_DIR}"/rain_gauge \
-	"Rain Gauge (in)" \
-	"Rain Gauge (in)" \
+	"Rain Gauge" \
+	"1 Hour Totals" \
 	"${WEB_BASE_DIR}"/argent_80422.rrd \
-	rain_gauge_1h
+	rain_gauge_1h \
+	"Daily Totals" \
+	"${WEB_BASE_DIR}"/argent_80422.rrd \
+	rain_gauge_today
 
 "${CREATE_MIN_MAX_GRAPHS}" \
 	"${WEB_BASE_DIR}"/wind_dir \
