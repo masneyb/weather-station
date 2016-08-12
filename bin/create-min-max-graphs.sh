@@ -60,7 +60,7 @@ create_graph()
 			"DEF:${RRD_FIELD1}min=${RRD_FILE1}:${RRD_FIELD1}:MIN" \
 			"AREA:${RRD_FIELD1}max#FF0000:Max ${RRD_FIELD1_LABEL}" \
 			"AREA:${RRD_FIELD1}min#FFFF00:Min ${RRD_FIELD1_LABEL}" \
-			"GPRINT:${RRD_FIELD1}max:LAST:Last Reading %2.1lf"
+			"GPRINT:${RRD_FIELD1}max:LAST:Last Reading %2.2lf"
 	else
 		rrdtool graph "${OUTFILE}" \
 			--start "-${SCALE}" \
@@ -74,8 +74,8 @@ create_graph()
 			"AREA:${RRD_FIELD1}1min#FFFF00:Min ${RRD_FIELD1_LABEL}\j" \
 			"LINE1:${RRD_FIELD2}2max#FF00FF:Max ${RRD_FIELD2_LABEL}" \
 			"LINE1:${RRD_FIELD2}2min#0000FF:Min ${RRD_FIELD2_LABEL}\j" \
-			"GPRINT:${RRD_FIELD2}2max:LAST:Last ${RRD_FIELD2_LABEL} %2.1lf" \
-			"GPRINT:${RRD_FIELD1}1max:LAST:Last ${RRD_FIELD1_LABEL} %2.1lf\j"
+			"GPRINT:${RRD_FIELD2}2max:LAST:Last ${RRD_FIELD2_LABEL} %2.2lf" \
+			"GPRINT:${RRD_FIELD1}1max:LAST:Last ${RRD_FIELD1_LABEL} %2.2lf\j"
 	fi
 
 	# Add the graph to the HTML file
