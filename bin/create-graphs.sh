@@ -50,7 +50,7 @@ CREATE_MAX_GRAPHS="${YADL_BIN_DIR}"/create-max-graphs.sh
 	"${WEB_BASE_DIR}"/argent_80422.rrd \
 	wind_speed_gust_2m
 
-"${CREATE_MIN_MAX_GRAPHS}" \
+"${CREATE_MAX_GRAPHS}" \
 	"${WEB_BASE_DIR}"/rain_gauge \
 	"Rain Gauge" \
 	"1 Hour Totals" \
