@@ -165,6 +165,6 @@ data on a separate computer.
 * [DHT22](https://www.sparkfun.com/datasheets/Sensors/Temperature/DHT22.pdf)
 * [DS18B20](http://cdn.sparkfun.com/datasheets/Sensors/Temp/DS18B20.pdf)
 * [TMP36 analog temperature sensor](http://cdn.sparkfun.com/datasheets/Sensors/Temp/TMP35_36_37.pdf)
-* [Argent Data Systems Wind / Rain Sensor Assembly](https://www.argentdata.com/files/80422_datasheet.pdf)
+* [Argent Data Systems Wind / Rain Sensor Assembly](http://www.sparkfun.com/datasheets/Sensors/Weather/Weather%20Sensor%20Assembly..pdf)
 * [BMP180](http://cdn.sparkfun.com/datasheets/Sensors/Pressure/BMP180.pdf)
 
