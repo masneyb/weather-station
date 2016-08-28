@@ -1,6 +1,6 @@
 # Solar Powered Weather Station
 
-![Screenshot](images/weather-station-screenshot-20160817.png?raw=1)
+![Screenshot](images/weather-station-screenshot-20160827.png?raw=1)
 
 ## High level overview
 
