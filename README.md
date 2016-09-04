@@ -16,6 +16,9 @@ following features:
     sensors should be easily supported.
   * Supports BMP180 pressure, altitude and temperature sensor. The BMP180
     driver came from [this project](https://github.com/lexruee/bmp180).
+  * Supports BME280 pressure, humidity, altitude and temperature sensor. The
+    BME280 driver came from
+    [this project](https://github.com/andreiva/raspberry-pi-bme280).
 * Supports returning the data in JSON, YAML, CSV, XML, and RRD. RRDtool can
   be used to graph the data over time. It also supports writing multiple
   files from a single sensor reading. For example, you may want to write the
@@ -32,7 +35,7 @@ following features:
 
 ## Usage
 
-    usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|bmp180|argent_80422>
+    usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|bmp180|bme280|argent_80422>
     	--output <json|yaml|csv|xml|rrd|single_json> [ --output <...> ]
     	[ --outfile <optional output filename. Defaults to stdout> [ --outfile <...> ] ]
     	[ --only_log_value_changes ]
@@ -80,6 +83,10 @@ following features:
     
     * bmp180 - Temperature, pressure and altitude sensor.
     	--i2c_device <I2C device.>
+    	--i2c_address <I2C hex address. Use i2cdetect command to look up.>
+    	--temperature_unit <celsius|fahrenheit|kelvin|rankine>
+    
+    * bme280 - Temperature, humidity, pressure and altitude sensor.
     	--i2c_address <I2C hex address. Use i2cdetect command to look up.>
     	--temperature_unit <celsius|fahrenheit|kelvin|rankine>
     

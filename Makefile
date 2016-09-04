@@ -3,7 +3,8 @@ YADL_C_DEPS=src/adc_mcp3002.c src/adc_mcp3004.c src/adc_pcf8591.c src/adcs.c \
 	src/sensor_analog.c src/sensor_argent_80422.c src/sensor_digital.c \
 	src/sensor_digital_counter.c src/sensor_temperature_dht.c \
 	src/sensor_temperature_ds18b20.c src/sensor_temperature_tmp36.c \
-	src/sensor_bmp180.c src/sensors.c src/temperature_units.c src/yadl.c
+	src/sensor_bmp180.c src/sensor_bme280.c src/sensors.c src/temperature_units.c \
+	src/yadl.c
 
 YADL_ADD_RRD_SAMPLE_C_DEPS=src/loggers.c src/rrd_common.c \
 	src/yadl-add-rrd-sample.c

@@ -45,7 +45,7 @@
 
 void usage(void)
 {
-	printf("usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|bmp180|argent_80422>\n");
+	printf("usage: yadl --sensor <digital|counter|analog|dht11|dht22|ds18b20|tmp36|bmp180|bme280|argent_80422>\n");
 	printf("\t--output <json|yaml|csv|xml|rrd|single_json> [ --output <...> ]\n");
 	printf("\t[ --outfile <optional output filename. Defaults to stdout> [ --outfile <...> ] ]\n");
 	printf("\t[ --only_log_value_changes ]\n");
@@ -93,6 +93,10 @@ void usage(void)
 	printf("\n");
 	printf("* bmp180 - Temperature, pressure and altitude sensor.\n");
 	printf("\t--i2c_device <I2C device.>\n");
+	printf("\t--i2c_address <I2C hex address. Use i2cdetect command to look up.>\n");
+	printf("\t--temperature_unit <celsius|fahrenheit|kelvin|rankine>\n");
+	printf("\n");
+	printf("* bme280 - Temperature, humidity, pressure and altitude sensor.\n");
 	printf("\t--i2c_address <I2C hex address. Use i2cdetect command to look up.>\n");
 	printf("\t--temperature_unit <celsius|fahrenheit|kelvin|rankine>\n");
 	printf("\n");

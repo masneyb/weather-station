@@ -132,6 +132,8 @@ outputter *get_outputter(char *name);
 
 sensor bmp180_sensor_funcs;
 
+sensor bme280_sensor_funcs;
+
 sensor analog_sensor_funcs;
 
 sensor argent_80422_sensor_funcs;
