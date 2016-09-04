@@ -151,9 +151,8 @@ uint32_t getTemperatureCalibration(bme280_calib_data *cal, uint32_t adc_T) {
   return var1 + var2;
 }
 
-bme280_calib_data *readCalibrationData(int fd)
+void readCalibrationData(int fd, bme280_calib_data *data)
 {
-  bme280_calib_data *data = calloc(1, sizeof(*data));
   data->dig_T1 = (uint16_t)wiringPiI2CReadReg16(fd, BME280_REGISTER_DIG_T1);
   data->dig_T2 = (int16_t)wiringPiI2CReadReg16(fd, BME280_REGISTER_DIG_T2);
   data->dig_T3 = (int16_t)wiringPiI2CReadReg16(fd, BME280_REGISTER_DIG_T3);
@@ -174,8 +173,6 @@ bme280_calib_data *readCalibrationData(int fd)
   data->dig_H4 = (wiringPiI2CReadReg8(fd, BME280_REGISTER_DIG_H4) << 4) | (wiringPiI2CReadReg8(fd, BME280_REGISTER_DIG_H4+1) & 0xF);
   data->dig_H5 = (wiringPiI2CReadReg8(fd, BME280_REGISTER_DIG_H5+1) << 4) | (wiringPiI2CReadReg8(fd, BME280_REGISTER_DIG_H5) >> 4);
   data->dig_H6 = (int8_t)wiringPiI2CReadReg8(fd, BME280_REGISTER_DIG_H6);
-
-  return data;
 }
 
 float compensateTemperature(uint32_t t_fine)
@@ -229,10 +226,8 @@ float compensateHumidity(uint32_t adc_H, bme280_calib_data *cal, uint32_t t_fine
   return  h / 1024.0;
 }
 
-bme280_raw_data *getRawData(int fd)
+void getRawData(int fd, bme280_raw_data *raw)
 {
-  bme280_raw_data *raw = calloc(1, sizeof(*raw));
-  
   wiringPiI2CWrite(fd, 0xf7);
 
   raw->pmsb = wiringPiI2CRead(fd);
@@ -259,8 +254,6 @@ bme280_raw_data *getRawData(int fd)
   raw->humidity = 0;
   raw->humidity = (raw->humidity | raw->hmsb) << 8;
   raw->humidity = (raw->humidity | raw->hlsb);
-
-  return raw;
 }
 
 float getAltitude(float pressure)
@@ -286,30 +279,30 @@ static void _bme280_init(yadl_config *config)
 		usage();
 	}
 
+	config->fd = wiringPiI2CSetup(config->i2c_address);
+	if(config->fd < 0) {
+		fprintf(stderr, "i2c device not found at address %x\n", config->i2c_address);
+		usage();
+	}
+
 }
 
 static yadl_result *_bme280_read_data(yadl_config *config)
 {
-	int fd = wiringPiI2CSetup(config->i2c_address);
-	if(fd < 0) {
-		fprintf(stderr, "i2c device not found at address %x\n", config->i2c_address);
-		return NULL;
-	}
+	bme280_calib_data cal;
+	readCalibrationData(config->fd, &cal);
 
-	bme280_calib_data *cal = readCalibrationData(fd);
+	wiringPiI2CWriteReg8(config->fd, 0xf2, 0x01);	 // humidity oversampling x 1
+	wiringPiI2CWriteReg8(config->fd, 0xf4, 0x25);	 // pressure and temperature oversampling x 1, mode normal
 
-	wiringPiI2CWriteReg8(fd, 0xf2, 0x01);	 // humidity oversampling x 1
-	wiringPiI2CWriteReg8(fd, 0xf4, 0x25);	 // pressure and temperature oversampling x 1, mode normal
-	bme280_raw_data *raw = getRawData(fd);
+	bme280_raw_data raw;
+	getRawData(config->fd, &raw);
 
-	uint32_t t_fine = getTemperatureCalibration(cal, raw->temperature);
+	uint32_t t_fine = getTemperatureCalibration(&cal, raw.temperature);
 	float temperature = compensateTemperature(t_fine);
-	float humidity = compensateHumidity(raw->humidity, cal, t_fine);
-	float pressure = compensatePressure(raw->pressure, cal, t_fine) / 100;
+	float humidity = compensateHumidity(raw.humidity, &cal, t_fine);
+	float pressure = compensatePressure(raw.pressure, &cal, t_fine) / 100;
 	float altitude = getAltitude(pressure);
-
-	free(raw);
-	free(cal);
 
 	yadl_result *result = malloc(sizeof(*result));
 

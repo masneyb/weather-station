@@ -124,6 +124,8 @@ struct yadl_config_tag {
 	float wind_directions_60m[NUM_WIND_60_MIN_SAMPLES];
 	float wind_speeds_60m[NUM_WIND_60_MIN_SAMPLES];
 	int wind_60m_idx;
+
+	int fd;
 };
 
 filter get_filter(char *name);
