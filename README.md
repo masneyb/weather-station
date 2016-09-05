@@ -82,7 +82,6 @@ following features:
     	[ --analog_scaling_factor <value> (default 500) ]
     
     * bmp180 - Temperature, pressure and altitude sensor.
-    	--i2c_device <I2C device.>
     	--i2c_address <I2C hex address. Use i2cdetect command to look up.>
     	--temperature_unit <celsius|fahrenheit|kelvin|rankine>
     

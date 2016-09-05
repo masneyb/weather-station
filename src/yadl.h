@@ -69,7 +69,6 @@ struct yadl_config_tag {
 	int gpio_pin;
 	logger logger;
 	int spi_channel;
-	char *i2c_device;
 	int i2c_address;
 	int analog_channel;
 	adc_converter *adc;

@@ -5,6 +5,8 @@
  * @author 	Alexander Rüedlinger <a.rueedlinger@gmail.com>
  * @date 	26.02.2015
  *
+ * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ *
  * The MIT License (MIT)
  * 
  * Copyright (c) 2015 Alexander Rüedlinger
@@ -28,27 +30,7 @@
  * SOFTWARE.
  */
 
-/*
- * sensor_bmp180.c - Support for the BMP180 sensor
- *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
- *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
- * 02110-1301, USA.
- */
-
+#include <wiringPiI2C.h>
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>
@@ -57,7 +39,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include <stdio.h>
-#include <linux/i2c-dev.h>
 #include <time.h>
 #include <math.h>
 #include <unistd.h>
@@ -193,28 +174,16 @@ typedef struct {
 #endif
 
 
-/*
- * Shortcut to cast void pointer to a bmp180_t pointer
- */
-#define TO_BMP(x)	(bmp180_t*) x
-
-
 
 /*
  * Basic structure for the bmp180 sensor
  */
 typedef struct {
 	/* file descriptor */
-	int file;
+	int fd;
 
-	/* i2c device address */
-	int address;
-	
 	/* BMP180 oversampling mode */
 	int oss;
-	
-	/* i2c device file path */
-	char *i2c_device;
 	
 	/* Eprom values */
 	int32_t ac1;
@@ -253,76 +222,16 @@ int32_t bmp180_register_table[11][2] = {
 
 
 /*
- * Prototypes for helper functions
- */
-int bmp180_set_addr(void *_bmp);
-void bmp180_read_eprom_reg(void *_bmp, int32_t *_data, uint8_t reg, int32_t sign);
-void bmp180_read_eprom(void *_bmp);
-int32_t bmp180_read_raw_pressure(void *_bmp, uint8_t oss);
-int32_t bmp180_read_raw_temperature(void *_bmp);
-void bmp180_init_error_cleanup(void *_bmp);
-
-
-/*
- * Implemetation of the helper functions
- */
-
-
-/*
- * Sets the address for the i2c device file.
- * 
- * @param bmp180 sensor
- */
-int bmp180_set_addr(void *_bmp) {
-	bmp180_t* bmp = TO_BMP(_bmp);
-	int error;
-
-	if((error = ioctl(bmp->file, I2C_SLAVE, bmp->address)) < 0) {
-		DEBUG("error: ioctl() failed\n");
-	}
-
-	return error;
-}
-
-
-
-/*
- * Frees allocated memory in the init function.
- * 
- * @param bmp180 sensor
- */
-void bmp180_init_error_cleanup(void *_bmp) {
-	bmp180_t* bmp = TO_BMP(_bmp);
-	
-	if(bmp->i2c_device != NULL) {
-		free(bmp->i2c_device);
-		bmp->i2c_device = NULL;
-	}
-	
-	free(bmp);
-	bmp = NULL;
-}
-
-
-
-/*
  * Reads a single calibration coefficient from the BMP180 eprom.
  * 
  * @param bmp180 sensor
  */
-void bmp180_read_eprom_reg(void *_bmp, int32_t *_store, uint8_t reg, int32_t sign) {
-	bmp180_t *bmp = TO_BMP(_bmp);
-	int32_t data = i2c_smbus_read_word_data(bmp->file, reg) & 0xFFFF;
-	
-	// i2c_smbus_read_word_data assumes little endian 
-	// but ARM uses big endian. Thus the ordering of the bytes is reversed.
-	// data = 	 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15   bit position
-	//          |      lsb      |          msb        |  
-	
-	//                 msb           +     lsb
+void bmp180_read_eprom_reg(bmp180_t *bmp, int32_t *_store, uint8_t reg, int32_t sign) {
+	int32_t data = wiringPiI2CReadReg16(bmp->fd, reg) & 0xFFFF;
+
 	*_store = ((data << 8) & 0xFF00) + (data >> 8);
-	
-	if(sign && (*_store > 32767)) {
+
+	if (sign && (*_store > 32767)) {
 		*_store -= 65536;
 	}
 }
@@ -333,8 +242,7 @@ void bmp180_read_eprom_reg(void *_bmp, int32_t *_store, uint8_t reg, int32_t sig
  * 
  * @param bmp180 sensor
  */
-void bmp180_read_eprom(void *_bmp) {
-	bmp180_t *bmp = TO_BMP(_bmp);	
+void bmp180_read_eprom(bmp180_t *bmp) {
 	
 	int32_t *bmp180_register_addr[11] = {
 		&bmp->ac1, &bmp->ac2, &bmp->ac3, &bmp->ac4, &bmp->ac5, &bmp->ac6,
@@ -348,7 +256,7 @@ void bmp180_read_eprom(void *_bmp) {
 		reg = (uint8_t) bmp180_register_table[i][0];
 		sign = (uint8_t) bmp180_register_table[i][1];
 		data = bmp180_register_addr[i];
-		bmp180_read_eprom_reg(_bmp, data, reg, sign);
+		bmp180_read_eprom_reg(bmp, data, reg, sign);
 	}
 }
 
@@ -358,22 +266,15 @@ void bmp180_read_eprom(void *_bmp) {
  * 
  * @param bmp180 sensor
  */
-int32_t bmp180_read_raw_temperature(void *_bmp) {
-	bmp180_t* bmp = TO_BMP(_bmp);
-
-	bmp->error = i2c_smbus_write_byte_data(bmp->file, BMP180_CTRL, BMP180_TMP_READ_CMD);
-	if (bmp->error < 0) {
-		DEBUG("error: i2c_smbus_write_byte_data failed with error %d\n", bmp->error);
-		bmp->error *= -1;
-		return -1;
-	}
+int32_t bmp180_read_raw_temperature(bmp180_t *bmp) {
+	wiringPiI2CWriteReg8(bmp->fd, BMP180_CTRL, BMP180_TMP_READ_CMD);
 
 	usleep(BMP180_TMP_READ_WAIT_US);
-	int32_t data = i2c_smbus_read_word_data(bmp->file, BMP180_REG_TMP) & 0xFFFF;
-	
+
+	int32_t data = wiringPiI2CReadReg16(bmp->fd, BMP180_REG_TMP) & 0xFFFF;
 	data = ((data << 8) & 0xFF00) + (data >> 8);
-	
 	return data;
+
 }
 
 
@@ -382,8 +283,7 @@ int32_t bmp180_read_raw_temperature(void *_bmp) {
  * 
  * @param bmp180 sensor
  */
-int32_t bmp180_read_raw_pressure(void *_bmp, uint8_t oss) {
-	bmp180_t* bmp = TO_BMP(_bmp);
+int32_t bmp180_read_raw_pressure(bmp180_t *bmp, uint8_t oss) {
 	uint16_t wait;
 	uint8_t cmd;
 	
@@ -406,19 +306,14 @@ int32_t bmp180_read_raw_pressure(void *_bmp, uint8_t oss) {
 			break;
 	}
 	
-	bmp->error = i2c_smbus_write_byte_data(bmp->file, BMP180_CTRL, cmd);
-	if (bmp->error < 0) {
-		DEBUG("error: i2c_smbus_write_byte_data failed with error %d\n", bmp->error);
-		bmp->error *= -1;
-		return -1;
-	}
+	wiringPiI2CWriteReg8(bmp->fd, BMP180_CTRL, cmd);
 
 	usleep(wait);
 	
 	int32_t msb, lsb, xlsb, data;
-	msb = i2c_smbus_read_byte_data(bmp->file, BMP180_REG_PRE) & 0xFF;
-	lsb = i2c_smbus_read_byte_data(bmp->file, BMP180_REG_PRE+1) & 0xFF;
-	xlsb = i2c_smbus_read_byte_data(bmp->file, BMP180_REG_PRE+2) & 0xFF;
+	msb = wiringPiI2CReadReg8(bmp->fd, BMP180_REG_PRE) & 0xFF;
+	lsb = wiringPiI2CReadReg8(bmp->fd, BMP180_REG_PRE+1) & 0xFF;
+	xlsb = wiringPiI2CReadReg8(bmp->fd, BMP180_REG_PRE+2) & 0xFF;
 	
 	data = ((msb << 16)  + (lsb << 8)  + xlsb) >> (8 - bmp->oss);
 	
@@ -435,8 +330,7 @@ int32_t bmp180_read_raw_pressure(void *_bmp, uint8_t oss) {
  * @param bmp180 sensor
  * @param bmp180 eprom struct
  */
-void bmp180_dump_eprom(void *_bmp, bmp180_eprom_t *eprom) {
-	bmp180_t *bmp = TO_BMP(_bmp);
+void bmp180_dump_eprom(bmp180_t *bmp, bmp180_eprom_t *eprom) {
 	eprom->ac1 = bmp->ac1;
 	eprom->ac2 = bmp->ac2;
 	eprom->ac3 = bmp->ac3;
@@ -458,53 +352,25 @@ void bmp180_dump_eprom(void *_bmp, bmp180_eprom_t *eprom) {
  * @param i2c device file path
  * @return bmp180 sensor
  */
-void *bmp180_init(int address, const char* i2c_device_filepath) {
-	DEBUG("device: init using address %#x and i2cbus %s\n", address, i2c_device_filepath);
+bmp180_t *bmp180_init(int fd) {
+	DEBUG("device: init using address %#x\n", address);
 	
-	// setup BMP180
-	void *_bmp = malloc(sizeof(bmp180_t));
-	if(_bmp == NULL)  {
+	bmp180_t *bmp = malloc(sizeof(bmp180_t));
+	if(bmp == NULL)  {
 		DEBUG("error: malloc returns NULL pointer\n");
 		return NULL;
 	}
 
-	bmp180_t *bmp = TO_BMP(_bmp);
-	bmp->address = address;
-
-	// setup i2c device path
-	bmp->i2c_device = (char*) malloc(strlen(i2c_device_filepath) * sizeof(char));
-	if(bmp->i2c_device == NULL) {
-		DEBUG("error: malloc returns NULL pointer!\n");
-		bmp180_init_error_cleanup(bmp);
-		return NULL;
-	}
-
-	// copy string
-	strcpy(bmp->i2c_device, i2c_device_filepath);
-	
-	// open i2c device
-	int file;
-	if((file = open(bmp->i2c_device, O_RDWR)) < 0) {
-		DEBUG("error: %s open() failed\n", bmp->i2c_device);
-		bmp180_init_error_cleanup(bmp);
-		return NULL;
-	}
-	bmp->file = file;
-
-	// set i2c device address
-	if(bmp180_set_addr(_bmp) < 0) {
-		bmp180_init_error_cleanup(bmp);
-		return NULL;
-	}
+	bmp->fd = fd;
 
 	// setup i2c device
-	bmp180_read_eprom(_bmp);
+	bmp180_read_eprom(bmp);
 	bmp->oss = 0;
 	
 	DEBUG("device: open ok\n");
 
 	bmp->error = 0;
-	return _bmp;
+	return bmp;
 }
 
 
@@ -513,22 +379,10 @@ void *bmp180_init(int address, const char* i2c_device_filepath) {
  * 
  * @param bmp180 sensor
  */
-void bmp180_close(void *_bmp) {
-	if(_bmp == NULL) {
-		return;
-	}
-	
+void bmp180_close(bmp180_t *bmp) {
 	DEBUG("close bmp180 device\n");
-	bmp180_t *bmp = TO_BMP(_bmp);
 	
-	if(close(bmp->file) < 0) {
-		DEBUG("error: %s close() failed\n", bmp->i2c_device);
-	}
-	
-	free(bmp->i2c_device); // free string
-	bmp->i2c_device = NULL;
 	free(bmp); // free bmp structure
-	_bmp = NULL;
 } 
 
 
@@ -541,9 +395,8 @@ void bmp180_close(void *_bmp) {
  *        last failed operation
  */
 
-int bmp180_get_last_errno(void *_bmp)
+int bmp180_get_last_errno(bmp180_t *bmp)
 {
-	bmp180_t* bmp = TO_BMP(_bmp);
 	return bmp->error;
 }
 
@@ -554,12 +407,11 @@ int bmp180_get_last_errno(void *_bmp)
  * @param bmp180 sensor
  * @return temperature
  */
-float bmp180_temperature(void *_bmp) {
-	bmp180_t* bmp = TO_BMP(_bmp);
+float bmp180_temperature(bmp180_t *bmp) {
 	long UT, X1, X2, B5;
 	float T;
 	
-	UT = bmp180_read_raw_temperature(_bmp);
+	UT = bmp180_read_raw_temperature(bmp);
 	if (bmp->error != 0) {
 		return -FLT_MAX; // error
 	}
@@ -581,17 +433,16 @@ float bmp180_temperature(void *_bmp) {
  * @param bmp180 sensor
  * @return pressure
  */
-long bmp180_pressure(void *_bmp) {
-	bmp180_t* bmp = TO_BMP(_bmp);
+long bmp180_pressure(bmp180_t *bmp) {
 	long UT, UP, B6, B5, X1, X2, X3, B3, p;
 	unsigned long B4, B7;
 	
-	UT = bmp180_read_raw_temperature(_bmp);
+	UT = bmp180_read_raw_temperature(bmp);
 	if (bmp->error != 0) {
 		return LONG_MIN; // error
 	}
 
-	UP = bmp180_read_raw_pressure(_bmp, bmp->oss);
+	UP = bmp180_read_raw_pressure(bmp, bmp->oss);
 	if (bmp->error != 0) {
 		return LONG_MIN; // error
 	}
@@ -638,11 +489,10 @@ long bmp180_pressure(void *_bmp) {
  * @param bmp180 sensor
  * @return altitude
  */
-float bmp180_altitude(void *_bmp) {
-	bmp180_t* bmp = TO_BMP(_bmp);
+float bmp180_altitude(bmp180_t *bmp) {
 	float p, alt;
 
-	p = bmp180_pressure(_bmp);
+	p = bmp180_pressure(bmp);
 	if (bmp->error != 0) {
 		return -FLT_MAX; // error
 	}
@@ -659,8 +509,7 @@ float bmp180_altitude(void *_bmp) {
  * @param bmp180 sensor
  * @param oversampling mode
  */
-void bmp180_set_oss(void *_bmp, int oss) {
-	bmp180_t* bmp = TO_BMP(_bmp);
+void bmp180_set_oss(bmp180_t *bmp, int oss) {
 	bmp->oss = oss;
 }
 
@@ -672,12 +521,14 @@ static void _bmp180_init(yadl_config *config)
 		fprintf(stderr, "You must specify the --temperature_unit argument\n");
 		usage();
 	}
-	else if (config->i2c_device == NULL) {
-		fprintf(stderr, "You must specify the --i2c_device argument\n");
-		usage();
-	}
 	else if (config->i2c_address == -1) {
 		fprintf(stderr, "You must specify the --i2c_address argument\n");
+		usage();
+	}
+
+	config->fd = wiringPiI2CSetup(config->i2c_address);
+	if(config->fd < 0) {
+		fprintf(stderr, "i2c device not found at address %x\n", config->i2c_address);
 		usage();
 	}
 
@@ -685,7 +536,7 @@ static void _bmp180_init(yadl_config *config)
 
 static yadl_result *_bmp180_read_data(yadl_config *config)
 {
-        void *bmp = bmp180_init(config->i2c_address, config->i2c_device);
+        bmp180_t *bmp = bmp180_init(config->fd);
         if (bmp == NULL) {
 		fprintf(stderr, "Error initializing bmp180 sensor\n");
 		exit(1);

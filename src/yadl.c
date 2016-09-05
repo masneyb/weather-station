@@ -92,7 +92,6 @@ void usage(void)
 	printf("\t[ --analog_scaling_factor <value> (default %d) ]\n", DEFAULT_ANALOG_SCALING_FACTOR);
 	printf("\n");
 	printf("* bmp180 - Temperature, pressure and altitude sensor.\n");
-	printf("\t--i2c_device <I2C device.>\n");
 	printf("\t--i2c_address <I2C hex address. Use i2cdetect command to look up.>\n");
 	printf("\t--temperature_unit <celsius|fahrenheit|kelvin|rankine>\n");
 	printf("\n");
@@ -383,7 +382,6 @@ int main(int argc, char **argv)
 		{"analog_scaling_factor", required_argument, 0, 0 },
 		{"wind_speed_pin", required_argument, 0, 0 },
 		{"rain_gauge_pin", required_argument, 0, 0 },
-		{"i2c_device", required_argument, 0, 0 },
 		{"wind_speed_unit", required_argument, 0, 0 },
 		{"rain_gauge_unit", required_argument, 0, 0 },
 		{0, 0, 0, 0 }
@@ -520,12 +518,9 @@ int main(int argc, char **argv)
 			config.rain_gauge_pin = strtol(optarg, NULL, 10);
 			break;
 		case 28:
-			config.i2c_device = optarg;
-			break;
-		case 29:
 			config.wind_speed_unit = optarg;
 			break;
-		case 30:
+		case 29:
 			config.rain_gauge_unit = optarg;
 			break;
 		default:
