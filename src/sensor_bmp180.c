@@ -44,10 +44,10 @@
 #include "yadl.h"
 
 // pressure oversampling modes
-#define BMP180_PRESSURE_OSS0 0 // ultra low power
-#define BMP180_PRESSURE_OSS1 1 // standard
-#define BMP180_PRESSURE_OSS2 2 // high resolution
-#define BMP180_PRESSURE_OSS3 3 // ultra high resoultion
+#define BMP180_PRESSURE_OSS_ULTRA_LOW_POWER 0 // ultra low power
+#define BMP180_PRESSURE_OSS_STANDARD 1 // standard
+#define BMP180_PRESSURE_OSS_HIGH_RESOLUTION 2 // high resolution
+#define BMP180_PRESSURE_OSS_ULTRA_HIGH_RESOLUTION 3 // ultra high resoultion
 
 // Registers
 #define BMP180_REGISTER_AC1_H 0xAA
@@ -70,22 +70,22 @@
 #define BMP180_TEMPERATURE_READ_WAIT_US 5000
 
 // Pressure oversampling modes
-#define BMP180_PRESSURE_OSS0 0 // ultra low power
-#define BMP180_PRESSURE_OSS1 1 // standard
-#define BMP180_PRESSURE_OSS2 2 // high resolution
-#define BMP180_PRESSURE_OSS3 3 // ultra high resoultion
+#define BMP180_PRESSURE_OSS_ULTRA_LOW_POWER 0
+#define BMP180_PRESSURE_OSS_STANDARD 1
+#define BMP180_PRESSURE_OSS_HIGH_RESOLUTION 2
+#define BMP180_PRESSURE_OSS_ULTRA_HIGH_RESOLUTION 3
 
 // Pressure read commands
-#define BMP180_PRESSURE_OSS0_CMD 0x34
-#define BMP180_PRESSURE_OSS1_CMD 0x74
-#define BMP180_PRESSURE_OSS2_CMD 0xB4
-#define BMP180_PRESSURE_OSS3_CMD 0xF4
+#define BMP180_PRESSURE_OSS_ULTRA_LOW_POWER_CMD 0x34
+#define BMP180_PRESSURE_OSS_STANDARD_CMD 0x74
+#define BMP180_PRESSURE_OSS_HIGH_RESOLUTION_CMD 0xB4
+#define BMP180_PRESSURE_OSS_ULTRA_HIGH_RESOLUTION_CMD 0xF4
 
 // Waiting times in us for reading pressure values
-#define BMP180_PRESSURE_OSS0_WAIT_US 5000
-#define BMP180_PRESSURE_OSS1_WAIT_US 8000
-#define BMP180_PRESSURE_OSS2_WAIT_US 14000
-#define BMP180_PRESSURE_OSS3_WAIT_US 26000
+#define BMP180_PRESSURE_OSS_ULTRA_LOW_POWER_WAIT_US 5000
+#define BMP180_PRESSURE_OSS_STANDARD_WAIT_US 8000
+#define BMP180_PRESSURE_OSS_HIGH_RESOLUTION_WAIT_US 14000
+#define BMP180_PRESSURE_OSS_ULTRA_HIGH_RESOLUTION_WAIT_US 26000
 
 #define BMP180_AVG_PRESSURE_AT_SEA_LEVEL_IN_HPA 1013.25
 
@@ -160,24 +160,28 @@ static int32_t bmp180_read_raw_temperature(bmp180_t *bmp)
 
 
 // Returns the raw measured pressure value of this BMP180 sensor.
-static int32_t bmp180_read_raw_pressure(bmp180_t *bmp, uint8_t oss)
+static int32_t bmp180_read_raw_pressure(bmp180_t *bmp)
 {
 	uint16_t wait;
 	uint8_t cmd;
 	
-	switch(oss) {
-		case BMP180_PRESSURE_OSS1:
-			wait = BMP180_PRESSURE_OSS1_WAIT_US; cmd = BMP180_PRESSURE_OSS1_CMD;
+	switch(bmp->oss) {
+		case BMP180_PRESSURE_OSS_STANDARD:
+			wait = BMP180_PRESSURE_OSS_STANDARD_WAIT_US;
+			cmd = BMP180_PRESSURE_OSS_STANDARD_CMD;
 			break;
-		case BMP180_PRESSURE_OSS2:
-			wait = BMP180_PRESSURE_OSS2_WAIT_US; cmd = BMP180_PRESSURE_OSS2_CMD;
+		case BMP180_PRESSURE_OSS_HIGH_RESOLUTION:
+			wait = BMP180_PRESSURE_OSS_HIGH_RESOLUTION_WAIT_US;
+			cmd = BMP180_PRESSURE_OSS_HIGH_RESOLUTION_CMD;
 			break;
-		case BMP180_PRESSURE_OSS3:
-			wait = BMP180_PRESSURE_OSS3_WAIT_US; cmd = BMP180_PRESSURE_OSS3_CMD;
+		case BMP180_PRESSURE_OSS_ULTRA_HIGH_RESOLUTION:
+			wait = BMP180_PRESSURE_OSS_ULTRA_HIGH_RESOLUTION_WAIT_US;
+			cmd = BMP180_PRESSURE_OSS_ULTRA_HIGH_RESOLUTION_CMD;
 			break;
-		case BMP180_PRESSURE_OSS0:
+		case BMP180_PRESSURE_OSS_ULTRA_LOW_POWER:
 		default:
-			wait = BMP180_PRESSURE_OSS0_WAIT_US; cmd = BMP180_PRESSURE_OSS0_CMD;
+			wait = BMP180_PRESSURE_OSS_ULTRA_LOW_POWER_WAIT_US;
+			cmd = BMP180_PRESSURE_OSS_ULTRA_LOW_POWER_CMD;
 			break;
 	}
 	
@@ -185,59 +189,50 @@ static int32_t bmp180_read_raw_pressure(bmp180_t *bmp, uint8_t oss)
 
 	usleep(wait);
 	
-	int32_t msb, lsb, xlsb;
-	msb = wiringPiI2CReadReg8(bmp->fd, BMP180_REGISTER_PRESSURE) & 0xFF;
-	lsb = wiringPiI2CReadReg8(bmp->fd, BMP180_REGISTER_PRESSURE+1) & 0xFF;
-	xlsb = wiringPiI2CReadReg8(bmp->fd, BMP180_REGISTER_PRESSURE+2) & 0xFF;
+	int32_t msb = wiringPiI2CReadReg8(bmp->fd, BMP180_REGISTER_PRESSURE) & 0xFF;
+	int32_t lsb = wiringPiI2CReadReg8(bmp->fd, BMP180_REGISTER_PRESSURE+1) & 0xFF;
+	int32_t xlsb = wiringPiI2CReadReg8(bmp->fd, BMP180_REGISTER_PRESSURE+2) & 0xFF;
 	
-	return ((msb << 16)  + (lsb << 8)  + xlsb) >> (8 - bmp->oss);
+	return ((msb << 16) + (lsb << 8) + xlsb) >> (8 - bmp->oss);
 }
 
 // Returns the measured temperature in celsius.
 static float bmp180_temperature(bmp180_t *bmp)
 {
-	long UT, X1, X2, B5;
-	float T;
-	
-	UT = bmp180_read_raw_temperature(bmp);
-	X1 = ((UT - bmp->ac6) * bmp->ac5) >> 15;
-	X2 = (bmp->mc << 11) / (X1 + bmp->md);
-	B5 = X1 + X2;
-	T = ((B5 + 8) >> 4) / 10.0;
-
-	return T;
+	long UT = bmp180_read_raw_temperature(bmp);
+	long X1 = ((UT - bmp->ac6) * bmp->ac5) >> 15;
+	long X2 = (bmp->mc << 11) / (X1 + bmp->md);
+	long B5 = X1 + X2;
+	return ((B5 + 8) >> 4) / 10.0;
 }
 
 
 // Returns the measured pressure in pascal.
 static long bmp180_pressure(bmp180_t *bmp)
 {
-	long UT, UP, B6, B5, X1, X2, X3, B3, p;
-	unsigned long B4, B7;
-	
-	UT = bmp180_read_raw_temperature(bmp);
-	UP = bmp180_read_raw_pressure(bmp, bmp->oss);
+	long UT = bmp180_read_raw_temperature(bmp);
+	long UP = bmp180_read_raw_pressure(bmp);
 
-	X1 = ((UT - bmp->ac6) * bmp->ac5) >> 15;
-	X2 = (bmp->mc << 11) / (X1 + bmp->md);
-	
-	B5 = X1 + X2;
-	
-	B6 = B5 - 4000;
-	
+	long X1 = ((UT - bmp->ac6) * bmp->ac5) >> 15;
+	long X2 = (bmp->mc << 11) / (X1 + bmp->md);
+
+	long B5 = X1 + X2;
+
+	long B6 = B5 - 4000;
+
 	X1 = (bmp->b2 * (B6 * B6) >> 12) >> 11;
 	X2 = (bmp->ac2 * B6) >> 11;
-	X3 = X1 + X2;
-	
-	B3 = ((((bmp->ac1 * 4) + X3) << bmp->oss) + 2) / 4;
+	long X3 = X1 + X2;
+
+	long B3 = ((((bmp->ac1 * 4) + X3) << bmp->oss) + 2) / 4;
 	X1 = (bmp->ac3 * B6) >> 13;
 	X2 = (bmp->b1 * ((B6 * B6) >> 12)) >> 16;
 	X3 = ((X1 + X2) + 2) >> 2;
-	
-	
-	B4 = bmp->ac4 * (unsigned long)(X3 + 32768) >> 15;
-	B7 = ((unsigned long) UP - B3) * (50000 >> bmp->oss);
-	
+
+	unsigned long B4 = bmp->ac4 * (unsigned long)(X3 + 32768) >> 15;
+	unsigned long B7 = ((unsigned long) UP - B3) * (50000 >> bmp->oss);
+
+	long p;
 	if(B7 < 0x80000000) {
 		p = (B7 * 2) / B4;
 	} else {
@@ -247,21 +242,15 @@ static long bmp180_pressure(bmp180_t *bmp)
 	X1 = (p >> 8) * (p >> 8);
 	X1 = (X1 * 3038) >> 16;
 	X2 = (-7357 * p) >> 16;
-	p = p + ((X1 + X2 + 3791) >> 4);
-	
-	return p;
+	return p + ((X1 + X2 + 3791) >> 4);
 }
 
 // Returns altitude in meters based on the measured pressure 
 // and temperature of this sensor.
 static float bmp180_altitude(bmp180_t *bmp)
 {
-	float p, alt;
-
-	p = bmp180_pressure(bmp);
-	alt = 44330 * (1 - pow(( (p/100) / BMP180_AVG_PRESSURE_AT_SEA_LEVEL_IN_HPA),1/5.255));
-	
-	return alt;
+	float p = bmp180_pressure(bmp);
+	return 44330 * (1 - pow(( (p/100) / BMP180_AVG_PRESSURE_AT_SEA_LEVEL_IN_HPA),1/5.255));
 }
 
 static void _bmp180_init(yadl_config *config)
@@ -289,7 +278,7 @@ static yadl_result *_bmp180_read_data(yadl_config *config)
 
 	memset(&bmp, 0, sizeof(bmp));
         bmp.fd = config->fd;
-        bmp.oss = BMP180_PRESSURE_OSS3;
+        bmp.oss = BMP180_PRESSURE_OSS_ULTRA_HIGH_RESOLUTION;
         bmp180_read_eprom(&bmp);
 
 	float temperature = bmp180_temperature(&bmp);
