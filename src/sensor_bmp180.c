@@ -108,9 +108,6 @@ typedef struct {
 	int32_t mb;
 	int32_t mc;
 	int32_t md;
-
-	/* Last errno */
-	int error;
 } bmp180_t;
 
 // Lookup table for BMP180 register addresses
@@ -203,15 +200,11 @@ static float bmp180_temperature(bmp180_t *bmp)
 	float T;
 	
 	UT = bmp180_read_raw_temperature(bmp);
-	if (bmp->error != 0) {
-		return -FLT_MAX; // error
-	}
-	
 	X1 = ((UT - bmp->ac6) * bmp->ac5) >> 15;
 	X2 = (bmp->mc << 11) / (X1 + bmp->md);
 	B5 = X1 + X2;
 	T = ((B5 + 8) >> 4) / 10.0;
-	
+
 	return T;
 }
 
@@ -223,15 +216,8 @@ static long bmp180_pressure(bmp180_t *bmp)
 	unsigned long B4, B7;
 	
 	UT = bmp180_read_raw_temperature(bmp);
-	if (bmp->error != 0) {
-		return LONG_MIN; // error
-	}
-
 	UP = bmp180_read_raw_pressure(bmp, bmp->oss);
-	if (bmp->error != 0) {
-		return LONG_MIN; // error
-	}
-	
+
 	X1 = ((UT - bmp->ac6) * bmp->ac5) >> 15;
 	X2 = (bmp->mc << 11) / (X1 + bmp->md);
 	
@@ -273,9 +259,6 @@ static float bmp180_altitude(bmp180_t *bmp)
 	float p, alt;
 
 	p = bmp180_pressure(bmp);
-	if (bmp->error != 0) {
-		return -FLT_MAX; // error
-	}
 	alt = 44330 * (1 - pow(( (p/100) / BMP180_AVG_PRESSURE_AT_SEA_LEVEL_IN_HPA),1/5.255));
 	
 	return alt;
@@ -307,23 +290,11 @@ static yadl_result *_bmp180_read_data(yadl_config *config)
 	memset(&bmp, 0, sizeof(bmp));
         bmp.fd = config->fd;
         bmp.oss = BMP180_PRESSURE_OSS3;
-        bmp.error = 0;
         bmp180_read_eprom(&bmp);
 
 	float temperature = bmp180_temperature(&bmp);
-	if (bmp.error != 0) {
-		return NULL;
-	}
-
 	float pressure = bmp180_pressure(&bmp) / 100.0;
-	if (bmp.error != 0) {
-		return NULL;
-	}
-
 	float altitude = bmp180_altitude(&bmp);
-	if (bmp.error != 0) {
-		return NULL;
-	}
 
 	yadl_result *result = malloc(sizeof(*result));
 
