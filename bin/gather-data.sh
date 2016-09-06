@@ -36,7 +36,7 @@ if [ $? != 0 ] ; then
 fi
 
 JSON="${WEB_BASE_DIR}"/bmp180.json
-"${YADL_BIN}" --sensor bmp180 --i2c_device /dev/i2c-1 --i2c_address 77 --temperature_unit fahrenheit --output rrd --outfile "${WEB_BASE_DIR}"/bmp180.rrd --output single_json --outfile "${JSON}"
+"${YADL_BIN}" --sensor bmp180 --i2c_address 77 --temperature_unit fahrenheit --output rrd --outfile "${WEB_BASE_DIR}"/bmp180.rrd --output single_json --outfile "${JSON}"
 if [ $? != 0 ] ; then
 	rm -f "${JSON}"
 fi
