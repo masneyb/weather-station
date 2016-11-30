@@ -42,10 +42,9 @@
 ### Project Box
 
 I used
-[this project box on Amazon](https://www.amazon.com/uxcell%C2%AE-Waterproof-Connect-Junction-200x120x75mm/dp/B00O9YY1G2),
-although I am a little concerned about the quality of the seal on the box. The
-solar panel is mounted to the lid of the project box and the panel is wider
-than the box so it should also help to keep the water away from the seal.
+[this project box on Amazon](https://www.amazon.com/uxcell%C2%AE-Waterproof-Connect-Junction-200x120x75mm/dp/B00O9YY1G2).
+I was initially a little concerned about the quality of the seal on the box but
+it has held up so after being outside continuously since June 2016.
 
 All of the external sensors are terminated with a RJ45 connector to make it easy
 to remove the project box without having to bring the entire weather station
@@ -91,7 +90,7 @@ the wind / rain collector running in the background and 200 mAH when the main
 collection processes runs every 5 minutes for just a few seconds. This is with a
 USB WiFi dongle running the entire time. I would expect to get around 35 hours
 of usage on a fully charged battery without any kind of backup from the solar
-panel.
+panel. See Power Disclaimer section below for more details.
 
 The end of the solar panel is terminated with one of
 [these waterproof cables](https://www.adafruit.com/products/744) to make it
@@ -102,7 +101,11 @@ cloudy weather.
 
 I mounted this [waterproof on / off switch](https://www.adafruit.com/products/917)
 on the project box. Two wires from the switch go to the run pins on the
-Raspberry Pi Zero.
+PowerBoost 1000. I initially had it connected to the run pins on the Raspberry
+Pi Zero but I ran into a situation where the weather station battery got very
+low and I could not reset the Pi using the power button on the outside, even
+after the battery was fully charged. Being able to completely power off the Pi
+itself resolved that issue.
 
 
 ### Sensors
@@ -161,6 +164,22 @@ that leave the box.
 ![Inside](images/weather-station-outside-rj45-cable-glands.jpg?raw=1)
 
 [![Weather Underground PWS KWVMORGA45](http://banners.wunderground.com/cgi-bin/banner/ban/wxBanner?bannertype=pws250&weatherstationcount=KWVMORGA45)](http://www.wunderground.com/weatherstation/WXDailyHistory.asp?ID=KWVMORGA45)
+
+
+## Power Disclaimer
+
+I have received several emails from people asking about using this setup
+unattended in remote locations. The Pi Zero draws far too much power for the
+size battery that I used to be used unattended in some far away location. At
+the time that I wrote this (Nov 2016), Winter is approaching in the Northern
+Hemisphere, and the solar panel did not completely charge the battery with the
+shorter days, especially with all of the cloudy days in the area that I live.
+I currently have an extension cord running from my house to the weather
+station outside. At some point, I'm planning to get a large 12V battery, a
+larger solar panel, associated charger, and a 12V to 5V buck buck converter
+to power the weather station. The other alternative is to go with some low
+powered microcontroller (such as an Arduino or one of the numerous clones),
+however none of the code that I have here will run on that platform.
 
 
 ## Installation
