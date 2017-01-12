@@ -1,7 +1,7 @@
 /*
  * yadl-add-rrd-sample.c
  *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -64,7 +64,8 @@ int main(int argc, char **argv)
 	char *outfile = NULL, *logfile = NULL;
 	int opt = 0, long_index = 0, debug = 0;
 
-	while ((opt = getopt_long(argc, argv, "", long_options, &long_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "", long_options,
+				  &long_index)) != -1) {
 		if (opt != 0)
 			usage();
 
@@ -78,7 +79,8 @@ int main(int argc, char **argv)
 			break;
 		case 2:
 			num_headers++;
-			headers = realloc(headers, sizeof(char *) * num_headers);
+			headers = realloc(headers,
+					  sizeof(char *) * num_headers);
 			headers[num_headers - 1] = optarg;
 			break;
 		case 3:
@@ -100,7 +102,8 @@ int main(int argc, char **argv)
 	if (num_values == 0 || outfile == NULL)
 		usage();
 	else if (num_values != num_headers) {
-		fprintf(stderr, "You must specify the same number of --name and --value arguments\n");
+		fprintf(stderr,
+			"You must specify the same number of --name and --value arguments\n");
 		usage();
 	}
 

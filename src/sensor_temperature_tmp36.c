@@ -1,7 +1,7 @@
 /*
  * sensor_temperature_tmp36.c - Support for the TMP 36 temperature sensor.
  *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -28,7 +28,8 @@
 static void _tmp36_init(yadl_config *config)
 {
 	if (config->temperature_converter == NULL) {
-		fprintf(stderr, "You must specify the --temperature_unit flag\n");
+		fprintf(stderr,
+			"You must specify the --temperature_unit flag\n");
 		usage();
 	}
 
@@ -42,16 +43,21 @@ static void _tmp36_init(yadl_config *config)
 static yadl_result *_tmp36_read_data(yadl_config *config)
 {
 	config->logger("tmp36: Beginning to perform analog read. adc_millivolts=%d, adc_resolution=%d, analog_scaling_factor=%d\n",
-			config->adc_millivolts, config->adc->adc_resolution, config->analog_scaling_factor);
+			config->adc_millivolts, config->adc->adc_resolution,
+			config->analog_scaling_factor);
 
 	int reading = config->adc->adc_read(config);
-	int read_milli_volts = (float) reading * ((float) config->adc_millivolts / (float) config->adc->adc_resolution);
-	float temperature = (read_milli_volts - config->analog_scaling_factor) / 10.0;
+	int read_milli_volts = (float) reading *
+		((float) config->adc_millivolts /
+		 (float) config->adc->adc_resolution);
+	float temperature =
+		(read_milli_volts - config->analog_scaling_factor) / 10.0;
 
 	config->logger("tmp36: Reading %d was converted to %d millivolts.\n",
 			reading, read_milli_volts, temperature);
 
-	config->logger("tmp36: temperature=%.2fC, humidity=unsupported\n", temperature);
+	config->logger("tmp36: temperature=%.2fC, humidity=unsupported\n",
+		       temperature);
 
 	yadl_result *result = malloc(sizeof(*result));
 
@@ -64,16 +70,18 @@ static yadl_result *_tmp36_read_data(yadl_config *config)
 	return result;
 }
 
-static char * _tmp36_value_header_names[] = { "temperature", NULL };
+static char *_tmp36_value_header_names[] = { "temperature", NULL };
 
-static char ** _tmp36_get_value_header_names(__attribute__((__unused__)) yadl_config *config)
+static char **_tmp36_get_value_header_names(__attribute__((__unused__))
+					    yadl_config *config)
 {
 	return _tmp36_value_header_names;
 }
 
-static char * _tmp36_unit_header_names[] = { "temperature_unit", NULL };
+static char *_tmp36_unit_header_names[] = { "temperature_unit", NULL };
 
-static char ** _tmp36_get_unit_header_names(__attribute__((__unused__)) yadl_config *config)
+static char **_tmp36_get_unit_header_names(__attribute__((__unused__))
+					   yadl_config *config)
 {
 	return _tmp36_unit_header_names;
 }

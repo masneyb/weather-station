@@ -1,7 +1,7 @@
 /*
  * float_list.h
  *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -22,8 +22,8 @@
 typedef struct float_node_tag float_node;
 
 struct float_node_tag {
-        float value;
-        float_node *next;
+	float value;
+	float_node *next;
 };
 
 int list_len(float_node *list);

@@ -1,7 +1,7 @@
 /*
  * loggers.c
  *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -40,7 +40,7 @@ static void _logger_stderr(const char *format, ...)
 	va_end(args);
 }
 
-static FILE *_logfd = NULL;
+static FILE *_logfd;
 
 static void _logger_fd(const char *format, ...)
 {
@@ -57,7 +57,8 @@ logger get_logger(int debug, char *logfile)
 {
 	if (!debug) {
 		if (logfile != NULL) {
-			fprintf(stderr, "You must also specify the --debug flag with the --logfile argument\n");
+			fprintf(stderr,
+				"You must also specify the --debug flag with the --logfile argument\n");
 			usage();
 		}
 
@@ -67,7 +68,9 @@ logger get_logger(int debug, char *logfile)
 	if (logfile != NULL) {
 		_logfd = fopen(logfile, "w");
 		if (_logfd == NULL) {
-			fprintf(stderr, "Error opening %s: %s\n", logfile, strerror(errno));
+			fprintf(stderr,
+				"Error opening %s: %s\n",
+				logfile, strerror(errno));
 			exit(1);
 		}
 		return &_logger_fd;
@@ -82,6 +85,7 @@ void close_logger(char *logfile)
 		return;
 
 	int ret = fclose(_logfd);
+
 	if (ret < 0) {
 		fprintf(stderr, "Error closing logfile %s: %s\n", logfile,
 			strerror(errno));

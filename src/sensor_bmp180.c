@@ -3,20 +3,20 @@
  * https://github.com/lexruee/bmp180.
  *
  * The MIT License (MIT)
- * 
+ *
  * Copyright (c) 2015 Alexander Rüedlinger <a.rueedlinger@gmail.com>
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
- * 
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * 
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -95,7 +95,7 @@ typedef struct {
 
 	/* BMP180 oversampling mode */
 	int oss;
-	
+
 	/* Eprom values */
 	int32_t ac1;
 	int32_t ac2;
@@ -130,19 +130,19 @@ static int32_t bmp180_register_table[11][2] = {
 static void bmp180_read_eprom(bmp180_t *bmp)
 {
 	int32_t *bmp180_register_addr[11] = {
-		&bmp->ac1, &bmp->ac2, &bmp->ac3, &bmp->ac4, &bmp->ac5, &bmp->ac6,
-		&bmp->b1, &bmp->b2, &bmp->mb, &bmp->mc, &bmp->md
+		&bmp->ac1, &bmp->ac2, &bmp->ac3, &bmp->ac4, &bmp->ac5,
+		&bmp->ac6, &bmp->b1, &bmp->b2, &bmp->mb, &bmp->mc, &bmp->md
 	};
-	
-	for(int i = 0; i < 11; i++) {
+
+	for (int i = 0; i < 11; i++) {
 		uint8_t reg = (uint8_t) bmp180_register_table[i][0];
 		uint8_t sign = (uint8_t) bmp180_register_table[i][1];
 
 		int32_t data = wiringPiI2CReadReg16(bmp->fd, reg) & 0xFFFF;
-		*(bmp180_register_addr[i]) = ((data << 8) & 0xFF00) + (data >> 8);
-		if (sign && (*(bmp180_register_addr[i]) > 32767)) {
+		*(bmp180_register_addr[i]) = ((data << 8) & 0xFF00) +
+			(data >> 8);
+		if (sign && (*(bmp180_register_addr[i]) > 32767))
 			*(bmp180_register_addr[i]) -= 65536;
-		}
 	}
 }
 
@@ -153,7 +153,9 @@ static int32_t bmp180_read_raw_temperature(bmp180_t *bmp)
 
 	usleep(BMP180_TEMPERATURE_READ_WAIT_US);
 
-	int32_t data = wiringPiI2CReadReg16(bmp->fd, BMP180_REGISTER_TEMPERATURE) & 0xFFFF;
+	int32_t data = wiringPiI2CReadReg16(bmp->fd,
+					    BMP180_REGISTER_TEMPERATURE) & 0xFFFF;
+
 	data = ((data << 8) & 0xFF00) + (data >> 8);
 	return data;
 }
@@ -164,35 +166,38 @@ static int32_t bmp180_read_raw_pressure(bmp180_t *bmp)
 {
 	uint16_t wait;
 	uint8_t cmd;
-	
-	switch(bmp->oss) {
-		case BMP180_PRESSURE_OSS_STANDARD:
-			wait = BMP180_PRESSURE_OSS_STANDARD_WAIT_US;
-			cmd = BMP180_PRESSURE_OSS_STANDARD_CMD;
-			break;
-		case BMP180_PRESSURE_OSS_HIGH_RESOLUTION:
-			wait = BMP180_PRESSURE_OSS_HIGH_RESOLUTION_WAIT_US;
-			cmd = BMP180_PRESSURE_OSS_HIGH_RESOLUTION_CMD;
-			break;
-		case BMP180_PRESSURE_OSS_ULTRA_HIGH_RESOLUTION:
-			wait = BMP180_PRESSURE_OSS_ULTRA_HIGH_RESOLUTION_WAIT_US;
-			cmd = BMP180_PRESSURE_OSS_ULTRA_HIGH_RESOLUTION_CMD;
-			break;
-		case BMP180_PRESSURE_OSS_ULTRA_LOW_POWER:
-		default:
-			wait = BMP180_PRESSURE_OSS_ULTRA_LOW_POWER_WAIT_US;
-			cmd = BMP180_PRESSURE_OSS_ULTRA_LOW_POWER_CMD;
-			break;
+
+	switch (bmp->oss) {
+	case BMP180_PRESSURE_OSS_STANDARD:
+		wait = BMP180_PRESSURE_OSS_STANDARD_WAIT_US;
+		cmd = BMP180_PRESSURE_OSS_STANDARD_CMD;
+		break;
+	case BMP180_PRESSURE_OSS_HIGH_RESOLUTION:
+		wait = BMP180_PRESSURE_OSS_HIGH_RESOLUTION_WAIT_US;
+		cmd = BMP180_PRESSURE_OSS_HIGH_RESOLUTION_CMD;
+		break;
+	case BMP180_PRESSURE_OSS_ULTRA_HIGH_RESOLUTION:
+		wait = BMP180_PRESSURE_OSS_ULTRA_HIGH_RESOLUTION_WAIT_US;
+		cmd = BMP180_PRESSURE_OSS_ULTRA_HIGH_RESOLUTION_CMD;
+		break;
+	case BMP180_PRESSURE_OSS_ULTRA_LOW_POWER:
+	default:
+		wait = BMP180_PRESSURE_OSS_ULTRA_LOW_POWER_WAIT_US;
+		cmd = BMP180_PRESSURE_OSS_ULTRA_LOW_POWER_CMD;
+		break;
 	}
-	
+
 	wiringPiI2CWriteReg8(bmp->fd, BMP180_CTRL, cmd);
 
 	usleep(wait);
-	
-	int32_t msb = wiringPiI2CReadReg8(bmp->fd, BMP180_REGISTER_PRESSURE) & 0xFF;
-	int32_t lsb = wiringPiI2CReadReg8(bmp->fd, BMP180_REGISTER_PRESSURE+1) & 0xFF;
-	int32_t xlsb = wiringPiI2CReadReg8(bmp->fd, BMP180_REGISTER_PRESSURE+2) & 0xFF;
-	
+
+	int32_t msb = wiringPiI2CReadReg8(bmp->fd,
+					  BMP180_REGISTER_PRESSURE) & 0xFF;
+	int32_t lsb = wiringPiI2CReadReg8(bmp->fd,
+					  BMP180_REGISTER_PRESSURE+1) & 0xFF;
+	int32_t xlsb = wiringPiI2CReadReg8(bmp->fd,
+					   BMP180_REGISTER_PRESSURE+2) & 0xFF;
+
 	return ((msb << 16) + (lsb << 8) + xlsb) >> (8 - bmp->oss);
 }
 
@@ -203,6 +208,7 @@ static float bmp180_temperature(bmp180_t *bmp)
 	long X1 = ((UT - bmp->ac6) * bmp->ac5) >> 15;
 	long X2 = (bmp->mc << 11) / (X1 + bmp->md);
 	long B5 = X1 + X2;
+
 	return ((B5 + 8) >> 4) / 10.0;
 }
 
@@ -225,6 +231,7 @@ static long bmp180_pressure(bmp180_t *bmp)
 	long X3 = X1 + X2;
 
 	long B3 = ((((bmp->ac1 * 4) + X3) << bmp->oss) + 2) / 4;
+
 	X1 = (bmp->ac3 * B6) >> 13;
 	X2 = (bmp->b1 * ((B6 * B6) >> 12)) >> 16;
 	X3 = ((X1 + X2) + 2) >> 2;
@@ -233,40 +240,45 @@ static long bmp180_pressure(bmp180_t *bmp)
 	unsigned long B7 = ((unsigned long) UP - B3) * (50000 >> bmp->oss);
 
 	long p;
-	if(B7 < 0x80000000) {
+
+	if (B7 < 0x80000000)
 		p = (B7 * 2) / B4;
-	} else {
+	else
 		p = (B7 / B4) * 2;
-	}
-	
+
 	X1 = (p >> 8) * (p >> 8);
 	X1 = (X1 * 3038) >> 16;
 	X2 = (-7357 * p) >> 16;
 	return p + ((X1 + X2 + 3791) >> 4);
 }
 
-// Returns altitude in meters based on the measured pressure 
+// Returns altitude in meters based on the measured pressure
 // and temperature of this sensor.
 static float bmp180_altitude(bmp180_t *bmp)
 {
 	float p = bmp180_pressure(bmp);
-	return 44330 * (1 - pow(( (p/100) / BMP180_AVG_PRESSURE_AT_SEA_LEVEL_IN_HPA),1/5.255));
+
+	return 44330 *
+		(1 - pow(((p/100) / BMP180_AVG_PRESSURE_AT_SEA_LEVEL_IN_HPA),
+			 1/5.255));
 }
 
 static void _bmp180_init(yadl_config *config)
 {
 	if (config->temperature_converter == NULL) {
-		fprintf(stderr, "You must specify the --temperature_unit argument\n");
+		fprintf(stderr,
+			"You must specify the --temperature_unit argument\n");
 		usage();
-	}
-	else if (config->i2c_address == -1) {
-		fprintf(stderr, "You must specify the --i2c_address argument\n");
+	} else if (config->i2c_address == -1) {
+		fprintf(stderr,
+			"You must specify the --i2c_address argument\n");
 		usage();
 	}
 
 	config->fd = wiringPiI2CSetup(config->i2c_address);
-	if(config->fd < 0) {
-		fprintf(stderr, "i2c device not found at address %x\n", config->i2c_address);
+	if (config->fd < 0) {
+		fprintf(stderr, "i2c device not found at address %x\n",
+			config->i2c_address);
 		usage();
 	}
 
@@ -274,12 +286,12 @@ static void _bmp180_init(yadl_config *config)
 
 static yadl_result *_bmp180_read_data(yadl_config *config)
 {
-        bmp180_t bmp;
+	bmp180_t bmp;
 
 	memset(&bmp, 0, sizeof(bmp));
-        bmp.fd = config->fd;
-        bmp.oss = BMP180_PRESSURE_OSS_ULTRA_HIGH_RESOLUTION;
-        bmp180_read_eprom(&bmp);
+	bmp.fd = config->fd;
+	bmp.oss = BMP180_PRESSURE_OSS_ULTRA_HIGH_RESOLUTION;
+	bmp180_read_eprom(&bmp);
 
 	float temperature = bmp180_temperature(&bmp);
 	float pressure = bmp180_pressure(&bmp) / 100.0;
@@ -299,16 +311,20 @@ static yadl_result *_bmp180_read_data(yadl_config *config)
 	return result;
 }
 
-static char * _bmp180_value_header_names[] = { "temperature", "pressure_millibars", "pressure_in", "altitude", NULL };
+static char *_bmp180_value_header_names[] = {
+	"temperature", "pressure_millibars", "pressure_in", "altitude", NULL
+};
 
-static char ** _bmp180_get_value_header_names(__attribute__((__unused__)) yadl_config *config)
+static char **_bmp180_get_value_header_names(__attribute__((__unused__))
+					     yadl_config *config)
 {
 	return _bmp180_value_header_names;
 }
 
-static char * _bmp180_unit_header_names[] = { "temperature_unit", NULL };
+static char *_bmp180_unit_header_names[] = { "temperature_unit", NULL };
 
-static char ** _bmp180_get_unit_header_names(__attribute__((__unused__)) yadl_config *config)
+static char **_bmp180_get_unit_header_names(__attribute__((__unused__))
+					    yadl_config *config)
 {
 	return _bmp180_unit_header_names;
 }

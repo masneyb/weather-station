@@ -1,7 +1,7 @@
 /*
  * yadl.c
  *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -54,8 +54,10 @@ void usage(void)
 	printf("\t[ --num_samples_per_result <# samples (default %d). See --filter for aggregation.> ]\n", DEFAULT_NUM_SAMPLES_PER_RESULT);
 	printf("\t[ --sleep_millis_between_samples <milliseconds (default %d)> ]\n", DEFAULT_SLEEP_MILLIS_BETWEEN_SAMPLES);
 	printf("\t[ --filter <median|mean|mode|sum|min|max|range (default median)> ]\n");
-	printf("\t[ --remove_n_samples_from_ends <# samples (default %d)> ]\n", DEFAULT_REMOVE_N_SAMPLES_FROM_ENDS);
-	printf("\t[ --max_retries <# retries (default %d)> ]\n", DEFAULT_MAX_RETRIES);
+	printf("\t[ --remove_n_samples_from_ends <# samples (default %d)> ]\n",
+	       DEFAULT_REMOVE_N_SAMPLES_FROM_ENDS);
+	printf("\t[ --max_retries <# retries (default %d)> ]\n",
+	       DEFAULT_MAX_RETRIES);
 	printf("\t[ --sleep_millis_between_retries <milliseconds (default %d)> ]\n", DEFAULT_SLEEP_MILLIS_BETWEEN_RETRIES);
 	printf("\t[ --debug ]\n");
 	printf("\t[ --logfile <path to debug logs. Uses stderr if not specified.> ]\n");
@@ -69,7 +71,8 @@ void usage(void)
 	printf("* counter - Counts the number of times the digital pin state changes.\n");
 	printf("\t--gpio_pin <wiringPi pin #. See http://wiringpi.com/pins/>\n");
 	printf("\t[ --counter_multiplier <multiplier to convert the requests per second to some other value. (default %.1f)> ]\n", DEFAULT_COUNTER_MULTIPLIER);
-	printf("\t[ --interrupt_edge <rising|falling|both (default %s)> ]\n", DEFAULT_INTERRUPT_EDGE);
+	printf("\t[ --interrupt_edge <rising|falling|both (default %s)> ]\n",
+	       DEFAULT_INTERRUPT_EDGE);
 	printf("\n");
 	printf("* analog\n");
 	printf("\t--adc <see ADC options below>\n");
@@ -89,7 +92,8 @@ void usage(void)
 	printf("* tmp36 - Analog temperature sensor.\n");
 	printf("\t--adc <see ADC options below>\n");
 	printf("\t--temperature_unit <celsius|fahrenheit|kelvin|rankine>\n");
-	printf("\t[ --analog_scaling_factor <value> (default %d) ]\n", DEFAULT_ANALOG_SCALING_FACTOR);
+	printf("\t[ --analog_scaling_factor <value> (default %d) ]\n",
+	       DEFAULT_ANALOG_SCALING_FACTOR);
 	printf("\n");
 	printf("* bmp180 - Temperature, pressure and altitude sensor.\n");
 	printf("\t--i2c_address <I2C hex address. Use i2cdetect command to look up.>\n");
@@ -107,7 +111,8 @@ void usage(void)
 	printf("\t--adc <see ADC options below. This is for the wind vane.>\n");
 	printf("\n");
 	printf("ADC Options and Supported Types\n");
-	printf("\t[ --adc_millivolts <value (default %d)> ]\n", DEFAULT_ADC_MILLIVOLTS);
+	printf("\t[ --adc_millivolts <value (default %d)> ]\n",
+	       DEFAULT_ADC_MILLIVOLTS);
 	printf("\n");
 	printf("* mcp3002 / mcp3004 / mcp3008 - 10-bit ADCs with a SPI interface.\n");
 	printf("\t--spi_channel <spi channel. Either 0 or 1 for the Pi.>\n");
@@ -152,16 +157,17 @@ int get_num_values(yadl_config *config)
 {
 	char **header_names = config->sens->get_value_header_names(config);
 	int i = 0;
-	for (; header_names[i] != NULL; i++);
+
+	for (; header_names[i] != NULL; i++)
+		;
 	return i;
 }
 
 static void _free_result(yadl_result *result)
 {
 	free(result->value);
-	if (result->unit != NULL) {
+	if (result->unit != NULL)
 		free(result->unit);
-	}
 	free(result);
 }
 
@@ -242,7 +248,9 @@ static float_node *_remove_outliers(float_node *list, yadl_config *config)
 	float_node *last_node_on_head_of_list = NULL;
 	float_node *cur = list;
 
-	for (int i = 0; i < config->num_samples_per_result - config->remove_n_samples_from_ends - 1; i++) {
+	for (int i = 0;
+	     i < config->num_samples_per_result - config->remove_n_samples_from_ends - 1;
+	     i++) {
 		if (i == (config->remove_n_samples_from_ends - 1))
 			last_node_on_head_of_list = cur;
 		cur = cur->next;
@@ -267,6 +275,7 @@ static yadl_result *_perform_all_readings(yadl_config *config)
 
 	char **header_names = config->sens->get_value_header_names(config);
 	int num_values = get_num_values(config);
+
 	value_list = calloc(num_values, sizeof(float *));
 
 	char **unit_values = NULL;
@@ -285,8 +294,10 @@ static yadl_result *_perform_all_readings(yadl_config *config)
 
 		config->logger("Sample #%d", i);
 		for (int num = 0; num < num_values; num++) {
-			config->logger(", %s=%.2f", header_names[num], sample->value[num]);
-			value_list[num] = _add_sample_to_sorted_list(sample->value[num], value_list[num]);
+			config->logger(", %s=%.2f", header_names[num],
+				       sample->value[num]);
+			value_list[num] = _add_sample_to_sorted_list(sample->value[num],
+								     value_list[num]);
 		}
 		config->logger("\n");
 
@@ -296,10 +307,12 @@ static yadl_result *_perform_all_readings(yadl_config *config)
 	for (int num = 0; num < num_values; num++) {
 		_dump_list(header_names[num], value_list[num], config);
 		value_list[num] = _remove_outliers(value_list[num], config);
-		_dump_list("Values(after removing outliers)", value_list[num], config);
+		_dump_list("Values(after removing outliers)", value_list[num],
+			   config);
 	}
 
 	yadl_result *result = malloc(sizeof(*result));
+
 	result->unit = unit_values;
 	result->value = malloc(sizeof(float) * num_values);
 	for (int num = 0; num < num_values; num++) {
@@ -319,8 +332,7 @@ static void _dofork(yadl_config *config)
 	if (pid < 0) {
 		fprintf(stderr, "Error forking: %s\n", strerror(errno));
 		exit(1);
-	}
-	else if (pid > 0) {
+	} else if (pid > 0) {
 		config->logger("Terminating parent process %d\n", pid);
 		/* In parent process */
 		exit(0);
@@ -334,7 +346,8 @@ static void _daemonize(yadl_config *config)
 	config->logger("Note: Running in daemon mode\n");
 
 	if (chdir("/") < 0) {
-		fprintf(stderr, "Error changing current path to /: %s\n", strerror(errno));
+		fprintf(stderr, "Error changing current path to /: %s\n",
+			strerror(errno));
 		exit(1);
 	}
 
@@ -342,7 +355,8 @@ static void _daemonize(yadl_config *config)
 	_dofork(config);
 
 	if (setsid() < 0) {
-		fprintf(stderr, "Error calling setsid(): %s\n", strerror(errno));
+		fprintf(stderr, "Error calling setsid(): %s\n",
+			strerror(errno));
 		exit(1);
 	}
 
@@ -395,7 +409,8 @@ int main(int argc, char **argv)
 	char **output_types = NULL;
 	int num_output_types = 0;
 	char **output_filenames = NULL;
-	int num_output_filenames = NULL;
+	int num_output_filenames = 0;
+
 	outputter **output_funcs = NULL;
 
 	int opt = 0, long_index = 0, debug = 0, daemon = 0;
@@ -423,7 +438,8 @@ int main(int argc, char **argv)
 	config.wind_speed_pin = -1;
 	config.rain_gauge_pin = -1;
 
-	while ((opt = getopt_long(argc, argv, "", long_options, &long_index)) != -1) {
+	while ((opt = getopt_long(argc, argv, "", long_options,
+				  &long_index)) != -1) {
 		if (opt != 0)
 			usage();
 
@@ -434,7 +450,8 @@ int main(int argc, char **argv)
 			break;
 		case 1:
 			num_output_types++;
-			output_types = realloc(output_types, sizeof(char *) * num_output_types);
+			output_types = realloc(output_types,
+					       sizeof(char *) * num_output_types);
 			output_types[num_output_types - 1] = optarg;
 			break;
 		case 2:
@@ -445,7 +462,8 @@ int main(int argc, char **argv)
 			break;
 		case 4:
 			num_output_filenames++;
-			output_filenames = realloc(output_filenames, sizeof(char *) * num_output_filenames);
+			output_filenames = realloc(output_filenames,
+						   sizeof(char *) * num_output_filenames);
 			output_filenames[num_output_filenames - 1] = optarg;
 			break;
 		case 5:
@@ -559,14 +577,13 @@ int main(int argc, char **argv)
 	if (num_output_types == 0) {
 		fprintf(stderr, "You must specify at least one --output argument\n");
 		usage();
-	}
-	else if (num_output_types == 1 && num_output_filenames == 0) {
+	} else if (num_output_types == 1 && num_output_filenames == 0) {
 		// Send output to stdout if no filename was specified
 		num_output_filenames++;
-		output_filenames = realloc(output_filenames, sizeof(char *) * num_output_filenames);
+		output_filenames = realloc(output_filenames,
+					   sizeof(char *) * num_output_filenames);
 		output_filenames[num_output_filenames - 1] = NULL;
-	}
-	else if (num_output_types != num_output_filenames) {
+	} else if (num_output_types != num_output_filenames) {
 		fprintf(stderr, "You must specify the same number of --output and --outfile arguments\n");
 		usage();
 	}
@@ -587,11 +604,14 @@ int main(int argc, char **argv)
 	config.adc = get_adc(adc_name);
 
 	config.logger("num_results=%d; sleep_millis_between_samples=%d; num_samples_per_result=%d; sleep_millis_between_samples=%d\n",
-			config.num_results, config.sleep_millis_between_samples, config.num_samples_per_result, config.sleep_millis_between_samples);
+			config.num_results, config.sleep_millis_between_samples,
+			config.num_samples_per_result,
+			config.sleep_millis_between_samples);
 	config.logger("max_retries=%d; sleep_millis_between_retries=%d\n",
 			config.max_retries, config.sleep_millis_between_retries);
 
 	int num_values = get_num_values(&config);
+
 	config.last_values = malloc(sizeof(float) * num_values);
 
 	if (wiringPiSetup() == -1)
@@ -604,11 +624,14 @@ int main(int argc, char **argv)
 		config.sens->init(&config);
 
 	output_metadata **output_metadatas = malloc(sizeof(output_metadata *) * num_output_types);
+
 	for (int output_idx = 0; output_idx < num_output_types; output_idx++) {
-		output_metadatas[output_idx] = output_funcs[output_idx]->open(&config, output_filenames[output_idx]);
+		output_metadatas[output_idx] = output_funcs[output_idx]->open(&config,
+									      output_filenames[output_idx]);
 
 		if (output_funcs[output_idx]->write_header != NULL)
-			output_funcs[output_idx]->write_header(output_metadatas[output_idx], &config);
+			output_funcs[output_idx]->write_header(output_metadatas[output_idx],
+							       &config);
 	}
 
 	for (int i = 0; i < config.num_results || config.num_results < 0; i++) {
@@ -617,8 +640,11 @@ int main(int argc, char **argv)
 
 		yadl_result *result = _perform_all_readings(&config);
 
-		for (int output_idx = 0; output_idx < num_output_types; output_idx++) {
-			output_funcs[output_idx]->write_result(output_metadatas[output_idx], i, result, &config);
+		for (int output_idx = 0; output_idx < num_output_types;
+		     output_idx++) {
+			output_funcs[output_idx]->write_result(output_metadatas[output_idx],
+							       i, result,
+							       &config);
 		}
 
 		_free_result(result);

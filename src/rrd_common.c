@@ -1,7 +1,7 @@
 /*
  * rrd_common.c
  *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -31,7 +31,8 @@
 
 static void _create_rrd_database(char *rrd_database, char **names)
 {
-	printf("Error: The RRD database %s does not exist. Please manually\n", rrd_database);
+	printf("Error: The RRD database %s does not exist. Please manually\n",
+	       rrd_database);
 	printf("create this first with your desired parameters. If you would like to poll every\n");
 	printf("30 seconds, then you may want to consider creating a database with this command:\n");
 	printf("\n");
@@ -40,11 +41,12 @@ static void _create_rrd_database(char *rrd_database, char **names)
 	printf("\t\t--start N --step 30 \\\n");
 
 	int num_headers = 0;
-	for (; names[num_headers] != NULL; num_headers++);
 
-	for (int j = 0; j < num_headers; j++) {
+	for (; names[num_headers] != NULL; num_headers++)
+		;
+
+	for (int j = 0; j < num_headers; j++)
 		printf("\t\tDS:%s:GAUGE:600:U:U \\\n", names[j]);
-	}
 
 	printf("\t\tRRA:MIN:0.5:1:120 \\\n");
 	printf("\t\tRRA:MIN:0.5:2:120 \\\n");
@@ -78,9 +80,8 @@ static void _create_rrd_database(char *rrd_database, char **names)
 	printf("\trrdtool create %s \\\n", rrd_database);
 	printf("\t\t--start N --step 300 \\\n");
 
-	for (int j = 0; j < num_headers; j++) {
+	for (int j = 0; j < num_headers; j++)
 		printf("\t\tDS:%s:GAUGE:600:U:U \\\n", names[j]);
-	}
 
 	printf("\t\tRRA:MIN:0.5:1:288 \\\n");
 	printf("\t\tRRA:MIN:0.5:12:720 \\\n");
@@ -91,12 +92,14 @@ static void _create_rrd_database(char *rrd_database, char **names)
 	printf("\t\tRRA:MAX:0.5:288:365\n");
 
 	printf("\n");
-	printf("See https://stackoverflow.com/questions/15774423/how-set-rrd-to-store-for-2-years for\n");
-	printf("more details.\n");
+	printf("See\n");
+	printf("https://stackoverflow.com/questions/15774423/how-set-rrd-to-store-for-2-years\n");
+	printf("for more details.\n");
 	exit(1);
 }
 
-void write_to_rrd_database(logger log, char *rrd_database, char **names, float *values)
+void write_to_rrd_database(logger log, char *rrd_database, char **names,
+			   float *values)
 {
 	struct stat st;
 	char update_buf[255];

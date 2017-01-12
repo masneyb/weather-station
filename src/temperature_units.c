@@ -1,7 +1,7 @@
 /*
  * temperature_units.c
  *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -50,20 +50,16 @@ void populate_temperature_converter(yadl_config *config, char *name)
 	else if (strcmp(name, "celsius") == 0) {
 		config->temperature_converter = &_celsius_to_celsius;
 		config->temperature_unit = "C";
-	}
-	else if (strcmp(name, "fahrenheit") == 0) {
+	} else if (strcmp(name, "fahrenheit") == 0) {
 		config->temperature_converter = &_celsius_to_fahrenheit;
 		config->temperature_unit = "F";
-	}
-	else if (strcmp(name, "kelvin") == 0) {
+	} else if (strcmp(name, "kelvin") == 0) {
 		config->temperature_converter = &_celsius_to_kelvin;
 		config->temperature_unit = "K";
-	}
-	else if (strcmp(name, "rankine") == 0) {
+	} else if (strcmp(name, "rankine") == 0) {
 		config->temperature_converter = &_celsius_to_rankine;
 		config->temperature_unit = "R";
-	}
-	else {
+	} else {
 		fprintf(stderr, "Unknown temperature unit '%s'\n", name);
 		usage();
 	}

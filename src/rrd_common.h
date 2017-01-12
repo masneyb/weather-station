@@ -1,7 +1,7 @@
 /*
  * rrd_common.h
  *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -21,5 +21,6 @@
 
 #include "loggers.h"
 
-void write_to_rrd_database(logger log, char *rrd_database, char **names, float *values);
+void write_to_rrd_database(logger log, char *rrd_database, char **names,
+			   float *values);
 

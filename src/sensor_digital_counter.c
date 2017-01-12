@@ -1,7 +1,7 @@
 /*
  * sensor_digital_counter.c
  *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -29,8 +29,8 @@
 #include <sys/time.h>
 #include "yadl.h"
 
-static volatile int _interrupt_counter = 0;
-static int _last_stop_counter = 0;
+static volatile int _interrupt_counter;
+static int _last_stop_counter;
 static struct timeval _last_time;
 
 void _interrupt_handler(void)
@@ -49,13 +49,17 @@ static void _digital_counter_init(yadl_config *config)
 			config->interrupt_edge, config->gpio_pin);
 
 	if (strcmp(config->interrupt_edge, "rising") == 0)
-		wiringPiISR(config->gpio_pin, INT_EDGE_RISING, &_interrupt_handler);
+		wiringPiISR(config->gpio_pin, INT_EDGE_RISING,
+			    &_interrupt_handler);
 	else if (strcmp(config->interrupt_edge, "falling") == 0)
-		wiringPiISR(config->gpio_pin, INT_EDGE_FALLING, &_interrupt_handler);
+		wiringPiISR(config->gpio_pin, INT_EDGE_FALLING,
+			    &_interrupt_handler);
 	else if (strcmp(config->interrupt_edge, "both") == 0)
-		wiringPiISR(config->gpio_pin, INT_EDGE_BOTH, &_interrupt_handler);
+		wiringPiISR(config->gpio_pin, INT_EDGE_BOTH,
+			    &_interrupt_handler);
 	else {
-		fprintf(stderr, "Invalid --interrupt_edge paramter %s\n", config->interrupt_edge);
+		fprintf(stderr, "Invalid --interrupt_edge paramter %s\n",
+			config->interrupt_edge);
 		usage();
 	}
 
@@ -70,6 +74,7 @@ static yadl_result *_digital_counter_read_data(yadl_config *config)
 {
 	int start_counter = _last_stop_counter;
 	int stop_counter = _interrupt_counter;
+
 	_last_stop_counter = stop_counter;
 
 	int num_seen;
@@ -83,15 +88,20 @@ static yadl_result *_digital_counter_read_data(yadl_config *config)
 			start_counter, stop_counter, num_seen);
 
 	static struct timeval _current_time;
+
 	gettimeofday(&_current_time, NULL);
-	double elapsed_secs = ((_current_time.tv_sec - _last_time.tv_sec) * 1000000L + _current_time.tv_usec - _last_time.tv_usec) / 1000000L;
+	double elapsed_secs = ((_current_time.tv_sec - _last_time.tv_sec) *
+			       1000000L + _current_time.tv_usec -
+			       _last_time.tv_usec) / 1000000L;
+
 	_last_time.tv_sec = _current_time.tv_sec;
 	_last_time.tv_usec = _current_time.tv_usec;
 
 	float counts_per_sec = num_seen / elapsed_secs;
 
 	config->logger("num_seen=%d, elapsed_secs=%.2f, counts_per_sec=%.2f, counter_multiplier=%.2f\n",
-			num_seen, elapsed_secs, counts_per_sec, config->counter_multiplier);
+			num_seen, elapsed_secs, counts_per_sec,
+			config->counter_multiplier);
 
 	yadl_result *result = malloc(sizeof(*result));
 
@@ -106,11 +116,15 @@ static yadl_result *_digital_counter_read_data(yadl_config *config)
 	return result;
 }
 
-static char * _digital_counter_value_header_names[] = { "num_seen", "num_seen_with_multiplier", "counts_per_sec", "counts_per_sec_with_multiplier", NULL };
+static char *_digital_counter_value_header_names[] = {
+	"num_seen", "num_seen_with_multiplier", "counts_per_sec",
+	"counts_per_sec_with_multiplier", NULL
+};
 
-static char ** _digital_counter_get_value_header_names(__attribute__((__unused__)) yadl_config *config)
+static char **_digital_counter_get_value_header_names(__attribute__((__unused__))
+						      yadl_config *config)
 {
-        return _digital_counter_value_header_names;
+	return _digital_counter_value_header_names;
 }
 
 sensor digital_counter_sensor_funcs = {

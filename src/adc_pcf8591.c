@@ -1,7 +1,7 @@
 /*
  * adc_pcf8591.c - Support for the MCP3002 analog to digital converter
  *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -29,11 +29,12 @@
 static void pcf8591_analog_init(yadl_config *config)
 {
 	if (config->analog_channel == -1) {
-		fprintf(stderr, "You must specify the --analog_channel argument\n");
+		fprintf(stderr,
+			"You must specify the --analog_channel argument\n");
 		usage();
-	}
-	else if (config->i2c_address == -1) {
-		fprintf(stderr, "You must specify the --i2c_address argument\n");
+	} else if (config->i2c_address == -1) {
+		fprintf(stderr,
+			"You must specify the --i2c_address argument\n");
 		usage();
 	}
 
@@ -50,7 +51,7 @@ static int pcf8591_analog_read(yadl_config *config)
 
 	int ret = analogRead(chan);
 
-	config->logger("pcf8591: Read value %d from pi base %d and analog channel %d\n",
+	config->logger("pcf8591: Read value %d from pin base %d and analog channel %d\n",
 			ret, PIN_BASE, config->analog_channel);
 
 	return ret;

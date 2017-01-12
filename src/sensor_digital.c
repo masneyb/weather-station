@@ -1,7 +1,7 @@
 /*
  * sensor_digital.c
  *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -26,7 +26,7 @@
 #include <string.h>
 #include "yadl.h"
 
-static void _digital_init(__attribute__((__unused__)) yadl_config *config)
+static void _digital_init(__attribute__((__unused__)) yadl_config * config)
 {
 	if (config->gpio_pin == -1) {
 		fprintf(stderr, "You must specify the --gpio_pin argument\n");
@@ -39,6 +39,7 @@ static void _digital_init(__attribute__((__unused__)) yadl_config *config)
 static yadl_result *_digital_read_data(yadl_config *config)
 {
 	int reading = digitalRead(config->gpio_pin);
+
 	config->logger("Got digital reading %d from GPIO pin %d.\n",
 			reading, config->gpio_pin);
 
@@ -52,11 +53,12 @@ static yadl_result *_digital_read_data(yadl_config *config)
 	return result;
 }
 
-static char * _digital_value_header_names[] = { "pin_state", NULL };
+static char *_digital_value_header_names[] = { "pin_state", NULL };
 
-static char ** _digital_get_value_header_names(__attribute__((__unused__)) yadl_config *config)
+static char **_digital_get_value_header_names(__attribute__((__unused__))
+					      yadl_config *config)
 {
-        return _digital_value_header_names;
+	return _digital_value_header_names;
 }
 
 sensor digital_sensor_funcs = {

@@ -1,7 +1,7 @@
 /*
  * dht_temperature_sensor.c - Support for the DHT11/DHT22 sensors
  *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -62,15 +62,23 @@ static int _get_usecs_pin_is_in_state(yadl_config *config, int state)
 
 float _calculate_dew_point(float temperature, float humidity)
 {
-	// This uses the August-Roche-Magnus approximation to calulate the dew point
-	// based on the temperature and humidity.
-	// See http://andrew.rsmas.miami.edu/bmcnoldy/Humidity.html
-	return 243.04*(log(humidity/100)+((17.625*temperature)/(243.04+temperature)))/(17.625-log(humidity/100)-((17.625*temperature)/(243.04+temperature)));
+	/**
+	 * This uses the August-Roche-Magnus approximation to calulate the dew
+	 * point based on the temperature and humidity. See
+	 * http://andrew.rsmas.miami.edu/bmcnoldy/Humidity.html
+	 */
+	return 243.04 * (log(humidity / 100) +
+			 ((17.625 * temperature) /
+			  (243.04 + temperature))) /
+		(17.625 - log(humidity / 100) -
+		 ((17.625 * temperature) /
+		  (243.04+temperature)));
 }
 
 /*
  * See the DHT11 data sheet that is linked in the README for a good
- * description of the overall process. */
+ * description of the overall process.
+ */
 static yadl_result *_dht_read_data(char *sensor_descr,
 	yadl_config *config,
 	void (*dht_parser)(int data[5], yadl_result *result))
@@ -91,19 +99,25 @@ static yadl_result *_dht_read_data(char *sensor_descr,
 
 	/* Wait while the pin is high */
 	if (_get_usecs_pin_is_in_state(config, 1) < 0) {
-		config->logger("%s: Sensor is not ready during phase 1 of the handshake.\n", sensor_descr);
+		config->logger("%s: Sensor is not ready during phase 1 of the handshake.\n",
+			       sensor_descr);
 		return NULL;
 	}
 
 	/* Sensor signals it is ready for data by setting pin to low for 80us */
 	if (_get_usecs_pin_is_in_state(config, 0) < 0) {
-		config->logger("%s: Sensor is not ready during phase 2 of the handshake.\n", sensor_descr);
+		config->logger("%s: Sensor is not ready during phase 2 of the handshake.\n",
+			       sensor_descr);
 		return NULL;
 	}
 
-	/* Sensor signals it is ready for data by setting pin to high for 80us */
+	/*
+	 * Sensor signals it is ready for data by setting pin to high for
+	 * 80us.
+	 */
 	if (_get_usecs_pin_is_in_state(config, 1) < 0) {
-		config->logger("%s: Sensor is not ready during phase 3 of the handshake.\n", sensor_descr);
+		config->logger("%s: Sensor is not ready during phase 3 of the handshake.\n",
+			       sensor_descr);
 		return NULL;
 	}
 
@@ -113,9 +127,11 @@ static yadl_result *_dht_read_data(char *sensor_descr,
 
 	for (; bit_pos < 40; bit_pos++) {
 		/*
-		 * Get the amount of time that the pin is low and high. The length
-		 * of time that it is high determines the bit state. */
+		 * Get the amount of time that the pin is low and high. The
+		 * length of time that it is high determines the bit state.
+		 */
 		int usecs_low = _get_usecs_pin_is_in_state(config, 0);
+
 		if (usecs_low < 0) {
 			config->logger("%s: Timeout reading bit position %d.\n",
 					sensor_descr, bit_pos);
@@ -123,6 +139,7 @@ static yadl_result *_dht_read_data(char *sensor_descr,
 		}
 
 		int usecs_high = _get_usecs_pin_is_in_state(config, 1);
+
 		if (usecs_high < 0) {
 			config->logger("%s: Timeout reading bit position %d.\n",
 					sensor_descr, bit_pos);
@@ -130,11 +147,13 @@ static yadl_result *_dht_read_data(char *sensor_descr,
 		}
 
 		/*
-		 * If the pin was high for 26-28 us, then the bit is 0. If the pin
-		 * was high for 70 us, then the bit is 1. Due to the scheduling
-		 * policy, and lack of realtime scheduling, the times here are
-		 * approximate. */
+		 * If the pin was high for 26-28 us, then the bit is 0. If the
+		 * pin was high for 70 us, then the bit is 1. Due to the
+		 * scheduling policy, and lack of realtime scheduling, the times
+		 * here are approximate.
+		 */
 		int byte_pos = bit_pos / 8;
+
 		data[byte_pos] <<= 1;
 		if (usecs_high > BIT_ENABLED_THRESHOLD)
 			data[byte_pos] |= 1;
@@ -150,9 +169,11 @@ static yadl_result *_dht_read_data(char *sensor_descr,
 	_get_usecs_pin_is_in_state(config, 0);
 
 	config->logger("%s: Read data 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x from sensor\n",
-			sensor_descr, data[0], data[1], data[2], data[3], data[4]);
+			sensor_descr, data[0], data[1], data[2], data[3],
+			data[4]);
 
 	int checksum = (data[0] + data[1] + data[2] + data[3]) & 0xFF;
+
 	if (data[4] != checksum) {
 		config->logger("%s: Computed checksum 0x%02x does not match checksum 0x%02x read from the sensor. Retrying.\n",
 				sensor_descr, checksum, data[4]);
@@ -166,9 +187,11 @@ static yadl_result *_dht_read_data(char *sensor_descr,
 
 	result->value = malloc(sizeof(float) * 3);
 	dht_parser(data, result);
-	result->value[2] = _calculate_dew_point(result->value[0], result->value[1]);
+	result->value[2] = _calculate_dew_point(result->value[0],
+						result->value[1]);
 	config->logger("%s: temperature=%.2fC, humidity=%.2f%%, dew_point=%.2fC\n",
-			sensor_descr, result->value[0], result->value[1], result->value[2]);
+			sensor_descr, result->value[0], result->value[1],
+			result->value[2]);
 	result->value[0] = config->temperature_converter(result->value[0]);
 	result->value[2] = config->temperature_converter(result->value[2]);
 
@@ -195,24 +218,29 @@ static void _dht_init(__attribute__((__unused__)) yadl_config *config)
 		usage();
 	}
 
-        if (config->temperature_converter == NULL) {
-		fprintf(stderr, "You must specify the --temperature_unit flag\n");
+	if (config->temperature_converter == NULL) {
+		fprintf(stderr,
+			"You must specify the --temperature_unit flag\n");
 		usage();
 	}
 }
 
-static char * _dht_value_header_names[] = { "temperature", "humidity", "dew_point", NULL };
+static char *_dht_value_header_names[] = {
+	"temperature", "humidity", "dew_point", NULL
+};
 
-static char ** _dht_get_value_header_names(__attribute__((__unused__)) yadl_config *config)
+static char **_dht_get_value_header_names(__attribute__((__unused__))
+					  yadl_config *config)
 {
-        return _dht_value_header_names;
+	return _dht_value_header_names;
 }
 
-static char * _dht_unit_header_names[] = { "temperature_unit", NULL };
+static char *_dht_unit_header_names[] = { "temperature_unit", NULL };
 
-static char ** _dht_get_unit_header_names(__attribute__((__unused__)) yadl_config *config)
+static char **_dht_get_unit_header_names(__attribute__((__unused__))
+					 yadl_config *config)
 {
-        return _dht_unit_header_names;
+	return _dht_unit_header_names;
 }
 
 sensor dht11_sensor_funcs = {

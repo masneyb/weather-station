@@ -1,7 +1,7 @@
 /*
  * sensor_analog.c
  *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -36,12 +36,16 @@ static void _analog_init(yadl_config *config)
 
 static yadl_result *_analog_read_data(yadl_config *config)
 {
-	config->logger("Beginning to perform analog read. adc_millivolts=%d, adc_resolution=%d\n",
+	config->logger("Performing analog read: adc_millivolts=%d, adc_resolution=%d\n",
 			config->adc_millivolts, config->adc->adc_resolution);
 
 	int reading = config->adc->adc_read(config);
-	int read_millivolts = (float) reading * ((float) config->adc_millivolts / (float) config->adc->adc_resolution);
-	config->logger("Got analog reading %d; %d millivolts.\n", reading, read_millivolts);
+	int read_millivolts = (float) reading *
+		((float) config->adc_millivolts /
+		 (float) config->adc->adc_resolution);
+
+	config->logger("Got analog reading %d; %d millivolts.\n",
+		       reading, read_millivolts);
 
 	yadl_result *result = malloc(sizeof(*result));
 
@@ -54,9 +58,10 @@ static yadl_result *_analog_read_data(yadl_config *config)
 	return result;
 }
 
-static char * _analog_value_header_names[] = { "reading", "millivolts", NULL };
+static char *_analog_value_header_names[] = { "reading", "millivolts", NULL };
 
-static char ** _analog_get_value_header_names(__attribute__((__unused__)) yadl_config *config)
+static char **_analog_get_value_header_names(__attribute__((__unused__))
+					     yadl_config *config)
 {
 	return _analog_value_header_names;
 }

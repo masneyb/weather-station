@@ -1,7 +1,7 @@
 /*
  * sensor_tempeature_ds18b20.c - Support for the DS18B20 temperature sensor
  *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -59,27 +59,32 @@ static yadl_result *_ds18b20_read_data(yadl_config *config)
 
 	fd = fopen(config->w1_slave, "r");
 	if (fd == NULL) {
-		fprintf(stderr, "ds18b20: Error opening file %s: %s\n", config->w1_slave,
+		fprintf(stderr, "ds18b20: Error opening file %s: %s\n",
+			config->w1_slave,
 			strerror(errno));
 		exit(1);
 	}
 
 	if (_read_line(buf, sizeof(buf), fd) == NULL) {
-		fprintf(stderr, "ds18b20: Error reading file %s: %s\n", config->w1_slave,
+		fprintf(stderr, "ds18b20: Error reading file %s: %s\n",
+			config->w1_slave,
 			errno == 0 ? "Premature end of file" : strerror(errno));
 		fclose(fd);
 		exit(1);
 	}
-	config->logger("ds18b20: Skipping first line '%s' from w1 slave %s\n", buf, config->w1_slave);
+	config->logger("ds18b20: Skipping first line '%s' from w1 slave %s\n",
+		       buf, config->w1_slave);
 
 	if (_read_line(buf, sizeof(buf), fd) == NULL) {
-		fprintf(stderr, "ds18b20: Error reading file %s: %s\n", config->w1_slave,
+		fprintf(stderr, "ds18b20: Error reading file %s: %s\n",
+			config->w1_slave,
 			errno == 0 ? "Premature end of file" : strerror(errno));
 		fclose(fd);
 		exit(1);
 	}
 
-	config->logger("ds18b20: Processing line '%s' from w1 slave %s\n", buf, config->w1_slave);
+	config->logger("ds18b20: Processing line '%s' from w1 slave %s\n", buf,
+		       config->w1_slave);
 
 	fclose(fd);
 
@@ -91,14 +96,18 @@ static yadl_result *_ds18b20_read_data(yadl_config *config)
 	}
 
 	if (*pos == '\0') {
-		fprintf(stderr, "ds18b20: Could not parse line '%s' from w1 slave %s\n", buf, config->w1_slave);
+		fprintf(stderr,
+			"ds18b20: Could not parse line '%s' from w1 slave %s\n",
+			buf, config->w1_slave);
 		exit(1);
 	}
 
 	temperature = strtol(pos, NULL, 10) / 1000.0;
-	config->logger("ds18b20: temperature=%.2fC, humidity=unsupported\n", temperature);
+	config->logger("ds18b20: temperature=%.2fC, humidity=unsupported\n",
+		       temperature);
 
 	yadl_result *result = malloc(sizeof(*result));
+
 	result->value = malloc(sizeof(float) * 1);
 	result->value[0] = config->temperature_converter(temperature);
 
@@ -116,21 +125,24 @@ static void _ds18b20_init(__attribute__((__unused__)) yadl_config *config)
 	}
 
 	if (config->temperature_converter == NULL) {
-		fprintf(stderr, "You must specify the --temperature_unit flag\n");
+		fprintf(stderr,
+			"You must specify the --temperature_unit flag\n");
 		usage();
 	}
 }
 
-static char * _ds18b20_value_header_names[] = { "temperature", NULL };
+static char *_ds18b20_value_header_names[] = { "temperature", NULL };
 
-static char ** _ds18b20_get_value_header_names(__attribute__((__unused__)) yadl_config *config)
+static char **_ds18b20_get_value_header_names(__attribute__((__unused__))
+					      yadl_config *config)
 {
-        return _ds18b20_value_header_names;
+	return _ds18b20_value_header_names;
 }
 
-static char * _ds18b20_unit_header_names[] = { "temperature_unit", NULL };
+static char *_ds18b20_unit_header_names[] = { "temperature_unit", NULL };
 
-static char ** _ds18b20_get_unit_header_names(__attribute__((__unused__)) yadl_config *config)
+static char **_ds18b20_get_unit_header_names(__attribute__((__unused__))
+					     yadl_config *config)
 {
 	return _ds18b20_unit_header_names;
 }

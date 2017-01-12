@@ -1,7 +1,7 @@
 /*
  * adc_mcp3004.c - Support for the MCP3004 analog to digital converter
  *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -29,11 +29,12 @@
 static void mcp3004_analog_init(yadl_config *config)
 {
 	if (config->spi_channel == -1) {
-		fprintf(stderr, "You must specify the --spi_channel argument\n");
+		fprintf(stderr,
+			"You must specify the --spi_channel argument\n");
 		usage();
-	}
-	else if (config->analog_channel == -1) {
-		fprintf(stderr, "You must specify the --analog_channel argument\n");
+	} else if (config->analog_channel == -1) {
+		fprintf(stderr,
+			"You must specify the --analog_channel argument\n");
 		usage();
 	}
 
@@ -50,8 +51,8 @@ static int mcp3004_analog_read(yadl_config *config)
 
 	int ret = analogRead(chan);
 
-        config->logger("mcp3004: Read value %d from pi base %d and analog channel %d\n",
-                        ret, PIN_BASE, config->analog_channel);
+	config->logger("mcp3004: Read value %d from pi base %d and analog channel %d\n",
+			ret, PIN_BASE, config->analog_channel);
 
 	return ret;
 }

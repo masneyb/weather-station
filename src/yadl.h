@@ -1,7 +1,7 @@
 /*
  * yadl.h
  *
- * Copyright (C) 2016 Brian Masney <masneyb@onstation.org>
+ * Copyright (C) 2016-2017 Brian Masney <masneyb@onstation.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -44,7 +44,8 @@ typedef struct output_metadata_tag {
 typedef struct outputter_tag {
 	output_metadata *(*open)(yadl_config *config, char *outfile);
 	void (*write_header)(output_metadata *meta, yadl_config *config);
-	void (*write_result)(output_metadata *meta, int reading_number, yadl_result *result, yadl_config *config);
+	void (*write_result)(output_metadata *meta, int reading_number,
+			     yadl_result *result, yadl_config *config);
 	void (*write_footer)(output_metadata *meta);
 	void (*close)(output_metadata *meta, yadl_config *config);
 } outputter;
@@ -107,7 +108,10 @@ struct yadl_config_tag {
 	float_node *rain_gauge_24h;
 	int num_rain_gauge_24h_samples;
 
-	/* Keep track of the amount of rain that was seen since midnight local time */
+	/**
+	 * Keep track of the amount of rain that was seen since midnight
+	 * local time
+	 */
 	int current_hour;
 	int num_rain_clicks_today;
 
