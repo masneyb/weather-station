@@ -25,12 +25,15 @@ ID="${3:-}"
 PASSWORD="${4:-}"
 
 if [ "${YADL_BIN}" = "" ] || [ "${WEB_BASE_DIR}" = "" ] ; then
-        echo "usage: $0 <path to yadl binary> <path to web/ directory [ <weather underground ID> <weather underground password> ]" >&2
+        echo "usage: $0 <path to yadl binary> <path to web/ directory" \
+		"[ <weather underground ID> <weather underground password> ]" >&2
         exit 1
 fi
 
 JSON="${WEB_BASE_DIR}"/temperature_humidity.json
-"${YADL_BIN}" --gpio_pin 3 --sensor dht22 --temperature_unit fahrenheit --max_retries 30 --output rrd --outfile "${WEB_BASE_DIR}"/temperature_humidity.rrd --output single_json --outfile "${JSON}"
+"${YADL_BIN}" --gpio_pin 3 --sensor dht22 --temperature_unit fahrenheit --max_retries 30 \
+	--output rrd --outfile "${WEB_BASE_DIR}"/temperature_humidity.rrd \
+	--output single_json --outfile "${JSON}"
 if [ $? != 0 ] ; then
 	rm -f "${JSON}"
 fi
@@ -46,13 +49,17 @@ if [ $? != 0 ] ; then
 fi
 
 JSON="${WEB_BASE_DIR}"/battery.json
-"${YADL_BIN}" --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 3 --adc_millivolts 5000 --output rrd --outfile "${WEB_BASE_DIR}"/battery.rrd --output single_json --outfile "${JSON}"
+"${YADL_BIN}" --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 3 --adc_millivolts 5000 \
+	--output rrd --outfile "${WEB_BASE_DIR}"/battery.rrd \
+	--output single_json --outfile "${JSON}"
 if [ $? != 0 ] ; then
 	rm -f "${JSON}"
 fi
 
 JSON="${WEB_BASE_DIR}"/booster.json
-"${YADL_BIN}" --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 2 --adc_millivolts 5000 --output rrd --outfile "${WEB_BASE_DIR}"/booster.rrd --output single_json --outfile "${JSON}"
+"${YADL_BIN}" --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 2 --adc_millivolts 5000 \
+	--output rrd --outfile "${WEB_BASE_DIR}"/booster.rrd \
+	--output single_json --outfile "${JSON}"
 if [ $? != 0 ] ; then
 	rm -f "${JSON}"
 fi
@@ -69,6 +76,7 @@ __EOF__
 
 # Publish to weather underground
 if [ "${ID}" != "" ] && [ "${PASSWORD}" != "" ] ; then
-	/home/masneyb/data/weather-station/bin/weather-underground-publish.sh "${WEB_BASE_DIR}" "${ID}" "${PASSWORD}"
+	/home/masneyb/data/weather-station/bin/weather-underground-publish.sh "${WEB_BASE_DIR}" \
+		"${ID}" "${PASSWORD}"
 fi
 
