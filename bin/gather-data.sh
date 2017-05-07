@@ -36,7 +36,11 @@ if [ $? != 0 ] ; then
 fi
 
 JSON="${WEB_BASE_DIR}"/bmp180.json
-"${YADL_BIN}" --sensor bmp180 --i2c_address 77 --temperature_unit fahrenheit --output rrd --outfile "${WEB_BASE_DIR}"/bmp180.rrd --output single_json --outfile "${JSON}"
+"${YADL_BIN}" --sensor bmp180 --i2c_address 77 --temperature_unit fahrenheit \
+	--num_samples_per_result 5 --remove_n_samples_from_ends 1 --filter mean \
+	--sleep_millis_between_samples 200 \
+	--output rrd --outfile "${WEB_BASE_DIR}"/bmp180.rrd \
+	--output single_json --outfile "${JSON}"
 if [ $? != 0 ] ; then
 	rm -f "${JSON}"
 fi
