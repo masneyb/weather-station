@@ -40,7 +40,7 @@ fi
 
 JSON="${WEB_BASE_DIR}"/bmp180.json
 "${YADL_BIN}" --sensor bmp180 --i2c_address 77 --temperature_unit fahrenheit \
-	--num_samples_per_result 7 --remove_n_samples_from_ends 2 --filter mean \
+	--num_samples_per_result 7 --filter median \
 	--sleep_millis_between_samples 1000 \
 	--output rrd --outfile "${WEB_BASE_DIR}"/bmp180.rrd \
 	--output single_json --outfile "${JSON}"
