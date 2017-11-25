@@ -49,7 +49,7 @@ if [ $? != 0 ] ; then
 fi
 
 JSON="${WEB_BASE_DIR}"/battery.json
-"${YADL_BIN}" --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 3 --adc_millivolts 5000 \
+"${YADL_BIN}" --sensor analog --adc mcp3008 --spi_channel 0 --analog_channel 3 --adc_millivolts 14000 \
 	--output rrd --outfile "${WEB_BASE_DIR}"/battery.rrd \
 	--output single_json --outfile "${JSON}"
 if [ $? != 0 ] ; then
