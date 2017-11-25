@@ -85,10 +85,10 @@ CREATE_MAX_GRAPHS="${YADL_BIN_DIR}"/create-max-graphs.sh
 "${CREATE_MIN_MAX_GRAPHS}" \
 	"${WEB_BASE_DIR}"/battery \
 	"Voltages" \
-	"Battery Charge (mV)" \
-	"${WEB_BASE_DIR}"/battery.rrd \
-	millivolts \
 	"Booster (mV)" \
 	"${WEB_BASE_DIR}"/booster.rrd \
+	millivolts \
+	"Battery Charge (mV)" \
+	"${WEB_BASE_DIR}"/battery.rrd \
 	millivolts
 
