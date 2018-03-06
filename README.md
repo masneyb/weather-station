@@ -194,7 +194,7 @@ however none of the code that I have here will run on that platform.
 - Run `bin/create-rrds.sh <path to web/ directory>` to create the initial
   empty RRD databases.
 - `sudo make install`
-- `sudo apt-get install nginx`
+- `sudo apt-get install jq nginx`
 - `sudo ln -s /path/to/web/directory /var/www/html/weather-station`
 
 
