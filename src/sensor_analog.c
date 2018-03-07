@@ -51,7 +51,7 @@ static yadl_result *_analog_read_data(yadl_config *config)
 
 	result->value = malloc(sizeof(float) * 2);
 	result->value[0] = reading;
-	result->value[1] = read_millivolts;
+	result->value[1] = read_millivolts * config->adc_multiplier;
 
 	result->unit = NULL;
 

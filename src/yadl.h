@@ -86,6 +86,7 @@ struct yadl_config_tag {
 	float counter_multiplier;
 	char *interrupt_edge;
 	int adc_millivolts;
+	float adc_multiplier;
 	char *temperature_unit;
 	temperature_unit_converter temperature_converter;
 	char *w1_slave;

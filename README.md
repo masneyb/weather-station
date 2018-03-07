@@ -98,6 +98,10 @@ following features:
     
     ADC Options and Supported Types
     	[ --adc_millivolts <value (default 3300)> ]
+    	[ --adc_multiplier <value (default 1.0)> ]
+    
+    	The --adc_multiplier can be used if have a voltage divider and
+    	and want to convert the reading back to the original value.
     
     * mcp3002 / mcp3004 / mcp3008 - 10-bit ADCs with a SPI interface.
     	--spi_channel <spi channel. Either 0 or 1 for the Pi.>

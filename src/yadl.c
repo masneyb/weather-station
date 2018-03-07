@@ -41,6 +41,7 @@
 #define DEFAULT_COUNTER_MULTIPLIER          1.0
 #define DEFAULT_INTERRUPT_EDGE              "rising"
 #define DEFAULT_ADC_MILLIVOLTS              3300
+#define DEFAULT_ADC_MULTIPLIER              1.0
 #define DEFAULT_ANALOG_SCALING_FACTOR       500
 
 void usage(void)
@@ -113,6 +114,11 @@ void usage(void)
 	printf("ADC Options and Supported Types\n");
 	printf("\t[ --adc_millivolts <value (default %d)> ]\n",
 	       DEFAULT_ADC_MILLIVOLTS);
+	printf("\t[ --adc_multiplier <value (default %.1f)> ]\n",
+	       DEFAULT_ADC_MULTIPLIER);
+	printf("\n");
+	printf("\tThe --adc_multiplier can be used if have a voltage divider and\n");
+	printf("\tand want to convert the reading back to the original value.\n");
 	printf("\n");
 	printf("* mcp3002 / mcp3004 / mcp3008 - 10-bit ADCs with a SPI interface.\n");
 	printf("\t--spi_channel <spi channel. Either 0 or 1 for the Pi.>\n");
@@ -398,6 +404,7 @@ int main(int argc, char **argv)
 		{"rain_gauge_pin", required_argument, 0, 0 },
 		{"wind_speed_unit", required_argument, 0, 0 },
 		{"rain_gauge_unit", required_argument, 0, 0 },
+		{"adc_multiplier", required_argument, 0, 0 },
 		{0, 0, 0, 0 }
 	};
 
@@ -434,6 +441,7 @@ int main(int argc, char **argv)
 	config.counter_multiplier = DEFAULT_COUNTER_MULTIPLIER;
 	config.interrupt_edge = DEFAULT_INTERRUPT_EDGE;
 	config.adc_millivolts = DEFAULT_ADC_MILLIVOLTS; /* Raspberry Pi GPIO pins are 3.3V */
+	config.adc_multiplier = DEFAULT_ADC_MULTIPLIER;
 	config.analog_scaling_factor = DEFAULT_ANALOG_SCALING_FACTOR;
 	config.wind_speed_pin = -1;
 	config.rain_gauge_pin = -1;
@@ -540,6 +548,9 @@ int main(int argc, char **argv)
 			break;
 		case 29:
 			config.rain_gauge_unit = optarg;
+			break;
+		case 30:
+			config.adc_multiplier = strtof(optarg, NULL);
 			break;
 		default:
 			usage();
