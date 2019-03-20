@@ -30,3 +30,4 @@ shellcheck:
 	shellcheck bin/gather-data.sh
 	shellcheck bin/power-savings
 	shellcheck bin/weather-underground-publish.sh
+	cd pi-yadl && make shellcheck
