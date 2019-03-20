@@ -1,0 +1,21 @@
+* Poll a single sample from BCM digital pin 17 (wiringPi pin 0) as JSON
+  $ yadl --sensor digital --gpio_pin 0 --output json
+  { "result": [ { "pin_state": 0.0, "timestamp": 1464465651 } ] }
+
+* Hook a button up to a digital pin and check for bounce when the button
+  is pressed. This polls the digital pin indefinitely until Crtl-C is
+  pressed. Note: Newlines were added for clarity between the two button
+  presses for illustration purposes.
+  $ yadl --sensor digital --gpio_pin 0 --output csv --num_results -1 \
+    --only_log_value_changes
+  reading_number,timestamp,pin_state
+  0,1464480347,0.0
+
+  636673,1464480348,1.0
+  687383,1464480348,0.0
+
+  1678984,1464480351,1.0
+  1731987,1464480351,0.0
+  1731988,1464480351,1.0
+  1732148,1464480351,0.0
+
