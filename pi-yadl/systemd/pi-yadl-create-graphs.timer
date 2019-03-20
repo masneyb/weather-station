@@ -1,8 +1,0 @@
-[Unit]
-Description=pi-yadl graph creator timer
-
-[Timer]
-OnCalendar=hourly
-
-[Install]
-WantedBy=multi-user.target

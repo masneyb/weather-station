@@ -1,7 +1,0 @@
-[Unit]
-Description=pi-yadl data gatherer
-
-[Service]
-User=root
-Type=simple
-ExecStart=/home/masneyb/data/weather-station/pi-yadl/bin/yadl --gpio_pin 0 --sensor dht22 --temperature_unit fahrenheit --output rrd --outfile /home/masneyb/data/weather-station/pi-yadl/web/humiture.rrd

@@ -25,18 +25,6 @@ ${YADL_ADD_RRD_SAMPLE_BIN}: ${YADL_ADD_RRD_SAMPLE_C_DEPS}
 clean:
 	rm -f ${YADL_BIN} ${YADL_ADD_RRD_SAMPLE_BIN}
 
-install:
-	cp -v systemd/* /etc/systemd/system/
-	systemctl daemon-reload
-
-	systemctl start pi-yadl-gatherer.service
-	systemctl start pi-yadl-gatherer.timer
-	systemctl enable pi-yadl-gatherer.timer
-
-	systemctl start pi-yadl-create-graphs.service
-	systemctl start pi-yadl-create-graphs.timer
-	systemctl enable pi-yadl-create-graphs.timer
-
 shellcheck:
 	shellcheck bin/create-min-max-graphs.sh || true
 	shellcheck bin/create-max-graphs.sh || true

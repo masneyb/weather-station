@@ -1,8 +1,0 @@
-[Unit]
-Description=pi-yadl data gatherer timer
-
-[Timer]
-OnCalendar=*:0/5
-
-[Install]
-WantedBy=multi-user.target
