@@ -1,8 +1,8 @@
 # pi-yadl - Yet Another Data Logger
 
-*Note: If I was starting this weather station project over, I would use the
+**Note: If I was starting this weather station project over, I would use the
 [Linux Industrial I/O Subsystem](https://wiki.analog.com/software/linux/docs/iio/iio)
-instead of coding this. This was a good learning exercise.*
+instead of coding this. This was a good learning exercise.**
 
 An extensible analog and digital data collector for the Raspberry Pi with the
 following features:
