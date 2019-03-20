@@ -1,6 +1,9 @@
-.PHONY: all install shellcheck
+.PHONY: all install shellcheck yadl
 
-all:
+all: yadl
+
+yadl:
+	cd pi-yadl && make
 
 install:
 	cp -v systemd/* /etc/systemd/system/

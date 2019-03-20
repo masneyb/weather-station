@@ -23,7 +23,7 @@ root.
       [Service]
       User=root
       Type=simple
-      ExecStart=/home/masneyb/data/pi-yadl/bin/yadl --gpio_pin 0 --sensor dht22 --temperature_unit fahrenheit --output json --outfile /var/www/html/humiture.json
+      ExecStart=/home/masneyb/data/weather-station/pi-yadl/bin/yadl --gpio_pin 0 --sensor dht22 --temperature_unit fahrenheit --output json --outfile /var/www/html/humiture.json
 
   /etc/systemd/system/yadl-json-output.timer
 
@@ -75,7 +75,7 @@ root.
       [Service]
       User=root
       Type=simple
-      ExecStart=/home/masneyb/data/pi-yadl/bin/log-remote-sensor.sh http://IP_ADDRESS_TO_YOUR_PI/humiture.json /home/masneyb/data/pi-yadl/web/remote.rrd /home/masneyb/data/pi-yadl/bin/yadl-add-rrd-sample
+      ExecStart=/home/masneyb/data/weather-station/pi-yadl/bin/log-remote-sensor.sh http://IP_ADDRESS_TO_YOUR_PI/humiture.json /home/masneyb/data/weather-station/pi-yadl/web/remote.rrd /home/masneyb/data/weather-station/pi-yadl/bin/yadl-add-rrd-sample
 
   /etc/systemd/system/yadl-remote-readings.timer
 
@@ -102,7 +102,7 @@ root.
       [Service]
       User=masneyb
       Type=simple
-      ExecStart=/home/masneyb/data/pi-yadl/bin/create-graphs.sh /home/masneyb/data/pi-yadl/web/remote "Graph Description"
+      ExecStart=/home/masneyb/data/weather-station/pi-yadl/bin/create-graphs.sh /home/masneyb/data/weather-station/pi-yadl/web/remote "Graph Description"
 
   /etc/systemd/system/yadl-remote-graphs.timer
 

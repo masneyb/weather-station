@@ -4,8 +4,8 @@
 
 ## High level overview
 
-- My [pi-yadl](https://github.com/masneyb/pi-yadl) project is used to gather and
-  graph the data from the following types of sensors:
+- My [pi-yadl](pi-yadl) project is used to gather and graph the data from the following types
+  of sensors:
   - [Argent Data Systems Weather Sensor Assembly](https://www.sparkfun.com/products/8942)
     contains a wind vane, anemometer, and rain gauge. The wind speed average and gusts
     over the last 2 minute, 10 minute and 60 minute periods are logged. The amount of
